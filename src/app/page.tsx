@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useUser } from "@/components/user-provider";
 
 const features = [
   {
@@ -114,8 +115,7 @@ const faqs = [
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const user = useUser();
 
   return (
     <div className="min-h-screen">
@@ -140,9 +140,20 @@ export default function LandingPage() {
               <a href="#faq" className="text-[11px] uppercase tracking-[0.12em] text-[#6b6560] hover:text-foreground transition-colors">
                 FAQ
               </a>
-              <Link href="/auth/signup" className="glass-btn-primary text-[11px]">
-                Start Free Trial
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <span className="text-[11px] text-[#6b6560]">
+                    Already have an account?
+                  </span>
+                  <Link href="/dashboard" className="glass-btn-primary text-[11px]">
+                    Dashboard
+                  </Link>
+                </div>
+              ) : (
+                <Link href="/auth/signup" className="glass-btn-primary text-[11px]">
+                  Get Started
+                </Link>
+              )}
             </div>
 
             <button
@@ -165,9 +176,15 @@ export default function LandingPage() {
             <a href="#features" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">Features</a>
             <a href="#pricing" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">Pricing</a>
             <a href="#faq" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">FAQ</a>
-            <Link href="/auth/signup" className="block glass-btn-primary text-center text-[11px]">
-              Start Free Trial
-            </Link>
+            {user ? (
+              <Link href="/dashboard" className="block glass-btn-primary text-center text-[11px]">
+                Dashboard
+              </Link>
+            ) : (
+              <Link href="/auth/signup" className="block glass-btn-primary text-center text-[11px]">
+                Get Started
+              </Link>
+            )}
           </div>
         )}
       </nav>
@@ -198,21 +215,15 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-start gap-4 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="flex w-full sm:w-auto">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 sm:w-64 px-4 py-3 glass-input rounded-r-none border-r-0 text-sm"
-                  />
-                  <button
-                    onClick={() => setSubmitted(true)}
-                    className="px-6 py-3 glass-btn-primary rounded-l-none text-sm"
-                  >
-                    {submitted ? "✓ You're in!" : "Start Free →"}
-                  </button>
-                </div>
+                {user ? (
+                  <Link href="/dashboard" className="px-8 py-4 glass-btn-primary text-[13px]">
+                    Go to Dashboard →
+                  </Link>
+                ) : (
+                  <Link href="/auth/signup" className="px-8 py-4 glass-btn-primary text-[13px]">
+                    Get Started — It's Free →
+                  </Link>
+                )}
               </div>
 
               <p className="text-[11px] text-[#6b6560] animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
@@ -506,7 +517,7 @@ export default function LandingPage() {
             href="/auth/signup"
             className="inline-block px-10 py-4 glass-btn-primary"
           >
-            Start Your Free Trial →
+            Get Started Free →
           </Link>
           <p className="text-[11px] text-[#6b6560] mt-6">
             No credit card · 14 days free · Cancel anytime
