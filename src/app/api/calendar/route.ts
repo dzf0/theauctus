@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrCreateUser } from "@/lib/auth-helpers";
-import { prisma } from "@/lib/prisma";
+import { requireAuth, getProfile } from "@/lib/auth-helpers";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // POST /api/calendar — Generate a full 30-day content calendar
 export async function POST(request: NextRequest) {
-  const user = await getOrCreateUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const user = await requireAuth();
+  const supabase = await createSupabaseServerClient();
 
   const body = await request.json();
   const { month, year } = body;
@@ -18,9 +16,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "month and year required" }, { status: 400 });
   }
 
-  const connectedPlatforms = user.platforms
-    .filter((p) => p.connected)
-    .map((p) => p.platform);
+  // Get connected platforms
+  const { data: platforms } = await supabase
+    .from("connected_platforms")
+    .select("platform")
+    .eq("user_id", user.id)
+    .eq("connected", true);
+
+  const connectedPlatforms = platforms?.map((p) => p.platform) || [];
 
   if (connectedPlatforms.length === 0) {
     return NextResponse.json(
@@ -29,32 +32,48 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Get user profile for AI generation
+  const profile = await getProfile(user.id);
+
   // Check if Claude API key is set
   if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === "your-anthropic-api-key") {
     // Fallback: generate posts using the local algorithm
-    const posts = generateLocalPosts(user.niche || "General", connectedPlatforms, month, year);
+    const posts = generateLocalPosts(profile?.niche || "General", connectedPlatforms, month, year);
 
-    const calendar = await prisma.contentCalendar.create({
-      data: {
-        userId: user.id,
+    // Create calendar
+    const { data: calendar, error: calError } = await supabase
+      .from("content_calendars")
+      .upsert({
+        user_id: user.id,
         month,
         year,
-        posts: {
-          create: posts.map((p) => ({
-            userId: user.id,
-            title: p.title,
-            content: p.content,
-            platform: p.platform,
-            contentType: p.contentType,
-            status: "draft",
-            scheduledAt: p.scheduledAt ? new Date(p.scheduledAt) : null,
-            hashtags: JSON.stringify(p.hashtags),
-            aiGenerated: true,
-          })),
-        },
-      },
-      include: { posts: true },
-    });
+      })
+      .select()
+      .single();
+
+    if (calError) {
+      return NextResponse.json({ error: calError.message }, { status: 500 });
+    }
+
+    // Insert posts
+    const postsToInsert = posts.map((p) => ({
+      calendar_id: calendar.id,
+      user_id: user.id,
+      title: p.title,
+      content: p.content,
+      platform: p.platform,
+      content_type: p.contentType,
+      status: "draft",
+      scheduled_at: p.scheduledAt || null,
+      hashtags: p.hashtags,
+      ai_generated: true,
+    }));
+
+    const { error: postsError } = await supabase.from("posts").insert(postsToInsert);
+
+    if (postsError) {
+      return NextResponse.json({ error: postsError.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       calendar,
@@ -71,11 +90,11 @@ export async function POST(request: NextRequest) {
     const daysInMonth = new Date(year, month, 0).getDate();
     const monthName = new Date(year, month - 1).toLocaleString("en-US", { month: "long" });
 
-    const prompt = `You are a content strategist for a creator in the "${user.niche || "General"}" niche.
+    const prompt = `You are a content strategist for a creator in the "${profile?.niche || "General"}" niche.
 
-Brand voice: ${user.brandVoice || "Professional, actionable, engaging."}
-Target audience: ${user.targetAudience || "Creators and entrepreneurs"}
-Keywords: ${user.keywords || "content, growth, productivity"}
+Brand voice: ${profile?.brand_voice || "Professional, actionable, engaging."}
+Target audience: ${profile?.target_audience || "Creators and entrepreneurs"}
+Keywords: ${profile?.keywords?.join(", ") || "content, growth, productivity"}
 Connected platforms: ${connectedPlatforms.join(", ")}
 
 Generate a ${daysInMonth}-day content calendar for ${monthName} ${year}.
@@ -131,27 +150,40 @@ Return ONLY the JSON array, no markdown, no explanation.`;
       );
     }
 
-    const calendar = await prisma.contentCalendar.create({
-      data: {
-        userId: user.id,
+    // Create calendar
+    const { data: calendar, error: calError } = await supabase
+      .from("content_calendars")
+      .upsert({
+        user_id: user.id,
         month,
         year,
-        posts: {
-          create: posts.map((p: Record<string, unknown>) => ({
-            userId: user.id,
-            title: String(p.title || ""),
-            content: String(p.content || ""),
-            platform: String(p.platform || "twitter"),
-            contentType: String(p.contentType || "text"),
-            status: "draft",
-            scheduledAt: p.scheduledAt ? new Date(String(p.scheduledAt)) : null,
-            hashtags: JSON.stringify(p.hashtags || []),
-            aiGenerated: true,
-          })),
-        },
-      },
-      include: { posts: true },
-    });
+      })
+      .select()
+      .single();
+
+    if (calError) {
+      return NextResponse.json({ error: calError.message }, { status: 500 });
+    }
+
+    // Insert posts
+    const postsToInsert = posts.map((p: Record<string, unknown>) => ({
+      calendar_id: calendar.id,
+      user_id: user.id,
+      title: String(p.title || ""),
+      content: String(p.content || ""),
+      platform: String(p.platform || "twitter"),
+      content_type: String(p.contentType || "text"),
+      status: "draft",
+      scheduled_at: p.scheduledAt ? new Date(String(p.scheduledAt)).toISOString() : null,
+      hashtags: Array.isArray(p.hashtags) ? p.hashtags : [],
+      ai_generated: true,
+    }));
+
+    const { error: postsError } = await supabase.from("posts").insert(postsToInsert);
+
+    if (postsError) {
+      return NextResponse.json({ error: postsError.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       calendar,
@@ -169,28 +201,31 @@ Return ONLY the JSON array, no markdown, no explanation.`;
 
 // GET /api/calendar?month=9&year=2026
 export async function GET(request: NextRequest) {
-  const user = await getOrCreateUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const user = await requireAuth();
+  const supabase = await createSupabaseServerClient();
 
   const { searchParams } = new URL(request.url);
   const month = parseInt(searchParams.get("month") || "0");
   const year = parseInt(searchParams.get("year") || "0");
 
   if (!month || !year) {
-    const calendars = await prisma.contentCalendar.findMany({
-      where: { userId: user.id },
-      include: { posts: { orderBy: { scheduledAt: "asc" } } },
-      orderBy: [{ year: "desc" }, { month: "desc" }],
-    });
+    const { data: calendars } = await supabase
+      .from("content_calendars")
+      .select("*, posts(*)")
+      .eq("user_id", user.id)
+      .order("year", { ascending: false })
+      .order("month", { ascending: false });
+
     return NextResponse.json(calendars);
   }
 
-  const calendar = await prisma.contentCalendar.findUnique({
-    where: { userId_month_year: { userId: user.id, month, year } },
-    include: { posts: { orderBy: { scheduledAt: "asc" } } },
-  });
+  const { data: calendar } = await supabase
+    .from("content_calendars")
+    .select("*, posts(*)")
+    .eq("user_id", user.id)
+    .eq("month", month)
+    .eq("year", year)
+    .single();
 
   return NextResponse.json(calendar);
 }

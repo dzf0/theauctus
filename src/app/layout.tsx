@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { UserProvider } from "@/components/user-provider";
 
 export const metadata: Metadata = {
   title: "TheAuctus — Automated Creator Growth Engine",
@@ -19,9 +20,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col editorial-bg">
-        <div className="relative z-10 flex-1 flex flex-col">
-          {children}
-        </div>
+        <UserProvider>
+          <div className="relative z-10 flex-1 flex flex-col">
+            {children}
+          </div>
+        </UserProvider>
       </body>
     </html>
   );

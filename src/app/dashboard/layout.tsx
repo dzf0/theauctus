@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useUser } from "@/components/user-provider";
 
 const navItems = [
   {
@@ -69,6 +70,23 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const user = useUser();
+
+  // Get user initials for avatar
+  const getInitials = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return "U";
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -166,11 +184,11 @@ export default function DashboardLayout({
               Operational
             </div>
             <div className="w-7 h-7 rounded-full bg-[#1e1e1e] border border-white/[0.08] flex items-center justify-center text-[10px] accent-text font-medium">
-              AR
+              {getInitials()}
             </div>
-            <Link href="/" className="text-[10px] uppercase tracking-[0.1em] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+            <a href="/api/auth/signout" className="text-[10px] uppercase tracking-[0.1em] text-[#6b6560] hover:text-[#9a9590] transition-colors">
               Sign out
-            </Link>
+            </a>
           </div>
         </header>
 
