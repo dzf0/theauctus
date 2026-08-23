@@ -40,7 +40,7 @@ export async function middleware(request: NextRequest) {
     !user
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/auth/signin";
     return NextResponse.redirect(url);
   }
 

@@ -140,7 +140,7 @@ export default function LandingPage() {
               <a href="#faq" className="text-[11px] uppercase tracking-[0.12em] text-[#6b6560] hover:text-foreground transition-colors">
                 FAQ
               </a>
-              <Link href="/dashboard" className="glass-btn-primary text-[11px]">
+              <Link href="/auth/signup" className="glass-btn-primary text-[11px]">
                 Start Free Trial
               </Link>
             </div>
@@ -165,7 +165,7 @@ export default function LandingPage() {
             <a href="#features" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">Features</a>
             <a href="#pricing" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">Pricing</a>
             <a href="#faq" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">FAQ</a>
-            <Link href="/dashboard" className="block glass-btn-primary text-center text-[11px]">
+            <Link href="/auth/signup" className="block glass-btn-primary text-center text-[11px]">
               Start Free Trial
             </Link>
           </div>
@@ -437,7 +437,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/dashboard"
+                  href="/auth/signup"
                   className={`block w-full text-center py-3 ${
                     tier.popular ? "glass-btn-primary" : "glass-btn"
                   }`}
@@ -503,7 +503,7 @@ export default function LandingPage() {
             Join 2,800+ creators who automated their content and scaled their audience — without hiring anyone.
           </p>
           <Link
-            href="/dashboard"
+            href="/auth/signup"
             className="inline-block px-10 py-4 glass-btn-primary"
           >
             Start Your Free Trial →

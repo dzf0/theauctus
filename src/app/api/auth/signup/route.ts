@@ -1,0 +1,73 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
+
+export async function POST(request: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+
+  const body = await request.json();
+  const { email, password, username, fullName } = body;
+
+  if (!email || !password || !username || !fullName) {
+    return NextResponse.json(
+      { error: "All fields are required" },
+      { status: 400 }
+    );
+  }
+
+  if (password.length < 6) {
+    return NextResponse.json(
+      { error: "Password must be at least 6 characters" },
+      { status: 400 }
+    );
+  }
+
+  // Check if username is already taken
+  const { data: existingUser } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single();
+
+  if (existingUser) {
+    return NextResponse.json(
+      { error: "Username is already taken" },
+      { status: 400 }
+    );
+  }
+
+  // Sign up with Supabase Auth
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        username: username,
+      },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://www.theauctus.in"}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 400 }
+    );
+  }
+
+  // Check if email confirmation is needed
+  if (data.user && !data.session) {
+    return NextResponse.json({
+      message: "Verification email sent",
+      email: data.user.email,
+      needsVerification: true,
+    });
+  }
+
+  // If auto-confirmed (rare in production)
+  return NextResponse.json({
+    message: "Account created successfully",
+    user: data.user,
+    session: data.session,
+  });
+}

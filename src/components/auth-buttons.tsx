@@ -5,18 +5,18 @@ import Link from "next/link";
 export function SignInButton() {
   return (
     <div className="flex items-center gap-3">
-      <a
-        href="/api/auth/signin"
+      <Link
+        href="/auth/signin"
         className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
       >
         Log in
-      </a>
-      <a
-        href="/api/auth/signin"
+      </Link>
+      <Link
+        href="/auth/signup"
         className="text-sm font-medium glass-btn-primary"
       >
         Start Free Trial
-      </a>
+      </Link>
     </div>
   );
 }
