@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c9a87c;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#dcc4a0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a88b5a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#darkGrad)" stroke="url(#copperGrad)" stroke-width="1.5"/>
+  
+  <!-- Elegant A monogram -->
+  <path d="M100 45 L140 155 L132 155 L123 128 L77 128 L68 155 L60 155 L100 45 Z M82 120 L100 65 L118 120 L82 120 Z" fill="url(#copperGrad)"/>
+  
+  <!-- Subtle accent line -->
+  <line x1="70" y1="160" x2="130" y2="160" stroke="url(#copperGrad)" stroke-width="0.75" opacity="0.5"/>
+  
+  <!-- Small decorative dot -->
+  <circle cx="100" cy="170" r="2" fill="url(#copperGrad)" opacity="0.7"/>
+</svg>

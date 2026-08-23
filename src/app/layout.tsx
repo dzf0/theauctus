@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "TheAuctus — Automated Creator Growth Engine",
   description:
     "Automate your content planning, publishing, and audience growth with AI. Schedule 30 days of content in minutes, not hours.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

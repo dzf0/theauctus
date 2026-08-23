@@ -105,7 +105,8 @@ export default function DashboardLayout({
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center px-5 h-16 border-b border-white/[0.04]">
+        <div className="flex items-center gap-3 px-5 h-16 border-b border-white/[0.04]">
+          <img src="/logo.svg" alt="TheAuctus" className="w-8 h-8" />
           <span className="font-headline text-lg text-[#f5f0eb]">
             The<span className="accent-text">Auctus</span>
           </span>

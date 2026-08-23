@@ -124,6 +124,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
+              <img src="/logo.svg" alt="TheAuctus" className="w-8 h-8" />
               <span className="font-headline text-xl tracking-tight text-foreground">
                 The<span className="accent-text">Auctus</span>
               </span>
@@ -516,9 +517,12 @@ export default function LandingPage() {
       {/* ── Footer — editorial ──────────────────────────────── */}
       <footer className="py-12 px-6 lg:px-12 border-t border-white/[0.04]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <span className="font-headline text-lg text-[#f5f0eb]">
-            The<span className="accent-text">Auctus</span>
-          </span>
+          <div className="flex items-center gap-2">
+            <img src="/logo.svg" alt="TheAuctus" className="w-6 h-6" />
+            <span className="font-headline text-lg text-[#f5f0eb]">
+              The<span className="accent-text">Auctus</span>
+            </span>
+          </div>
           <p className="text-[11px] text-[#6b6560]">
             © 2026 TheAuctus. Built by creators, for creators.
           </p>

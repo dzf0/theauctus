@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c9a87c;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#dcc4a0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a88b5a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#111111"/>
+  
+  <!-- A monogram -->
+  <path d="M16 6 L24 26 L22 26 L20.5 22 L11.5 22 L10 26 L8 26 L16 6 Z M12.5 20 L16 10 L19.5 20 L12.5 20 Z" fill="url(#copperGrad)"/>
+</svg>
