@@ -35,7 +35,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Sign up with Supabase Auth (without email redirect - we'll send OTP separately)
+  // Sign up with Supabase Auth
+  // Supabase automatically sends a confirmation email with OTP
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -44,7 +45,6 @@ export async function POST(request: NextRequest) {
         full_name: fullName,
         username: username,
       },
-      // Don't set emailRedirectTo - we want OTP, not magic link
     },
   });
 
@@ -53,20 +53,6 @@ export async function POST(request: NextRequest) {
       { error: error.message },
       { status: 400 }
     );
-  }
-
-  // Now send OTP for email verification
-  const { error: otpError } = await supabase.auth.sendOtp({
-    email,
-    options: {
-      // This sends a 6-digit OTP code
-    },
-  });
-
-  if (otpError) {
-    console.error("OTP send error:", otpError);
-    // Account was created but OTP failed - still redirect to verify page
-    // User can use resend to get the code
   }
 
   // Check if email confirmation is needed

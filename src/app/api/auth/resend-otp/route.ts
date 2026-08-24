@@ -14,12 +14,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Send OTP for email verification
-  const { error } = await supabase.auth.sendOtp({
+  // Resend verification email using Supabase built-in method
+  const { error } = await supabase.auth.resend({
     email,
-    options: {
-      // This sends a 6-digit OTP code
-    },
+    type: "signup",
   });
 
   if (error) {
