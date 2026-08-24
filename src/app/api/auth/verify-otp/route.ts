@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import {
+  checkRateLimit,
+  getClientIp,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-
   const body = await request.json();
   const { email, token, type } = body;
 
@@ -14,9 +17,34 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Rate limit: 5 attempts per 15 min per IP+email
+  const ip = getClientIp(request);
+  const rateLimitKey = `verify-otp:${ip}:${email}`;
+  const { allowed, remaining, retryAfterSeconds } = checkRateLimit(
+    rateLimitKey,
+    RATE_LIMITS.verifyOtp.limit,
+    RATE_LIMITS.verifyOtp.windowMs
+  );
+
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        error: `Too many attempts. Try again in ${retryAfterSeconds} seconds.`,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(retryAfterSeconds),
+          "X-RateLimit-Limit": String(RATE_LIMITS.verifyOtp.limit),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
+  const supabase = await createSupabaseServerClient();
+
   // Verify the OTP
-  // When verifyOtp succeeds, supabase sets session cookies via setAll
-  // Next.js App Router automatically includes these in the response
   const { data, error } = await supabase.auth.verifyOtp({
     email,
     token,
@@ -26,12 +54,26 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json(
       { error: error.message || "Invalid or expired verification code" },
-      { status: 400 }
+      {
+        status: 400,
+        headers: {
+          "X-RateLimit-Limit": String(RATE_LIMITS.verifyOtp.limit),
+          "X-RateLimit-Remaining": String(remaining),
+        },
+      }
     );
   }
 
-  return NextResponse.json({
-    message: "Email verified successfully",
-    user: data.user,
-  });
+  return NextResponse.json(
+    {
+      message: "Email verified successfully",
+      user: data.user,
+    },
+    {
+      headers: {
+        "X-RateLimit-Limit": String(RATE_LIMITS.verifyOtp.limit),
+        "X-RateLimit-Remaining": String(remaining),
+      },
+    }
+  );
 }
