@@ -137,6 +137,12 @@ export default function SignInPage() {
             />
           </div>
 
+          <div className="flex justify-end">
+            <Link href="/auth/forgot-password" className="text-[11px] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+              Forgot password?
+            </Link>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
