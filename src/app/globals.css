@@ -191,6 +191,27 @@ html.light ::-webkit-scrollbar-thumb:hover {
    BASE STYLES
    ══════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════
+   GLOBAL THEME TRANSITION
+   Makes the entire page smoothly animate when switching themes
+   ══════════════════════════════════════════════════════════════ */
+html {
+  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html * {
+  transition-property: background-color, color, border-color, box-shadow, opacity;
+  transition-duration: 0.5s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Disable theme transitions on interactive elements — those should be instant */
+html a, html button, html input, html [role="button"], html [role="tab"] {
+  transition-property: transform, box-shadow, opacity;
+  transition-duration: 0.15s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* ── Base ──────────────────────────────────────────────────── */
 * {
   box-sizing: border-box;
@@ -205,6 +226,7 @@ body {
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Selection ─────────────────────────────────────────────── */
@@ -231,6 +253,7 @@ body {
   background: #111111;
   min-height: 100vh;
   position: relative;
+  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .editorial-bg::after {
@@ -259,9 +282,10 @@ body {
   border-radius: 8px;
   transition:
     transform var(--duration-slow) var(--ease-out-expo),
-    border-color var(--duration-slow) var(--ease-out-expo),
-    background var(--duration-slow) var(--ease-out-expo),
-    box-shadow var(--duration-slow) var(--ease-out-expo);
+    border-color 0.5s var(--ease-out-expo),
+    background 0.6s var(--ease-out-expo),
+    box-shadow 0.5s var(--ease-out-expo),
+    color 0.5s var(--ease-out-expo);
   position: relative;
 }
 
@@ -316,6 +340,7 @@ body {
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   border-right: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background-color 0.6s var(--ease-out-expo), border-color 0.5s var(--ease-out-expo);
 }
 
 /* ══════════════════════════════════════════════════════════════

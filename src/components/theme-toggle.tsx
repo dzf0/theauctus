@@ -56,7 +56,7 @@ export function ThemeToggle({ width = 56, height = 28 }: ThemeToggleProps) {
           backgroundColor: isDark ? "#2A2A2E" : "#F3F2F7",
           borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
           transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
-          transitionDuration: "0.4s",
+          transitionDuration: "0.6s",
         }}
       />
 
