@@ -15,6 +15,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Verify the OTP
+  // When verifyOtp succeeds, supabase sets session cookies via setAll
+  // Next.js App Router automatically includes these in the response
   const { data, error } = await supabase.auth.verifyOtp({
     email,
     token,
@@ -30,7 +32,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     message: "Email verified successfully",
-    session: data.session,
     user: data.user,
   });
 }

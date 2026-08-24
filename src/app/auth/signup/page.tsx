@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createSupabaseClient } from "@/lib/supabase";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -47,30 +48,72 @@ export default function SignUpPage() {
     }
 
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          username: formData.username,
-          fullName: formData.fullName,
-        }),
-      });
+      const supabase = createSupabaseClient();
 
-      const data = await response.json();
+      // Check if username is already taken
+      const { data: existingUser } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", formData.username)
+        .single();
 
-      if (!response.ok) {
-        setError(data.error || "Failed to create account");
+      if (existingUser) {
+        setError("Username is already taken");
         setLoading(false);
         return;
       }
 
-      // Success - redirect to OTP verification
-      router.push(`/auth/verify-otp?email=${encodeURIComponent(formData.email)}`);
+      // Sign up — Supabase automatically hashes the password with bcrypt
+      // and sends a verification email
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            username: formData.username,
+          },
+        },
+      });
+
+      if (authError) {
+        setError(authError.message || "Failed to create account");
+        setLoading(false);
+        return;
+      }
+
+      // Check if email confirmation is needed
+      if (data.user && !data.session) {
+        // Redirect to OTP verification
+        router.push(`/auth/verify-otp?email=${encodeURIComponent(formData.email)}`);
+        return;
+      }
+
+      // If auto-confirmed (email confirm disabled), session is set
+      if (data.session) {
+        router.push("/onboarding");
+        router.refresh();
+      }
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      const supabase = createSupabaseClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+      }
+    } catch {
+      setError("Something went wrong with Google sign-up.");
     }
   };
 
@@ -94,8 +137,8 @@ export default function SignUpPage() {
 
         {/* Social Login Buttons */}
         <div className="space-y-3 mb-8">
-          <a
-            href="/api/auth/signin?provider=google"
+          <button
+            onClick={handleGoogleSignUp}
             className="flex items-center justify-center gap-3 w-full px-4 py-3 glass-card hover:bg-white/[0.04] transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -105,7 +148,7 @@ export default function SignUpPage() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             <span className="text-[13px] text-[#f5f0eb]">Continue with Google</span>
-          </a>
+          </button>
         </div>
 
         {/* Divider */}

@@ -1,7 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+/**
+ * Creates a Supabase server client that reads/writes auth cookies.
+ * Uses the standard @supabase/ssr pattern for Next.js App Router.
+ *
+ * Usage in API routes:
+ *   const supabase = await createSupabaseServerClient();
+ *   // Cookies are automatically set via the cookie store
+ *
+ * Usage in middleware:
+ *   Use the middleware-specific version (see middleware.ts)
+ */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 

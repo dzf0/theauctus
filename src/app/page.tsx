@@ -231,6 +231,15 @@ export default function LandingPage() {
                 )}
               </div>
 
+              {!user && (
+                <p className="text-[12px] text-[#6b6560] mb-8 animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
+                  Already have an account?{' '}
+                  <Link href="/auth/signin" className="accent-text hover:text-[#dcc4a0] transition-colors">
+                    Sign in
+                  </Link>
+                </p>
+              )}
+
               <p className="text-[11px] text-[#6b6560] animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                 No credit card · 14-day free trial · Cancel anytime
               </p>

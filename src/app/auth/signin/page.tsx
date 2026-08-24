@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createSupabaseClient } from "@/lib/supabase";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -17,26 +18,45 @@ export default function SignInPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/signin-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const supabase = createSupabaseClient();
+
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Invalid email or password");
+      if (authError) {
+        setError(authError.message || "Invalid email or password");
         setLoading(false);
         return;
       }
 
-      // Success - redirect to dashboard
-      router.push("/dashboard");
-      router.refresh();
+      if (data.session) {
+        // Session is automatically stored in cookies by the Supabase browser client
+        // The middleware will pick up these cookies on the next request
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const supabase = createSupabaseClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+      }
+    } catch {
+      setError("Something went wrong with Google sign-in.");
     }
   };
 
@@ -60,8 +80,8 @@ export default function SignInPage() {
 
         {/* Social Login Buttons */}
         <div className="space-y-3 mb-8">
-          <a
-            href="/api/auth/signin?provider=google"
+          <button
+            onClick={handleGoogleSignIn}
             className="flex items-center justify-center gap-3 w-full px-4 py-3 glass-card hover:bg-white/[0.04] transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -71,7 +91,7 @@ export default function SignInPage() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             <span className="text-[13px] text-[#f5f0eb]">Continue with Google</span>
-          </a>
+          </button>
         </div>
 
         {/* Divider */}
@@ -115,12 +135,6 @@ export default function SignInPage() {
               className="w-full px-4 py-3 glass-input text-[13px]"
               required
             />
-          </div>
-
-          <div className="flex justify-end">
-            <Link href="/auth/forgot-password" className="text-[11px] text-[#6b6560] hover:text-[#9a9590] transition-colors">
-              Forgot password?
-            </Link>
           </div>
 
           <button
