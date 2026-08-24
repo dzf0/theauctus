@@ -125,23 +125,23 @@ function OtpForm() {
         {/* Header */}
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-8">
-            <span className="font-headline text-2xl text-[#f5f0eb]">
+            <span className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>
               The<span className="accent-text">Auctus</span>
             </span>
           </Link>
-          <h1 className="font-headline text-3xl text-[#f5f0eb] mb-3">
+          <h1 className="font-headline text-3xl mb-3" style={{ color: "var(--foreground)" }}>
             Verify your email
           </h1>
-          <p className="text-[13px] text-[#6b6560]">
+          <p className="text-[13px]" style={{ color: "var(--muted)" }}>
             We sent a 6-digit code to<br />
-            <span className="text-[#f5f0eb]">{email}</span>
+            <span style={{ color: "var(--foreground)" }}>{email}</span>
           </p>
         </div>
 
         {/* OTP Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="p-3 glass-card border border-red-500/20 text-red-400 text-[12px]">
+            <div className="p-3 liquid-card border border-red-500/20 text-red-400 text-[12px]">
               {error}
             </div>
           )}
@@ -159,7 +159,7 @@ function OtpForm() {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
                 maxLength={1}
-                className="w-12 h-14 text-center text-xl font-headline glass-input"
+                className="w-12 h-14 text-center text-xl font-headline liquid-input"
                 autoComplete="one-time-code"
               />
             ))}
@@ -168,7 +168,7 @@ function OtpForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
+            className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -181,14 +181,14 @@ function OtpForm() {
         {/* Resend */}
         <div className="text-center mt-6">
           {resendCooldown > 0 ? (
-            <p className="text-[12px] text-[#6b6560]">
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
               Resend code in {resendCooldown}s
             </p>
           ) : (
             <button
               onClick={handleResend}
               disabled={resendLoading}
-              className="text-[12px] accent-text hover:text-[#dcc4a0] transition-colors disabled:opacity-50"
+              className="text-[12px] accent-text hover:opacity-80 transition-opacity disabled:opacity-50"
             >
               {resendLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -200,8 +200,8 @@ function OtpForm() {
         </div>
 
         {/* Back to signup */}
-        <p className="text-center mt-8 text-[12px] text-[#6b6560]">
-          <Link href="/auth/signup" className="accent-text hover:text-[#dcc4a0] transition-colors">
+        <p className="text-center mt-8 text-[12px]" style={{ color: "var(--muted)" }}>
+          <Link href="/auth/signup" className="accent-text hover:opacity-80 transition-opacity">
             ← Back to sign up
           </Link>
         </p>
@@ -214,7 +214,7 @@ export default function VerifyOtpPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[#6b6560]">Loading...</div>
+        <div style={{ color: "var(--muted)" }}>Loading...</div>
       </div>
     }>
       <OtpForm />

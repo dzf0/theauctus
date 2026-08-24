@@ -78,7 +78,7 @@ export default function UpdatePasswordPage() {
   if (checking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[13px] text-[#6b6560]">Verifying reset link...</div>
+        <div className="text-[13px]" style={{ color: "var(--muted)" }}>Verifying reset link...</div>
       </div>
     );
   }
@@ -91,38 +91,38 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-8">
-            <span className="font-headline text-2xl text-[#f5f0eb]">
+            <span className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>
               The<span className="accent-text">Auctus</span>
             </span>
           </Link>
-          <h1 className="font-headline text-3xl text-[#f5f0eb] mb-3">
+          <h1 className="font-headline text-3xl mb-3" style={{ color: "var(--foreground)" }}>
             Set new password
           </h1>
-          <p className="text-[13px] text-[#6b6560]">
+          <p className="text-[13px]" style={{ color: "var(--muted)" }}>
             Choose a strong password for your account
           </p>
         </div>
 
         {success ? (
           <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[#1a1a1a] border border-[#c9a87c]/20 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full liquid-card flex items-center justify-center">
               <svg className="w-8 h-8 accent-text" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-[13px] text-[#9a9590] mb-2">Password updated!</p>
-            <p className="text-[12px] text-[#6b6560]">Redirecting you to the dashboard...</p>
+            <p className="text-[13px] mb-2" style={{ color: "var(--foreground)" }}>Password updated!</p>
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>Redirecting you to the dashboard...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 glass-card border border-red-500/20 text-red-400 text-[12px]">
+              <div className="p-3 liquid-card border border-red-500/20 text-red-400 text-[12px]">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-[11px] uppercase tracking-[0.1em] text-[#6b6560] mb-2">
+              <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>
                 New Password
               </label>
               <input
@@ -130,7 +130,7 @@ export default function UpdatePasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 glass-input text-[13px]"
+                className="w-full px-4 py-3 liquid-input text-[13px]"
                 required
               />
 
@@ -138,7 +138,7 @@ export default function UpdatePasswordPage() {
               {password && (
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--lg-bg)" }}>
                       <div
                         className="h-full rounded-full transition-all duration-300"
                         style={{
@@ -166,17 +166,13 @@ export default function UpdatePasswordPage() {
                           style={{
                             backgroundColor: passwordRules[i]
                               ? "rgba(34, 197, 94, 0.15)"
-                              : "rgba(255, 255, 255, 0.06)",
-                            color: passwordRules[i] ? "#22c55e" : "#6b6560",
+                              : "var(--lg-bg)",
+                            color: passwordRules[i] ? "#22c55e" : "var(--muted)",
                           }}
                         >
                           {passwordRules[i] ? "✓" : "·"}
                         </span>
-                        <span
-                          className={
-                            passwordRules[i] ? "text-[#9a9590]" : "text-[#6b6560]"
-                          }
-                        >
+                        <span style={{ color: "var(--muted)" }}>
                           {rule.label}
                         </span>
                       </div>
@@ -187,7 +183,7 @@ export default function UpdatePasswordPage() {
             </div>
 
             <div>
-              <label className="block text-[11px] uppercase tracking-[0.1em] text-[#6b6560] mb-2">
+              <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>
                 Confirm Password
               </label>
               <input
@@ -195,7 +191,7 @@ export default function UpdatePasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 glass-input text-[13px]"
+                className="w-full px-4 py-3 liquid-input text-[13px]"
                 required
               />
             </div>
@@ -203,7 +199,7 @@ export default function UpdatePasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
+              className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -214,8 +210,8 @@ export default function UpdatePasswordPage() {
           </form>
         )}
 
-        <p className="text-center mt-8 text-[12px] text-[#6b6560]">
-          <Link href="/auth/signin" className="accent-text hover:text-[#dcc4a0] transition-colors">
+        <p className="text-center mt-8 text-[12px]" style={{ color: "var(--muted)" }}>
+          <Link href="/auth/signin" className="accent-text hover:opacity-80 transition-opacity">
             ← Back to sign in
           </Link>
         </p>

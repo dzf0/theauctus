@@ -181,14 +181,14 @@ export default function OnboardingPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-8">
-            <span className="font-headline text-2xl text-[#f5f0eb]">
+            <span className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>
               The<span className="accent-text">Auctus</span>
             </span>
           </Link>
-          <h1 className="font-headline text-3xl text-[#f5f0eb] mb-3">
+          <h1 className="font-headline text-3xl mb-3" style={{ color: "var(--foreground)" }}>
             Set up your brand
           </h1>
-          <p className="text-[13px] text-[#6b6560]">
+          <p className="text-[13px]" style={{ color: "var(--muted)" }}>
             Tell us about your content so we can personalize your experience
           </p>
         </div>
@@ -199,24 +199,27 @@ export default function OnboardingPage() {
             {STEPS.map((step) => (
               <div
                 key={step.id}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium transition-colors ${
-                  step.id <= currentStep
-                    ? "bg-[#c9a87c] text-[#111]"
-                    : "bg-white/[0.06] text-[#6b6560]"
-                }`}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-medium transition-colors"
+                style={{
+                  backgroundColor: step.id <= currentStep ? "var(--accent-copper)" : "var(--lg-bg)",
+                  color: step.id <= currentStep ? "#111" : "var(--muted)",
+                }}
               >
                 {step.id}
               </div>
             ))}
           </div>
-          <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--lg-bg)" }}>
             <div
-              className="h-full bg-[#c9a87c] transition-all duration-300"
-              style={{ width: `${(currentStep / 5) * 100}%` }}
+              className="h-full transition-all duration-300"
+              style={{ 
+                width: `${(currentStep / 5) * 100}%`,
+                backgroundColor: "var(--accent-copper)",
+              }}
             />
           </div>
           <div className="mt-2 text-center">
-            <p className="text-[12px] text-[#6b6560]">
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
               Step {currentStep} of 5: {STEPS[currentStep - 1].title}
             </p>
           </div>
@@ -224,17 +227,17 @@ export default function OnboardingPage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-3 glass-card border border-red-500/20 text-red-400 text-[12px]">
+          <div className="mb-6 p-3 liquid-card border border-red-500/20 text-red-400 text-[12px]">
             {error}
           </div>
         )}
 
         {/* Step Content */}
-        <div className="glass-card p-6 mb-6">
+        <div className="liquid-card p-6 mb-6">
           {/* Step 1: Niche */}
           {currentStep === 1 && (
             <div>
-              <h2 className="font-headline text-xl text-[#f5f0eb] mb-4">
+              <h2 className="font-headline text-xl mb-4" style={{ color: "var(--foreground)" }}>
                 What&apos;s your niche?
               </h2>
               <div className="grid grid-cols-2 gap-3">
@@ -242,11 +245,12 @@ export default function OnboardingPage() {
                   <button
                     key={niche}
                     onClick={() => handleNicheSelect(niche)}
-                    className={`p-3 text-left text-[13px] rounded-lg border transition-colors ${
-                      formData.niche === niche
-                        ? "border-[#c9a87c] bg-[#c9a87c]/10 text-[#f5f0eb]"
-                        : "border-white/[0.06] bg-white/[0.02] text-[#9a9590] hover:border-white/[0.12]"
-                    }`}
+                    className="p-3 text-left text-[13px] rounded-lg border transition-colors"
+                    style={{
+                      borderColor: formData.niche === niche ? "var(--accent-copper)" : "var(--lg-border)",
+                      backgroundColor: formData.niche === niche ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+                      color: formData.niche === niche ? "var(--foreground)" : "var(--muted)",
+                    }}
                   >
                     {niche}
                   </button>
@@ -258,7 +262,7 @@ export default function OnboardingPage() {
                   value={formData.customNiche}
                   onChange={(e) => setFormData({ ...formData, customNiche: e.target.value })}
                   placeholder="Enter your niche"
-                  className="mt-4 w-full px-4 py-3 glass-input text-[13px]"
+                  className="mt-4 w-full px-4 py-3 liquid-input text-[13px]"
                 />
               )}
             </div>
@@ -267,7 +271,7 @@ export default function OnboardingPage() {
           {/* Step 2: Brand Voice */}
           {currentStep === 2 && (
             <div>
-              <h2 className="font-headline text-xl text-[#f5f0eb] mb-4">
+              <h2 className="font-headline text-xl mb-4" style={{ color: "var(--foreground)" }}>
                 Choose your brand voice
               </h2>
               <div className="space-y-3 mb-6">
@@ -275,19 +279,19 @@ export default function OnboardingPage() {
                   <button
                     key={voice.id}
                     onClick={() => handleVoiceSelect(voice.id)}
-                    className={`w-full p-4 text-left rounded-lg border transition-colors ${
-                      formData.brandVoice === voice.id
-                        ? "border-[#c9a87c] bg-[#c9a87c]/10"
-                        : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
-                    }`}
+                    className="w-full p-4 text-left rounded-lg border transition-colors"
+                    style={{
+                      borderColor: formData.brandVoice === voice.id ? "var(--accent-copper)" : "var(--lg-border)",
+                      backgroundColor: formData.brandVoice === voice.id ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+                    }}
                   >
-                    <div className="font-medium text-[14px] text-[#f5f0eb]">{voice.label}</div>
-                    <div className="text-[12px] text-[#6b6560]">{voice.description}</div>
+                    <div className="font-medium text-[14px]" style={{ color: "var(--foreground)" }}>{voice.label}</div>
+                    <div className="text-[12px]" style={{ color: "var(--muted)" }}>{voice.description}</div>
                   </button>
                 ))}
               </div>
 
-              <h3 className="font-medium text-[14px] text-[#f5f0eb] mb-3">
+              <h3 className="font-medium text-[14px] mb-3" style={{ color: "var(--foreground)" }}>
                 Select tone preferences (1-3)
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -295,11 +299,12 @@ export default function OnboardingPage() {
                   <button
                     key={tone}
                     onClick={() => handleToneToggle(tone)}
-                    className={`px-4 py-2 text-[13px] rounded-full border transition-colors ${
-                      formData.tonePreferences.includes(tone)
-                        ? "border-[#c9a87c] bg-[#c9a87c]/10 text-[#f5f0eb]"
-                        : "border-white/[0.06] bg-white/[0.02] text-[#9a9590] hover:border-white/[0.12]"
-                    }`}
+                    className="px-4 py-2 text-[13px] rounded-full border transition-colors"
+                    style={{
+                      borderColor: formData.tonePreferences.includes(tone) ? "var(--accent-copper)" : "var(--lg-border)",
+                      backgroundColor: formData.tonePreferences.includes(tone) ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+                      color: formData.tonePreferences.includes(tone) ? "var(--foreground)" : "var(--muted)",
+                    }}
                   >
                     {tone}
                   </button>
@@ -311,21 +316,21 @@ export default function OnboardingPage() {
           {/* Step 3: Target Audience */}
           {currentStep === 3 && (
             <div>
-              <h2 className="font-headline text-xl text-[#f5f0eb] mb-4">
+              <h2 className="font-headline text-xl mb-4" style={{ color: "var(--foreground)" }}>
                 Who&apos;s your target audience?
               </h2>
-              <p className="text-[13px] text-[#6b6560] mb-4">
+              <p className="text-[13px] mb-4" style={{ color: "var(--muted)" }}>
                 Describe your ideal follower. Be specific about age, interests, and what they&apos;re looking for.
               </p>
               <textarea
                 value={formData.targetAudience}
                 onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
                 placeholder="e.g., 18-24 year old fashion enthusiasts who love sustainable streetwear and follow brands like Zara and H&M"
-                className="w-full h-32 px-4 py-3 glass-input text-[13px] resize-none"
+                className="w-full h-32 px-4 py-3 liquid-input text-[13px] resize-none"
                 maxLength={200}
               />
               <div className="mt-2 text-right">
-                <span className={`text-[11px] ${formData.targetAudience.length < 10 ? "text-[#6b6560]" : "text-[#c9a87c]"}`}>
+                <span className="text-[11px]" style={{ color: formData.targetAudience.length < 10 ? "var(--muted)" : "var(--accent-copper)" }}>
                   {formData.targetAudience.length}/200
                 </span>
               </div>
@@ -335,10 +340,10 @@ export default function OnboardingPage() {
           {/* Step 4: Content Goals */}
           {currentStep === 4 && (
             <div>
-              <h2 className="font-headline text-xl text-[#f5f0eb] mb-4">
+              <h2 className="font-headline text-xl mb-4" style={{ color: "var(--foreground)" }}>
                 What are your content goals?
               </h2>
-              <p className="text-[13px] text-[#6b6560] mb-4">
+              <p className="text-[13px] mb-4" style={{ color: "var(--muted)" }}>
                 Select up to 3 goals that matter most to you.
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -346,14 +351,14 @@ export default function OnboardingPage() {
                   <button
                     key={goal.id}
                     onClick={() => handleGoalToggle(goal.id)}
-                    className={`p-4 text-left rounded-lg border transition-colors ${
-                      formData.contentGoals.includes(goal.id)
-                        ? "border-[#c9a87c] bg-[#c9a87c]/10"
-                        : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
-                    }`}
+                    className="p-4 text-left rounded-lg border transition-colors"
+                    style={{
+                      borderColor: formData.contentGoals.includes(goal.id) ? "var(--accent-copper)" : "var(--lg-border)",
+                      backgroundColor: formData.contentGoals.includes(goal.id) ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+                    }}
                   >
                     <div className="text-2xl mb-2">{goal.icon}</div>
-                    <div className="font-medium text-[13px] text-[#f5f0eb]">{goal.label}</div>
+                    <div className="font-medium text-[13px]" style={{ color: "var(--foreground)" }}>{goal.label}</div>
                   </button>
                 ))}
               </div>
@@ -363,7 +368,7 @@ export default function OnboardingPage() {
           {/* Step 5: Posting Frequency */}
           {currentStep === 5 && (
             <div>
-              <h2 className="font-headline text-xl text-[#f5f0eb] mb-4">
+              <h2 className="font-headline text-xl mb-4" style={{ color: "var(--foreground)" }}>
                 How often do you post?
               </h2>
               <div className="space-y-3">
@@ -371,14 +376,14 @@ export default function OnboardingPage() {
                   <button
                     key={freq.id}
                     onClick={() => setFormData({ ...formData, postingFrequency: freq.id })}
-                    className={`w-full p-4 text-left rounded-lg border transition-colors ${
-                      formData.postingFrequency === freq.id
-                        ? "border-[#c9a87c] bg-[#c9a87c]/10"
-                        : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
-                    }`}
+                    className="w-full p-4 text-left rounded-lg border transition-colors"
+                    style={{
+                      borderColor: formData.postingFrequency === freq.id ? "var(--accent-copper)" : "var(--lg-border)",
+                      backgroundColor: formData.postingFrequency === freq.id ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+                    }}
                   >
-                    <div className="font-medium text-[14px] text-[#f5f0eb]">{freq.label}</div>
-                    <div className="text-[12px] text-[#6b6560]">{freq.description}</div>
+                    <div className="font-medium text-[14px]" style={{ color: "var(--foreground)" }}>{freq.label}</div>
+                    <div className="text-[12px]" style={{ color: "var(--muted)" }}>{freq.description}</div>
                   </button>
                 ))}
               </div>
@@ -391,7 +396,8 @@ export default function OnboardingPage() {
           {currentStep > 1 && (
             <button
               onClick={handleBack}
-              className="flex-1 py-3 glass-card text-[13px] text-[#9a9590] hover:bg-white/[0.04] transition-colors"
+              className="flex-1 py-3 liquid-card text-[13px] transition-colors"
+              style={{ color: "var(--muted)" }}
             >
               Back
             </button>
@@ -400,7 +406,7 @@ export default function OnboardingPage() {
             <button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex-1 py-3 glass-btn-primary text-[13px] disabled:opacity-50"
+              className="flex-1 py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
             >
               Continue
             </button>
@@ -408,7 +414,7 @@ export default function OnboardingPage() {
             <button
               onClick={handleSubmit}
               disabled={!canProceed() || loading}
-              className="flex-1 py-3 glass-btn-primary text-[13px] disabled:opacity-50"
+              className="flex-1 py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
             >
               {loading ? "Saving..." : "Complete Setup"}
             </button>
@@ -416,13 +422,13 @@ export default function OnboardingPage() {
         </div>
 
         {/* Skip Link */}
-        <p className="text-center mt-6 text-[12px] text-[#6b6560]">
+        <p className="text-center mt-6 text-[12px]" style={{ color: "var(--muted)" }}>
           <button
             onClick={async () => {
               await fetch("/api/profile/complete-onboarding", { method: "POST" });
               router.push("/dashboard");
             }}
-            className="hover:text-[#9a9590] transition-colors"
+            className="hover:opacity-80 transition-opacity"
           >
             Skip for now →
           </button>

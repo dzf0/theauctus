@@ -33,8 +33,6 @@ export default function SignInPage() {
       }
 
       if (data.session) {
-        // Session is automatically stored in cookies by the Supabase browser client
-        // The middleware will pick up these cookies on the next request
         router.push("/dashboard");
         router.refresh();
       }
@@ -67,14 +65,14 @@ export default function SignInPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <Link href="/" className="inline-block mb-8">
-            <span className="font-headline text-2xl text-[#f5f0eb]">
+            <span className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>
               The<span className="accent-text">Auctus</span>
             </span>
           </Link>
-          <h1 className="font-headline text-3xl text-[#f5f0eb] mb-3">
+          <h1 className="font-headline text-3xl mb-3" style={{ color: "var(--foreground)" }}>
             Welcome back
           </h1>
-          <p className="text-[13px] text-[#6b6560]">
+          <p className="text-[13px]" style={{ color: "var(--muted)" }}>
             Sign in to your account
           </p>
         </div>
@@ -83,7 +81,7 @@ export default function SignInPage() {
         <div className="space-y-3 mb-8">
           <button
             onClick={handleGoogleSignIn}
-            className="flex items-center justify-center gap-3 w-full px-4 py-3 glass-card hover:bg-white/[0.04] transition-colors"
+            className="flex items-center justify-center gap-3 w-full px-4 py-3 liquid-card hover:border-[var(--lg-border-strong)] transition-all duration-300"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -91,27 +89,31 @@ export default function SignInPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            <span className="text-[13px] text-[#f5f0eb]">Continue with Google</span>
+            <span className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>
+              Continue with Google
+            </span>
           </button>
         </div>
 
         {/* Divider */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="flex-1 h-px bg-white/[0.06]"></div>
-          <span className="text-[11px] uppercase tracking-[0.1em] text-[#6b6560]">or</span>
-          <div className="flex-1 h-px bg-white/[0.06]"></div>
+          <div className="flex-1 h-px" style={{ background: "var(--lg-border)" }}></div>
+          <span className="text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>
+            or
+          </span>
+          <div className="flex-1 h-px" style={{ background: "var(--lg-border)" }}></div>
         </div>
 
         {/* Email/Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3 glass-card border border-red-500/20 text-red-400 text-[12px]">
+            <div className="p-3 liquid-card border border-red-500/20 text-red-400 text-[12px]">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-[11px] uppercase tracking-[0.1em] text-[#6b6560] mb-2">
+            <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>
               Email
             </label>
             <input
@@ -119,13 +121,13 @@ export default function SignInPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-3 glass-input text-[13px]"
+              className="w-full px-4 py-3 liquid-input text-[13px]"
               required
             />
           </div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-[0.1em] text-[#6b6560] mb-2">
+            <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>
               Password
             </label>
             <input
@@ -133,13 +135,13 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 glass-input text-[13px]"
+              className="w-full px-4 py-3 liquid-input text-[13px]"
               required
             />
           </div>
 
           <div className="flex justify-end">
-            <Link href="/auth/forgot-password" className="text-[11px] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+            <Link href="/auth/forgot-password" className="text-[11px] hover:opacity-80 transition-opacity" style={{ color: "var(--muted)" }}>
               Forgot password?
             </Link>
           </div>
@@ -147,7 +149,7 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
+            className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -158,9 +160,9 @@ export default function SignInPage() {
         </form>
 
         {/* Footer */}
-        <p className="text-center mt-8 text-[12px] text-[#6b6560]">
+        <p className="text-center mt-8 text-[12px]" style={{ color: "var(--muted)" }}>
           Don&apos;t have an account?{" "}
-          <Link href="/auth/signup" className="accent-text hover:text-[#dcc4a0] transition-colors">
+          <Link href="/auth/signup" className="accent-text hover:opacity-80 transition-opacity">
             Sign up
           </Link>
         </p>

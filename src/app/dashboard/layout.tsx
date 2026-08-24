@@ -99,16 +99,16 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* ── Sidebar — editorial minimal ─────────────────────── */}
+      {/* ── Sidebar — liquid glass ──────────────────────────── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-56 glass-sidebar flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-56 liquid-sidebar flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 h-16 border-b border-white/[0.04]">
+        <div className="flex items-center gap-3 px-5 h-16" style={{ borderBottom: "1px solid var(--lg-border)" }}>
           <img src="/logo.svg" alt="TheAuctus" className="w-8 h-8" />
-          <span className="font-headline text-lg text-[#f5f0eb]">
+          <span className="font-headline text-lg" style={{ color: "var(--foreground)" }}>
             The<span className="accent-text">Auctus</span>
           </span>
         </div>
@@ -125,11 +125,11 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded text-[12px] transition-all ${
-                  isActive
-                    ? "text-[#f5f0eb] bg-white/[0.04]"
-                    : "text-[#6b6560] hover:text-[#9a9590] hover:bg-white/[0.02]"
-                }`}
+                className="flex items-center gap-3 px-3 py-2 rounded text-[12px] transition-all"
+                style={{
+                  color: isActive ? "var(--foreground)" : "var(--muted)",
+                  backgroundColor: isActive ? "var(--lg-bg)" : "transparent",
+                }}
               >
                 {item.icon}
                 <span className="tracking-wide">{item.label}</span>
@@ -140,15 +140,15 @@ export default function DashboardLayout({
 
         {/* Plan badge */}
         <div className="px-3 pb-4">
-          <div className="glass-subtle p-3">
+          <div className="liquid-subtle p-3">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-1.5 h-1.5 bg-[#c9a87c] rounded-full"></div>
-              <span className="text-[10px] uppercase tracking-[0.1em] text-[#9a9590]">Growth Plan</span>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--accent-copper)" }}></div>
+              <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>Growth Plan</span>
             </div>
-            <p className="text-[10px] text-[#6b6560] mb-2">Renews Sep 22, 2026</p>
+            <p className="text-[10px] mb-2" style={{ color: "var(--muted)" }}>Renews Sep 22, 2026</p>
             <Link
               href="/dashboard/billing"
-              className="text-[10px] uppercase tracking-[0.1em] accent-text hover:text-[#dcc4a0] transition-colors"
+              className="text-[10px] uppercase tracking-[0.1em] accent-text hover:opacity-80 transition-opacity"
             >
               Manage →
             </Link>
@@ -160,7 +160,8 @@ export default function DashboardLayout({
           <form action="/api/auth/signout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2 rounded text-[12px] text-[#6b6560] hover:text-[#9a9590] hover:bg-white/[0.02] transition-colors w-full text-left"
+              className="flex items-center gap-3 px-3 py-2 rounded text-[12px] hover:bg-white/[0.02] transition-colors w-full text-left"
+              style={{ color: "var(--muted)" }}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -174,9 +175,10 @@ export default function DashboardLayout({
       {/* ── Main content ────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="h-16 border-b border-white/[0.04] flex items-center justify-between px-4 lg:px-8 shrink-0">
+        <header className="h-16 flex items-center justify-between px-4 lg:px-8 shrink-0" style={{ borderBottom: "1px solid var(--lg-border)" }}>
           <button
-            className="lg:hidden p-2 -ml-2 text-[#6b6560] hover:text-foreground transition-colors"
+            className="lg:hidden p-2 -ml-2 transition-colors"
+            style={{ color: "var(--muted)" }}
             onClick={() => setSidebarOpen(true)}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -185,7 +187,7 @@ export default function DashboardLayout({
           </button>
 
           <div className="flex-1 lg:flex-none">
-            <h1 className="font-headline text-lg text-[#f5f0eb]">
+            <h1 className="font-headline text-lg" style={{ color: "var(--foreground)" }}>
               {navItems.find(
                 (item) =>
                   item.href === "/dashboard"
@@ -196,16 +198,16 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-[0.1em] text-[#6b6560]">
-              <div className="w-1.5 h-1.5 bg-[#7cb87c] rounded-full"></div>
+            <div className="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--success)" }}></div>
               Operational
             </div>
             <ThemeToggle />
-            <div className="w-7 h-7 rounded-full bg-[#1e1e1e] border border-white/[0.08] flex items-center justify-center text-[10px] accent-text font-medium">
+            <div className="w-7 h-7 rounded-full liquid-card flex items-center justify-center text-[10px] accent-text font-medium">
               {getInitials()}
             </div>
             <form action="/api/auth/signout" method="POST" className="inline">
-              <button type="submit" className="text-[10px] uppercase tracking-[0.1em] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+              <button type="submit" className="text-[10px] uppercase tracking-[0.1em] hover:opacity-70 transition-opacity" style={{ color: "var(--muted)" }}>
                 Sign out
               </button>
             </form>
