@@ -1,6 +1,6 @@
 -- ══════════════════════════════════════════════════════════════
 -- THEAUCTUS SECURITY POLICIES
--- Run this in Supabase SQL Editor to enable RLS on all tables
+-- Safe to re-run: drops existing policies before creating new ones
 -- ══════════════════════════════════════════════════════════════
 
 -- Enable RLS on all tables
@@ -13,22 +13,23 @@ ALTER TABLE IF EXISTS connected_platforms ENABLE ROW LEVEL SECURITY;
 -- PROFILES TABLE (uses 'id' column = auth.uid())
 -- ══════════════════════════════════════════════════════════════
 
--- Users can only read their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users cannot delete profiles" ON profiles;
+
 CREATE POLICY "Users can view own profile"
   ON profiles FOR SELECT
   USING (auth.uid() = id);
 
--- Users can insert their own profile
 CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
 
--- Users can update their own profile
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   USING (auth.uid() = id);
 
--- Users cannot delete profiles (admin only)
 CREATE POLICY "Users cannot delete profiles"
   ON profiles FOR DELETE
   USING (false);
@@ -37,22 +38,23 @@ CREATE POLICY "Users cannot delete profiles"
 -- POSTS TABLE (uses 'user_id' column)
 -- ══════════════════════════════════════════════════════════════
 
--- Users can only read their own posts
+DROP POLICY IF EXISTS "Users can view own posts" ON posts;
+DROP POLICY IF EXISTS "Users can create own posts" ON posts;
+DROP POLICY IF EXISTS "Users can update own posts" ON posts;
+DROP POLICY IF EXISTS "Users can delete own posts" ON posts;
+
 CREATE POLICY "Users can view own posts"
   ON posts FOR SELECT
   USING (auth.uid() = user_id);
 
--- Users can create posts for themselves
 CREATE POLICY "Users can create own posts"
   ON posts FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Users can update their own posts
 CREATE POLICY "Users can update own posts"
   ON posts FOR UPDATE
   USING (auth.uid() = user_id);
 
--- Users can delete their own posts
 CREATE POLICY "Users can delete own posts"
   ON posts FOR DELETE
   USING (auth.uid() = user_id);
@@ -61,22 +63,23 @@ CREATE POLICY "Users can delete own posts"
 -- CONTENT CALENDARS TABLE (uses 'user_id' column)
 -- ══════════════════════════════════════════════════════════════
 
--- Users can only read their own calendars
+DROP POLICY IF EXISTS "Users can view own calendars" ON content_calendars;
+DROP POLICY IF EXISTS "Users can create own calendars" ON content_calendars;
+DROP POLICY IF EXISTS "Users can update own calendars" ON content_calendars;
+DROP POLICY IF EXISTS "Users can delete own calendars" ON content_calendars;
+
 CREATE POLICY "Users can view own calendars"
   ON content_calendars FOR SELECT
   USING (auth.uid() = user_id);
 
--- Users can create calendars for themselves
 CREATE POLICY "Users can create own calendars"
   ON content_calendars FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Users can update their own calendars
 CREATE POLICY "Users can update own calendars"
   ON content_calendars FOR UPDATE
   USING (auth.uid() = user_id);
 
--- Users can delete their own calendars
 CREATE POLICY "Users can delete own calendars"
   ON content_calendars FOR DELETE
   USING (auth.uid() = user_id);
@@ -85,38 +88,45 @@ CREATE POLICY "Users can delete own calendars"
 -- CONNECTED PLATFORMS TABLE (uses 'user_id' column)
 -- ══════════════════════════════════════════════════════════════
 
--- Users can only read their own connected platforms
+DROP POLICY IF EXISTS "Users can view own platforms" ON connected_platforms;
+DROP POLICY IF EXISTS "Users can connect own platforms" ON connected_platforms;
+DROP POLICY IF EXISTS "Users can update own platforms" ON connected_platforms;
+DROP POLICY IF EXISTS "Users can disconnect own platforms" ON connected_platforms;
+
 CREATE POLICY "Users can view own platforms"
   ON connected_platforms FOR SELECT
   USING (auth.uid() = user_id);
 
--- Users can connect platforms for themselves
 CREATE POLICY "Users can connect own platforms"
   ON connected_platforms FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Users can update their own platform connections
 CREATE POLICY "Users can update own platforms"
   ON connected_platforms FOR UPDATE
   USING (auth.uid() = user_id);
 
--- Users can disconnect their own platforms
 CREATE POLICY "Users can disconnect own platforms"
   ON connected_platforms FOR DELETE
   USING (auth.uid() = user_id);
 
 -- ══════════════════════════════════════════════════════════════
--- STORAGE BUCKETS (if using Supabase Storage)
+-- STORAGE BUCKETS
 -- ══════════════════════════════════════════════════════════════
 
--- Create storage buckets
 INSERT INTO storage.buckets (id, name, public)
 VALUES 
   ('avatars', 'avatars', true),
   ('media', 'media', false)
 ON CONFLICT (id) DO NOTHING;
 
--- Avatar storage policies
+-- Drop existing storage policies if any
+DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can view avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own avatar" ON storage.objects;
+DROP POLICY IF EXISTS "Users can upload own media" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view own media" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own media" ON storage.objects;
+
 CREATE POLICY "Users can upload own avatar"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -135,7 +145,6 @@ CREATE POLICY "Users can delete own avatar"
     AND auth.uid()::text = (storage.foldername(name))[1]
   );
 
--- Media storage policies (private)
 CREATE POLICY "Users can upload own media"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -161,7 +170,6 @@ CREATE POLICY "Users can delete own media"
 -- DATABASE FUNCTIONS (Security Definer)
 -- ══════════════════════════════════════════════════════════════
 
--- Function to check username availability (prevents enumeration)
 CREATE OR REPLACE FUNCTION check_username_available(username TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -174,7 +182,6 @@ BEGIN
 END;
 $$;
 
--- Function to create profile on signup (trigger)
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -193,14 +200,14 @@ BEGIN
 END;
 $$;
 
--- Trigger to create profile on user creation
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION handle_new_user();
 
 -- ══════════════════════════════════════════════════════════════
--- AUDIT LOG TABLE (optional but recommended)
+-- AUDIT LOG TABLE
 -- ══════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -218,12 +225,13 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
--- Only admins can view audit logs
+DROP POLICY IF EXISTS "Admins can view audit logs" ON audit_log;
+DROP POLICY IF EXISTS "System can insert audit logs" ON audit_log;
+
 CREATE POLICY "Admins can view audit logs"
   ON audit_log FOR SELECT
   USING (false);
 
--- System can insert audit logs
 CREATE POLICY "System can insert audit logs"
   ON audit_log FOR INSERT
   WITH CHECK (true);
