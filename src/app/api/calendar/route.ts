@@ -1,12 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, getProfile } from "@/lib/auth-helpers";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
+// Rate limit: 5 calendar generations per hour per user
+const CALENDAR_RATE_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 };
 
 // POST /api/calendar — Generate a full 30-day content calendar
 export async function POST(request: NextRequest) {
   const user = await requireAuth();
+
+  // Rate limit: prevent API bill burn
+  const { allowed, remaining, retryAfterSeconds } = checkRateLimit(
+    `calendar:${user.id}`,
+    CALENDAR_RATE_LIMIT.limit,
+    CALENDAR_RATE_LIMIT.windowMs
+  );
+
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        error: `Rate limit reached. You can generate ${CALENDAR_RATE_LIMIT.limit} calendars per hour. Try again in ${retryAfterSeconds} seconds.`,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(retryAfterSeconds),
+          "X-RateLimit-Limit": String(CALENDAR_RATE_LIMIT.limit),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const body = await request.json();
@@ -75,10 +103,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: postsError.message }, { status: 500 });
     }
 
+    // Fix: Don't leak config info
     return NextResponse.json({
       calendar,
       method: "local",
-      note: "Add ANTHROPIC_API_KEY to .env for AI-generated content",
     });
   }
 
@@ -185,13 +213,13 @@ Return ONLY the JSON array, no markdown, no explanation.`;
       return NextResponse.json({ error: postsError.message }, { status: 500 });
     }
 
+    // Fix: Don't leak tokensUsed or API details
     return NextResponse.json({
       calendar,
       method: "claude",
-      tokensUsed: response.usage?.output_tokens || 0,
     });
-  } catch (error) {
-    console.error("Claude API error:", error);
+  } catch {
+    // Fix: Don't log error object (may contain API key or sensitive details)
     return NextResponse.json(
       { error: "AI generation failed" },
       { status: 500 }
