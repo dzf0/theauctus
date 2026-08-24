@@ -142,12 +142,12 @@ export default function LandingPage() {
               </a>
               {user ? (
                 <div className="flex items-center gap-4">
-                  <span className="text-[11px] text-[#6b6560]">
-                    Already have an account?
-                  </span>
                   <Link href="/dashboard" className="glass-btn-primary text-[11px]">
                     Dashboard
                   </Link>
+                  <a href="/api/auth/signout" className="text-[11px] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+                    Sign out
+                  </a>
                 </div>
               ) : (
                 <Link href="/auth/signup" className="glass-btn-primary text-[11px]">
@@ -177,9 +177,14 @@ export default function LandingPage() {
             <a href="#pricing" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">Pricing</a>
             <a href="#faq" className="block text-[11px] uppercase tracking-[0.12em] text-[#6b6560]">FAQ</a>
             {user ? (
-              <Link href="/dashboard" className="block glass-btn-primary text-center text-[11px]">
-                Dashboard
-              </Link>
+              <div className="space-y-4">
+                <Link href="/dashboard" className="block glass-btn-primary text-center text-[11px]">
+                  Dashboard
+                </Link>
+                <a href="/api/auth/signout" className="block text-center text-[11px] text-[#6b6560] hover:text-[#9a9590]">
+                  Sign out
+                </a>
+              </div>
             ) : (
               <Link href="/auth/signup" className="block glass-btn-primary text-center text-[11px]">
                 Get Started

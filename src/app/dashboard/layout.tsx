@@ -153,6 +153,19 @@ export default function DashboardLayout({
             </Link>
           </div>
         </div>
+
+        {/* Sign out */}
+        <div className="px-3 pb-4">
+          <a
+            href="/api/auth/signout"
+            className="flex items-center gap-3 px-3 py-2 rounded text-[12px] text-[#6b6560] hover:text-[#9a9590] hover:bg-white/[0.02] transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="tracking-wide">Sign out</span>
+          </a>
+        </div>
       </aside>
 
       {/* ── Main content ────────────────────────────────────── */}
