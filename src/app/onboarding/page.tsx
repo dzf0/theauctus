@@ -413,9 +413,15 @@ export default function OnboardingPage() {
 
         {/* Skip Link */}
         <p className="text-center mt-6 text-[12px] text-[#6b6560]">
-          <Link href="/dashboard" className="hover:text-[#9a9590] transition-colors">
+          <button
+            onClick={async () => {
+              await fetch("/api/profile/complete-onboarding", { method: "POST" });
+              router.push("/dashboard");
+            }}
+            className="hover:text-[#9a9590] transition-colors"
+          >
             Skip for now →
-          </Link>
+          </button>
         </p>
       </div>
     </div>
