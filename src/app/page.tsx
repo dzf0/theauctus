@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useInView } from "@/hooks/use-in-view";
 import { ThreeDCard } from "@/components/three-d-card";
 import { HeroVisual } from "@/components/hero-visual";
+// AnimatedHeadline removed - use plain text for reliable mobile layout
 
 // ── Reveal wrapper ──────────────────────────────────────────────
 function Reveal({
@@ -78,26 +79,7 @@ const faqs = [
   { q: "How is this different from Buffer/Hootsuite?", a: "Those are scheduling tools. TheAuctus is a growth engine — it plans your content, tells you WHAT to post, optimizes timing, and suggests growth tactics based on your metrics." },
 ];
 
-// ── Animated Hero Characters ────────────────────────────────────
-function AnimatedHeadline({ text, className = "" }: { text: string; className?: string }) {
-  const [ref, isInView] = useInView({ threshold: 0.3 });
-  return (
-    <span ref={ref} className={className}>
-      {text.split("").map((char, i) => (
-        <span
-          key={i}
-          className="char-animate inline-block"
-          style={{
-            animationDelay: isInView ? `${i * 0.03}s` : "0s",
-            opacity: isInView ? undefined : 0,
-          }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </span>
-      ))}
-    </span>
-  );
-}
+
 
 // ── Main Page ───────────────────────────────────────────────────
 export default function LandingPage() {
@@ -183,12 +165,11 @@ export default function LandingPage() {
                 <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-8">Automated Creator Growth Engine</p>
               </Reveal>
               <Reveal direction="3d" delay={0.1}>
-                <h1 className="font-headline text-6xl sm:text-7xl lg:text-[5.5rem] leading-[0.95] text-[var(--foreground)] mb-8">
-                  <AnimatedHeadline text="Stop creating" /><br />
-                  <AnimatedHeadline text="content." /><br />
-                  <span className="text-[var(--muted)] italic"><AnimatedHeadline text="Start" /></span>{" "}
-                  <span className="gradient-text-animated italic"><AnimatedHeadline text="engineering" /></span>{" "}
-                  <AnimatedHeadline text="it." />
+                <h1 className="font-headline text-4xl sm:text-5xl lg:text-[5.5rem] leading-[0.95] text-[var(--foreground)] mb-8">
+                  Stop creating<br />content.<br />
+                  <span className="text-[var(--muted)] italic">Start </span>
+                  <span className="gradient-text-animated italic">engineering </span>
+                  it.
                 </h1>
               </Reveal>
               <Reveal direction="3d" delay={0.3}>
