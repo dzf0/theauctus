@@ -1,246 +1,230 @@
 "use client";
 
-import { growthMetrics, mockPosts, creatorProfile } from "@/lib/store";
-import { platformConfig } from "@/lib/store";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from "@/components/ui";
+
+interface Profile {
+  niche: string;
+  brand_voice: string;
+  onboarded: boolean;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  platform: string;
+  status: string;
+  created_at: string;
+}
 
 export default function DashboardPage() {
-  const upcomingPosts = mockPosts
-    .filter((p) => p.status === "scheduled")
-    .sort((a, b) => (a.scheduledAt || "").localeCompare(b.scheduledAt || ""))
-    .slice(0, 5);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  return (
-    <div className="space-y-16 animate-fade-in">
-      {/* ── Welcome — editorial headline ──────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3">
-            {creatorProfile.niche}
-          </p>
-          <h2 className="font-headline text-4xl sm:text-5xl text-[#f5f0eb] leading-[1.05]">
-            Welcome back,
-            <br />
-            <span className="text-[#6b6560]">{creatorProfile.name.split(" ")[0]}.</span>
-          </h2>
-          <p className="text-[13px] text-[#6b6560] mt-3">
-            {upcomingPosts.length} posts scheduled this week.
-          </p>
-        </div>
-        <Link
-          href="/dashboard/planner"
-          className="glass-btn-primary inline-flex items-center gap-2 text-[11px]"
-        >
-          + Generate Content
-        </Link>
-      </div>
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/profile").then((r) => r.json()),
+      fetch("/api/posts").then((r) => r.json()),
+    ]).then(([profileData, postsData]) => {
+      setProfile(profileData.profile);
+      setPosts(postsData.posts || []);
+      setLoading(false);
+    });
+  }, []);
 
-      {/* ── Metrics — editorial large numbers ─────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04]">
-        {[
-          {
-            value: growthMetrics.totalFollowers.toLocaleString(),
-            label: "Followers",
-            change: `+${growthMetrics.followersGrowth.toLocaleString()}`,
-          },
-          {
-            value: `${growthMetrics.engagementRate}%`,
-            label: "Engagement",
-            change: "+0.6%",
-          },
-          {
-            value: `${(growthMetrics.totalReach / 1000).toFixed(1)}K`,
-            label: "Reach",
-            change: "+23%",
-          },
-          {
-            value: growthMetrics.postsPublished.toString(),
-            label: "Published",
-            change: "+12",
-          },
-        ].map((metric, i) => (
-          <div key={i} className="p-6 bg-[#111] hover:bg-white/[0.02] transition-colors">
-            <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b6560] mb-2">{metric.label}</p>
-            <p className="font-headline text-4xl sm:text-5xl text-[#f5f0eb] tracking-tight mb-2">{metric.value}</p>
-            <p className="text-[11px] accent-text">{metric.change} this month</p>
-          </div>
-        ))}
-      </div>
+  const stats = [
+    {
+      label: "Credits",
+      value: "42",
+      change: "+10",
+      positive: true,
+    },
+    {
+      label: "Posts This Week",
+      value: posts.filter((p) => {
+        const created = new Date(p.created_at);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return created > weekAgo;
+      }).length.toString(),
+      change: "+5",
+      positive: true,
+    },
+    {
+      label: "Engagement Rate",
+      value: "4.2%",
+      change: "+0.8%",
+      positive: true,
+    },
+    {
+      label: "Followers",
+      value: "2.8K",
+      change: "+127",
+      positive: true,
+    },
+  ];
 
-      {/* ── Growth chart + Platforms ──────────────────────── */}
-      <div className="grid lg:grid-cols-[2fr_1fr] gap-px bg-white/[0.04]">
-        {/* Growth chart */}
-        <div className="p-6 bg-[#111]">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-headline text-lg text-[#f5f0eb]">Growth Overview</h3>
-            <span className="text-[10px] uppercase tracking-[0.15em] text-[#6b6560]">Last 6 weeks</span>
-          </div>
-          <div className="relative h-48">
-            <div className="absolute inset-0 flex items-end">
-              {growthMetrics.weeklyData.map((week, i) => {
-                const maxFollowers = Math.max(
-                  ...growthMetrics.weeklyData.map((w) => w.followers)
-                );
-                const height = (week.followers / maxFollowers) * 100;
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2 px-1">
-                    <div
-                      className="w-full rounded-t-sm transition-all duration-500"
-                      style={{
-                        height: `${height}%`,
-                        background: `linear-gradient(to top, rgba(201, 168, 124, 0.6), rgba(201, 168, 124, 0.2))`,
-                      }}
-                    />
-                    <span className="text-[9px] text-[#6b6560]">{week.week}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="mt-6 pt-4 border-t border-white/[0.04] flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-accent-copper rounded-full"></div>
-              <span className="text-[10px] uppercase tracking-[0.1em] text-[#6b6560]">Followers</span>
-            </div>
-            <span className="text-[10px] text-[#6b6560]">
-              +{growthMetrics.followersGrowth.toLocaleString()} growth
-            </span>
-          </div>
-        </div>
-
-        {/* Platforms */}
-        <div className="p-6 bg-[#111]">
-          <h3 className="font-headline text-lg text-[#f5f0eb] mb-6">Platforms</h3>
-          <div className="space-y-5">
-            {growthMetrics.platformBreakdown.map((platform, i) => {
-              const config = platformConfig[platform.platform];
-              const maxFollowers = Math.max(
-                ...growthMetrics.platformBreakdown.map((p) => p.followers)
-              );
-              return (
-                <div key={i}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs">{config.icon}</span>
-                      <span className="text-[12px] text-[#9a9590]">{config.label}</span>
-                    </div>
-                    <span className="font-headline text-sm text-[#f5f0eb]">
-                      {(platform.followers / 1000).toFixed(1)}K
-                    </span>
-                  </div>
-                  <div className="w-full h-[2px] bg-white/[0.04] overflow-hidden">
-                    <div
-                      className="h-full transition-all duration-500"
-                      style={{
-                        width: `${(platform.followers / maxFollowers) * 100}%`,
-                        backgroundColor: config.color,
-                        opacity: 0.7,
-                      }}
-                    />
-                  </div>
-                  <p className="text-[10px] accent-text mt-1">+{platform.growth.toLocaleString()}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Upcoming + Revenue ────────────────────────────── */}
-      <div className="grid lg:grid-cols-2 gap-px bg-white/[0.04]">
-        {/* Upcoming posts */}
-        <div className="p-6 bg-[#111]">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-headline text-lg text-[#f5f0eb]">Upcoming</h3>
-            <Link href="/dashboard/queue" className="text-[10px] uppercase tracking-[0.12em] accent-text hover:text-[#dcc4a0] transition-colors">
-              View all →
-            </Link>
-          </div>
-          <div className="space-y-0">
-            {upcomingPosts.map((post, i) => {
-              const config = platformConfig[post.platform];
-              return (
-                <div
-                  key={post.id}
-                  className={`flex items-start gap-4 py-4 ${
-                    i > 0 ? "border-t border-white/[0.04]" : ""
-                  }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-[#f5f0eb] truncate">{post.title}</p>
-                    <p className="text-[11px] text-[#6b6560] mt-1">
-                      {config.icon} {config.label} ·{" "}
-                      {post.scheduledAt
-                        ? new Date(post.scheduledAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })
-                        : "TBD"}
-                    </p>
-                  </div>
-                  <span className="glass-badge text-[9px] shrink-0">{post.contentType}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Revenue */}
-        <div className="p-6 bg-[#111]">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-headline text-lg text-[#f5f0eb]">Revenue</h3>
-            <Link href="/dashboard/analytics" className="text-[10px] uppercase tracking-[0.12em] accent-text hover:text-[#dcc4a0] transition-colors">
-              Details →
-            </Link>
-          </div>
-          <div className="space-y-6">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b6560] mb-1">Monthly</p>
-              <p className="font-headline text-5xl text-[#f5f0eb] tracking-tight">
-                ${growthMetrics.revenue.toLocaleString()}
-              </p>
-            </div>
-            <div className="editorial-divider" />
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b6560] mb-1">Subscribers</p>
-              <p className="font-headline text-3xl text-[#f5f0eb] tracking-tight">
-                {growthMetrics.subscribers}
-              </p>
-            </div>
-            <div className="editorial-divider" />
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] accent-text font-medium">+32%</span>
-              <span className="text-[11px] text-[#6b6560]">vs last month</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Growth tactics — editorial ─────────────────────── */}
-      <div className="p-6 bg-[#111] border border-white/[0.04]">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="font-headline text-lg text-[#f5f0eb]">Growth Tactics</h3>
-          <span className="glass-badge text-[9px]">AI-generated</span>
-        </div>
-        <div className="grid md:grid-cols-2 gap-px bg-white/[0.04]">
-          {[
-            'Create a "AI Productivity Starter Pack" thread — resource threads get 3-5x more bookmarks',
-            "Post 2 carousel posts on LinkedIn — carousels get 2.3x more saves",
-            "Spend 20 min/day replying to top creators for visibility",
-            "Repurpose your top tweet into an Instagram Reel — video gets 3x reach",
-          ].map((tactic, i) => (
-            <div
-              key={i}
-              className="p-5 bg-[#111]"
-            >
-              <span className="font-headline text-2xl text-[#2a2a2a] block mb-2">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <p className="text-[13px] text-[#9a9590] leading-relaxed">{tactic}</p>
-            </div>
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 bg-[#252525] rounded animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 bg-[#252525] rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Welcome Header */}
+      <div>
+        <h1 className="font-headline text-2xl text-[#F5F0EB]">
+          Welcome back{profile?.niche ? `, ${profile.niche} creator` : ""}
+        </h1>
+        <p className="text-[13px] text-[#6B6560] mt-1">
+          Here&apos;s what&apos;s happening with your content
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => (
+          <Card key={stat.label} variant="stat">
+            <CardContent>
+              <p className="text-[11px] uppercase tracking-[0.1em] text-[#6B6560] mb-1">
+                {stat.label}
+              </p>
+              <div className="flex items-baseline gap-2">
+                <span className="font-headline text-2xl text-[#F5F0EB]">
+                  {stat.value}
+                </span>
+                <span
+                  className={`text-[11px] ${
+                    stat.positive ? "text-[#7CB87C]" : "text-[#E06C75]"
+                  }`}
+                >
+                  {stat.change}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid md:grid-cols-3 gap-4">
+        <Link href="/dashboard/planner">
+          <Card variant="interactive">
+            <CardContent className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-[#C9A87C]/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#C9A87C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[14px] text-[#F5F0EB] font-medium">Generate Content</p>
+                <p className="text-[12px] text-[#6B6560]">AI-powered post creation</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/planner">
+          <Card variant="interactive">
+            <CardContent className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-[#7CB87C]/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#7CB87C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[14px] text-[#F5F0EB] font-medium">View Calendar</p>
+                <p className="text-[12px] text-[#6B6560]">See scheduled posts</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/analytics">
+          <Card variant="interactive">
+            <CardContent className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-[#61AFEF]/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#61AFEF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[14px] text-[#F5F0EB] font-medium">View Analytics</p>
+                <p className="text-[12px] text-[#6B6560]">Track performance</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Recent Posts */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Recent Posts</CardTitle>
+            <Link href="/dashboard/planner" className="text-[12px] text-[#C9A87C] hover:text-[#B8956A] transition-colors">
+              View All →
+            </Link>
+          </div>
+        </CardHeader>
+        <div className="divide-y divide-[#2A2A2A]">
+          {posts.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-[13px] text-[#6B6560] mb-4">No posts yet</p>
+              <Link href="/dashboard/planner">
+                <Button>Generate Your First Posts</Button>
+              </Link>
+            </div>
+          ) : (
+            posts.slice(0, 5).map((post) => (
+              <div key={post.id} className="py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[14px]">
+                    {post.platform === "instagram" && "📸"}
+                    {post.platform === "tiktok" && "🎵"}
+                    {post.platform === "twitter" && "🐦"}
+                    {post.platform === "linkedin" && "💼"}
+                    {post.platform === "facebook" && "👤"}
+                  </span>
+                  <div>
+                    <p className="text-[13px] text-[#F5F0EB] truncate max-w-[300px]">
+                      {post.title || post.content.slice(0, 50)}
+                    </p>
+                    <p className="text-[11px] text-[#6B6560]">
+                      {new Date(post.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <Badge
+                  variant={
+                    post.status === "published"
+                      ? "success"
+                      : post.status === "scheduled"
+                      ? "warning"
+                      : "default"
+                  }
+                >
+                  {post.status}
+                </Badge>
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

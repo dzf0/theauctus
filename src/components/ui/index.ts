@@ -15,3 +15,11 @@ export type { ModalProps } from "./Modal";
 
 export { ToastContainer, useToast } from "./Toast";
 export type { Toast, ToastType } from "./Toast";
+
+export { default as Select } from "./Select";
+export type { SelectProps } from "./Select";
+
+export { default as Checkbox } from "./Checkbox";
+export type { CheckboxProps } from "./Checkbox";
+
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
