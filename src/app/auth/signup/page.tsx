@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
+import {
+  validateEmail,
+  validatePassword,
+  validateUsername,
+  getPasswordRuleResults,
+  getPasswordStrength,
+  PASSWORD_RULES,
+} from "@/lib/validate";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -16,7 +24,6 @@ export default function SignUpPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,21 +35,40 @@ export default function SignUpPage() {
     setLoading(true);
     setError("");
 
-    // Validate
+    // Validate email
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      setError(emailError);
+      setLoading(false);
+      return;
+    }
+
+    // Validate username
+    const usernameError = validateUsername(formData.username);
+    if (usernameError) {
+      setError(usernameError);
+      setLoading(false);
+      return;
+    }
+
+    // Validate full name
+    if (!formData.fullName.trim()) {
+      setError("Full name is required");
+      setLoading(false);
+      return;
+    }
+
+    // Validate password
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setError(passwordError);
+      setLoading(false);
+      return;
+    }
+
+    // Validate confirm password
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.username || !formData.fullName || !formData.email) {
-      setError("All fields are required");
       setLoading(false);
       return;
     }
@@ -64,7 +90,6 @@ export default function SignUpPage() {
       }
 
       // Sign up — Supabase automatically hashes the password with bcrypt
-      // and sends a verification email
       const { data, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -82,14 +107,11 @@ export default function SignUpPage() {
         return;
       }
 
-      // Check if email confirmation is needed
       if (data.user && !data.session) {
-        // Redirect to OTP verification
         router.push(`/auth/verify-otp?email=${encodeURIComponent(formData.email)}`);
         return;
       }
 
-      // If auto-confirmed (email confirm disabled), session is set
       if (data.session) {
         router.push("/onboarding");
         router.refresh();
@@ -109,13 +131,14 @@ export default function SignUpPage() {
           redirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
         },
       });
-      if (error) {
-        setError(error.message);
-      }
+      if (error) setError(error.message);
     } catch {
       setError("Something went wrong with Google sign-up.");
     }
   };
+
+  const passwordRules = getPasswordRuleResults(formData.password);
+  const passwordStrength = getPasswordStrength(formData.password);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
@@ -224,6 +247,59 @@ export default function SignUpPage() {
               className="w-full px-4 py-3 glass-input text-[13px]"
               required
             />
+
+            {/* Password strength indicator */}
+            {formData.password && (
+              <div className="mt-3 space-y-2">
+                {/* Strength bar */}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${(passwordStrength.score / 4) * 100}%`,
+                        backgroundColor: passwordStrength.color,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className="text-[10px] font-medium uppercase tracking-wider"
+                    style={{ color: passwordStrength.color }}
+                  >
+                    {passwordStrength.label}
+                  </span>
+                </div>
+
+                {/* Rule checklist */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  {PASSWORD_RULES.map((rule, i) => (
+                    <div
+                      key={rule.id}
+                      className="flex items-center gap-1.5 text-[10px]"
+                    >
+                      <span
+                        className="w-3 h-3 flex items-center justify-center rounded-full"
+                        style={{
+                          backgroundColor: passwordRules[i]
+                            ? "rgba(34, 197, 94, 0.15)"
+                            : "rgba(255, 255, 255, 0.06)",
+                          color: passwordRules[i] ? "#22c55e" : "#6b6560",
+                        }}
+                      >
+                        {passwordRules[i] ? "✓" : "·"}
+                      </span>
+                      <span
+                        className={
+                          passwordRules[i] ? "text-[#9a9590]" : "text-[#6b6560]"
+                        }
+                      >
+                        {rule.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
