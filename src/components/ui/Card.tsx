@@ -11,22 +11,25 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ variant = "default", padding = "md", className = "", children, ...props }, ref) => {
     const baseStyles = "rounded-lg border relative overflow-hidden transition-all duration-300";
 
-    const variants: Record<string, string> = {
-      default: "bg-[#1A1A1A] border-[#2A2A2A]",
-      interactive: [
-        "bg-[#1A1A1A] border-[#2A2A2A] cursor-pointer",
-        "hover:border-[#C9A87C]/20 hover:bg-[#1E1E1E]",
-        "hover:shadow-[0_4px_20px_rgba(0,0,0,0.3),0_0_0_1px_rgba(201,168,124,0.05)]",
-        "hover:-translate-y-0.5",
-        "active:translate-y-0 active:shadow-none",
-        "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-      ].join(" "),
-      selected: "bg-[#C9A87C]/10 border-[#C9A87C]/30 shadow-[0_0_20px_rgba(201,168,124,0.08)]",
-      stat: [
-        "bg-[#1A1A1A] border-[#2A2A2A]",
-        "hover:border-[#2A2A2A]/80",
-        "transition-all duration-300",
-      ].join(" "),
+    const variantStyles: Record<string, React.CSSProperties> = {
+      default: {
+        background: "var(--lg-bg)",
+        borderColor: "var(--lg-border)",
+      },
+      interactive: {
+        background: "var(--lg-bg)",
+        borderColor: "var(--lg-border)",
+        cursor: "pointer",
+      },
+      selected: {
+        background: "rgba(201, 168, 124, 0.1)",
+        borderColor: "rgba(201, 168, 124, 0.3)",
+        boxShadow: "0 0 20px rgba(201, 168, 124, 0.08)",
+      },
+      stat: {
+        background: "var(--lg-bg)",
+        borderColor: "var(--lg-border)",
+      },
     };
 
     const paddings: Record<string, string> = {
@@ -36,18 +39,19 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       lg: "p-6",
     };
 
+    const hoverClass = variant === "interactive"
+      ? "hover:border-[var(--lg-border-strong)] hover:-translate-y-0.5 active:translate-y-0"
+      : variant === "stat"
+      ? "hover:border-[var(--lg-border-strong)]"
+      : "";
+
     return (
       <div
         ref={ref}
-        className={`${baseStyles} ${variants[variant]} ${paddings[padding]} ${className}`}
+        className={`${baseStyles} ${paddings[padding]} ${hoverClass} ${className}`}
+        style={variantStyles[variant]}
         {...props}
       >
-        {/* Shimmer sweep for interactive cards */}
-        {variant === "interactive" && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[inherit]">
-            <div className="absolute -top-full -left-full w-[200%] h-[200%] bg-gradient-to-br from-transparent via-white/[0.02] to-transparent rotate-12 opacity-0 hover:opacity-100 transition-opacity duration-500" />
-          </div>
-        )}
         {children}
       </div>
     );
@@ -77,7 +81,8 @@ export const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <h3
         ref={ref}
-        className={`font-headline text-[16px] text-[#F5F0EB] ${className}`}
+        className={`font-headline text-[16px] ${className}`}
+        style={{ color: "var(--foreground)" }}
         {...props}
       >
         {children}
@@ -93,7 +98,7 @@ export interface CardDescriptionProps extends HTMLAttributes<HTMLParagraphElemen
 export const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className = "", children, ...props }, ref) => {
     return (
-      <p ref={ref} className={`text-[13px] text-[#6B6560] ${className}`} {...props}>
+      <p ref={ref} className={`text-[13px] ${className}`} style={{ color: "var(--muted)" }} {...props}>
         {children}
       </p>
     );
@@ -123,7 +128,8 @@ export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
     return (
       <div
         ref={ref}
-        className={`mt-4 pt-4 border-t border-[#2A2A2A] ${className}`}
+        className={`mt-4 pt-4 ${className}`}
+        style={{ borderTop: "1px solid var(--lg-border)" }}
         {...props}
       >
         {children}

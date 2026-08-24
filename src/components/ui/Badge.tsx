@@ -9,15 +9,34 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ variant = "default", size = "sm", className = "", children, ...props }, ref) => {
-    const baseStyles =
-      "inline-flex items-center font-medium rounded-full";
+    const baseStyles = "inline-flex items-center font-medium rounded-full";
 
-    const variants = {
-      default: "bg-[#252525] text-[#9A9590] border border-[#2A2A2A]",
-      primary: "bg-[#C9A87C]/10 text-[#C9A87C] border border-[#C9A87C]/20",
-      success: "bg-[#7CB87C]/10 text-[#7CB87C] border border-[#7CB87C]/20",
-      warning: "bg-[#E5C07B]/10 text-[#E5C07B] border border-[#E5C07B]/20",
-      error: "bg-[#E06C75]/10 text-[#E06C75] border border-[#E06C75]/20",
+    const variantStyles: Record<string, React.CSSProperties> = {
+      default: {
+        background: "var(--lg-bg)",
+        color: "var(--muted)",
+        border: "1px solid var(--lg-border)",
+      },
+      primary: {
+        background: "rgba(201, 168, 124, 0.1)",
+        color: "var(--accent-copper)",
+        border: "1px solid rgba(201, 168, 124, 0.2)",
+      },
+      success: {
+        background: "rgba(124, 184, 124, 0.1)",
+        color: "var(--success)",
+        border: "1px solid rgba(124, 184, 124, 0.2)",
+      },
+      warning: {
+        background: "rgba(229, 192, 123, 0.1)",
+        color: "var(--accent-copper)",
+        border: "1px solid rgba(229, 192, 123, 0.2)",
+      },
+      error: {
+        background: "rgba(224, 108, 117, 0.1)",
+        color: "var(--danger)",
+        border: "1px solid rgba(224, 108, 117, 0.2)",
+      },
     };
 
     const sizes = {
@@ -28,7 +47,8 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     return (
       <span
         ref={ref}
-        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+        className={`${baseStyles} ${sizes[size]} ${className}`}
+        style={variantStyles[variant]}
         {...props}
       >
         {children}

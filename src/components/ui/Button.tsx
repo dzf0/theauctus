@@ -30,7 +30,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-      // Create ripple
       const button = buttonRef.current;
       if (button) {
         const rect = button.getBoundingClientRect();
@@ -46,42 +45,37 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const baseStyles =
-      "relative inline-flex items-center justify-center font-medium overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A87C] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F0F0F] disabled:opacity-40 disabled:cursor-not-allowed select-none";
+      "relative inline-flex items-center justify-center font-medium overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-copper)] disabled:opacity-40 disabled:cursor-not-allowed select-none";
 
-    const variants: Record<string, string> = {
-      primary: [
-        "bg-gradient-to-br from-[#C9A87C] to-[#B8935F] text-[#0F0F0F] font-semibold",
-        "border border-[#C9A87C]/30",
-        "shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]",
-        "hover:shadow-[0_4px_16px_rgba(201,168,124,0.3),0_0_0_1px_rgba(201,168,124,0.1)]",
-        "hover:from-[#dcc4a0] hover:to-[#c9a87c]",
-        "hover:border-[#C9A87C]/50",
-        "active:scale-[0.98] active:shadow-[0_1px_4px_rgba(201,168,124,0.2)]",
-        "transition-all duration-150 ease-out",
-      ].join(" "),
-      secondary: [
-        "bg-[rgba(255,255,255,0.04)] text-[#F5F0EB]",
-        "border border-[#2A2A2A]",
-        "hover:bg-[rgba(255,255,255,0.08)] hover:border-[#3A3A3A]",
-        "hover:shadow-[0_2px_8px_rgba(0,0,0,0.2)]",
-        "active:scale-[0.98] active:bg-[rgba(255,255,255,0.06)]",
-        "transition-all duration-150 ease-out",
-      ].join(" "),
-      ghost: [
-        "bg-transparent text-[#9A9590]",
-        "border border-transparent",
-        "hover:text-[#F5F0EB] hover:bg-[rgba(255,255,255,0.04)]",
-        "active:scale-[0.98]",
-        "transition-all duration-150 ease-out",
-      ].join(" "),
-      danger: [
-        "bg-[#E06C75]/10 text-[#E06C75]",
-        "border border-[#E06C75]/20",
-        "hover:bg-[#E06C75]/20 hover:border-[#E06C75]/30",
-        "hover:shadow-[0_4px_12px_rgba(224,108,117,0.15)]",
-        "active:scale-[0.98]",
-        "transition-all duration-150 ease-out",
-      ].join(" "),
+    const variantStyles: Record<string, React.CSSProperties> = {
+      primary: {
+        background: "linear-gradient(135deg, var(--accent-copper), var(--primary-dark))",
+        color: "#0a0a0f",
+        border: "1px solid rgba(201, 168, 124, 0.3)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+      },
+      secondary: {
+        background: "var(--lg-bg)",
+        color: "var(--foreground)",
+        border: "1px solid var(--lg-border)",
+      },
+      ghost: {
+        background: "transparent",
+        color: "var(--muted)",
+        border: "1px solid transparent",
+      },
+      danger: {
+        background: "rgba(224, 108, 117, 0.1)",
+        color: "var(--danger)",
+        border: "1px solid rgba(224, 108, 117, 0.2)",
+      },
+    };
+
+    const variantClasses: Record<string, string> = {
+      primary: "hover:shadow-[0_4px_16px_rgba(201,168,124,0.3)] active:scale-[0.98]",
+      secondary: "hover:bg-[var(--lg-bg-strong)] hover:border-[var(--lg-border-strong)] active:scale-[0.98]",
+      ghost: "hover:text-[var(--foreground)] hover:bg-[var(--lg-bg)] active:scale-[0.98]",
+      danger: "hover:bg-[rgba(224,108,117,0.2)] hover:border-[rgba(224,108,117,0.3)] active:scale-[0.98]",
     };
 
     const sizes: Record<string, string> = {
@@ -97,7 +91,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           if (typeof ref === "function") ref(node);
           else if (ref) ref.current = node;
         }}
-        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+        className={`${baseStyles} ${variantClasses[variant]} ${sizes[size]} ${className}`}
+        style={variantStyles[variant]}
         disabled={disabled || loading}
         onClick={handleClick}
         {...props}
@@ -119,7 +114,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         {/* Shine sweep overlay */}
         <span className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
-          <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+          <span className="absolute inset-0 -translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
         </span>
 
         {loading ? (
