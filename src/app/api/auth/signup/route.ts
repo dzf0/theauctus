@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Sign up with Supabase Auth
+  // Sign up with Supabase Auth (without email redirect - we'll send OTP separately)
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         full_name: fullName,
         username: username,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://www.theauctus.in"}/auth/callback`,
+      // Don't set emailRedirectTo - we want OTP, not magic link
     },
   });
 
@@ -55,10 +55,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Now send OTP for email verification
+  const { error: otpError } = await supabase.auth.sendOtp({
+    email,
+    options: {
+      // This sends a 6-digit OTP code
+    },
+  });
+
+  if (otpError) {
+    console.error("OTP send error:", otpError);
+    // Account was created but OTP failed - still redirect to verify page
+    // User can use resend to get the code
+  }
+
   // Check if email confirmation is needed
   if (data.user && !data.session) {
     return NextResponse.json({
-      message: "Verification email sent",
+      message: "Verification code sent",
       email: data.user.email,
       needsVerification: true,
     });
