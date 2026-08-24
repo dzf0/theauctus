@@ -34,44 +34,66 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect dashboard routes
+  const pathname = request.nextUrl.pathname;
+
+  // Skip middleware for static assets and API routes (already in matcher,
+  // but double-check to be safe)
   if (
-    request.nextUrl.pathname.startsWith("/dashboard") &&
-    !user
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".ico")
   ) {
+    return supabaseResponse;
+  }
+
+  // Protect dashboard routes — redirect to signin if not logged in
+  if (pathname.startsWith("/dashboard") && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/signin";
     return NextResponse.redirect(url);
   }
 
-  // Check onboarding status for authenticated users
-  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarded")
-      .eq("id", user.id)
-      .single();
+  // For authenticated users on dashboard, check onboarding status
+  // Use a try-catch to prevent redirect loops if the DB query fails
+  if (user && pathname.startsWith("/dashboard")) {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("onboarded")
+        .eq("id", user.id)
+        .maybeSingle();
 
-    // If not onboarded, redirect to onboarding
-    if (profile && !profile.onboarded && !request.nextUrl.pathname.startsWith("/onboarding")) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/onboarding";
-      return NextResponse.redirect(url);
+      // Only redirect if we successfully got the profile and user hasn't onboarded
+      if (!error && profile && !profile.onboarded) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/onboarding";
+        return NextResponse.redirect(url);
+      }
+      // If there's an error or no profile, let them through — the client
+      // will handle it with its own auth check
+    } catch {
+      // DB error — don't redirect, let client handle it
     }
   }
 
-  // Redirect from onboarding if already onboarded
-  if (user && request.nextUrl.pathname.startsWith("/onboarding")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarded")
-      .eq("id", user.id)
-      .single();
+  // If user is on onboarding but already onboarded, send to dashboard
+  if (user && pathname === "/onboarding") {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("onboarded")
+        .eq("id", user.id)
+        .maybeSingle();
 
-    if (profile && profile.onboarded) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      if (!error && profile && profile.onboarded) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+      }
+    } catch {
+      // DB error — let them stay on onboarding
     }
   }
 
