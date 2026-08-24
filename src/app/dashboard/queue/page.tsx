@@ -49,21 +49,21 @@ export default function QueuePage() {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Content Queue</h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <h2 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>Content Queue</h2>
+          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
             Manage, schedule, and track all your content across platforms
           </p>
         </div>
         <div className="flex items-center gap-3">
           {selectedPosts.size > 0 && (
-            <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-lg">
-              <span className="text-sm text-indigo-300 font-medium">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: "rgba(124, 158, 201, 0.1)" }}>
+              <span className="text-sm font-medium" style={{ color: "var(--info)" }}>
                 {selectedPosts.size} selected
               </span>
-              <button className="text-xs text-indigo-400 hover:text-indigo-800 font-medium">
+              <button className="text-xs font-medium hover:opacity-80" style={{ color: "var(--info)" }}>
                 Schedule
               </button>
-              <button className="text-xs text-red-400 hover:text-red-800 font-medium">
+              <button className="text-xs font-medium hover:opacity-80" style={{ color: "var(--danger)" }}>
                 Delete
               </button>
             </div>
@@ -77,14 +77,14 @@ export default function QueuePage() {
           <button
             key={status}
             onClick={() => setFilter(filter === status ? "all" : status)}
-            className={`p-3 rounded-xl border text-center transition-all ${
-              filter === status
-                ? "border-indigo-300 bg-indigo-50 shadow-sm"
-                : "border-white/[0.08] bg-white hover:border-gray-300"
-            }`}
+            className="p-3 rounded-xl border text-center transition-all"
+            style={{
+              borderColor: filter === status ? "var(--accent-copper)" : "var(--lg-border)",
+              background: filter === status ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+            }}
           >
-            <p className="text-2xl font-bold text-white">{statusCounts[status]}</p>
-            <p className="text-xs text-slate-500 capitalize mt-0.5">
+            <p className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>{statusCounts[status]}</p>
+            <p className="text-xs capitalize mt-0.5" style={{ color: "var(--muted)" }}>
               {status === "publishing" ? "Publishing" : status}
             </p>
           </button>
@@ -95,11 +95,12 @@ export default function QueuePage() {
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         <button
           onClick={() => setFilterPlatform("all")}
-          className={`px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors ${
-            filterPlatform === "all"
-              ? "glass-btn-primary"
-              : "glass-subtle text-slate-400 hover:bg-white/[0.1]"
-          }`}
+          className="px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors"
+          style={{
+            background: filterPlatform === "all" ? "linear-gradient(135deg, var(--accent-copper), var(--primary-dark))" : "var(--lg-bg)",
+            color: filterPlatform === "all" ? "#0a0a0f" : "var(--muted)",
+            border: `1px solid ${filterPlatform === "all" ? "rgba(201, 168, 124, 0.3)" : "var(--lg-border)"}`,
+          }}
         >
           All Platforms
         </button>
@@ -110,11 +111,12 @@ export default function QueuePage() {
               <button
                 key={platform}
                 onClick={() => setFilterPlatform(filterPlatform === platform ? "all" : platform)}
-                className={`px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors ${
-                  filterPlatform === platform
-                    ? "glass-btn-primary"
-                    : "glass-subtle text-slate-400 hover:bg-white/[0.1]"
-                }`}
+                className="px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors"
+                style={{
+                  background: filterPlatform === platform ? "linear-gradient(135deg, var(--accent-copper), var(--primary-dark))" : "var(--lg-bg)",
+                  color: filterPlatform === platform ? "#0a0a0f" : "var(--muted)",
+                  border: `1px solid ${filterPlatform === platform ? "rgba(201, 168, 124, 0.3)" : "var(--lg-border)"}`,
+                }}
               >
                 {config.icon} {config.label}
               </button>
@@ -124,15 +126,15 @@ export default function QueuePage() {
       </div>
 
       {/* ── Posts table ─────────────────────────────────────── */}
-      <div className="glass-card overflow-hidden">
+      <div className="liquid-card overflow-hidden">
         {/* Table header */}
-        <div className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-3 border-b border-white/[0.06] text-xs font-medium text-slate-500 uppercase tracking-wider">
+        <div className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-3 text-xs font-medium uppercase tracking-wider" style={{ borderBottom: "1px solid var(--lg-border)", color: "var(--muted)" }}>
           <div>
             <input
               type="checkbox"
               checked={selectedPosts.size === posts.length && posts.length > 0}
               onChange={selectAll}
-              className="rounded border-gray-300"
+              className="rounded"
             />
           </div>
           <div>Content</div>
@@ -150,24 +152,26 @@ export default function QueuePage() {
           return (
             <div
               key={post.id}
-              className={`grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-4 border-b border-gray-50 items-center hover:glass-subtle transition-colors ${
-                isSelected ? "bg-indigo-50" : ""
-              }`}
+              className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-4 items-center transition-colors"
+              style={{
+                borderBottom: "1px solid var(--lg-border)",
+                background: isSelected ? "rgba(124, 158, 201, 0.05)" : "transparent",
+              }}
             >
               <div>
                 <input
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleSelect(post.id)}
-                  className="rounded border-gray-300"
+                  className="rounded"
                 />
               </div>
 
               <div className="min-w-0">
-                <p className="text-sm font-medium text-white truncate">
+                <p className="text-sm font-medium truncate" style={{ color: "var(--foreground)" }}>
                   {post.title}
                 </p>
-                <p className="text-xs text-slate-500 truncate mt-0.5">
+                <p className="text-xs truncate mt-0.5" style={{ color: "var(--muted)" }}>
                   {post.content.slice(0, 80)}...
                 </p>
               </div>
@@ -185,7 +189,7 @@ export default function QueuePage() {
               </div>
 
               <div>
-                <span className="text-xs text-slate-400 capitalize">
+                <span className="text-xs capitalize" style={{ color: "var(--muted)" }}>
                   {post.contentType}
                 </span>
               </div>
@@ -194,7 +198,7 @@ export default function QueuePage() {
                 <StatusBadge status={post.status} />
               </div>
 
-              <div className="text-xs text-slate-500">
+              <div className="text-xs" style={{ color: "var(--muted)" }}>
                 {post.scheduledAt
                   ? new Date(post.scheduledAt).toLocaleDateString("en-US", {
                       month: "short",
@@ -212,15 +216,15 @@ export default function QueuePage() {
         })}
 
         {posts.length === 0 && (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-12" style={{ color: "var(--muted)" }}>
             <p className="text-sm">No posts match your filters</p>
           </div>
         )}
       </div>
 
       {/* ── Scheduled Tasks ─────────────────────────────────── */}
-      <div className="glass-card p-5">
-        <h3 className="font-semibold text-white mb-4">Publishing Queue</h3>
+      <div className="liquid-card p-5">
+        <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Publishing Queue</h3>
         <div className="space-y-3">
           {scheduledTasks
             .sort((a, b) => a.executeAt.localeCompare(b.executeAt))
@@ -232,21 +236,24 @@ export default function QueuePage() {
               return (
                 <div
                   key={task.id}
-                  className="flex items-center gap-4 p-3 rounded-lg glass-subtle"
+                  className="flex items-center gap-4 p-3 rounded-lg liquid-subtle"
                 >
                   <div className="flex items-center gap-2">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        task.status === "completed"
-                          ? "bg-green-400"
-                          : task.status === "executing"
-                          ? "bg-amber-400 animate-pulse"
-                          : task.status === "failed"
-                          ? "bg-red-400"
-                          : "bg-gray-300"
-                      }`}
+                      className="w-2 h-2 rounded-full"
+                      style={{
+                        backgroundColor:
+                          task.status === "completed"
+                            ? "var(--success)"
+                            : task.status === "executing"
+                            ? "var(--accent-copper)"
+                            : task.status === "failed"
+                            ? "var(--danger)"
+                            : "var(--muted)",
+                        animation: task.status === "executing" ? "pulse-glow 2s infinite" : "none",
+                      }}
                     />
-                    <span className="text-xs text-slate-500 capitalize">{task.status}</span>
+                    <span className="text-xs capitalize" style={{ color: "var(--muted)" }}>{task.status}</span>
                   </div>
 
                   <span
@@ -259,11 +266,11 @@ export default function QueuePage() {
                     {config.icon}
                   </span>
 
-                  <p className="text-sm text-slate-300 flex-1 truncate">
+                  <p className="text-sm flex-1 truncate" style={{ color: "var(--foreground)" }}>
                     {post.title}
                   </p>
 
-                  <span className="text-xs text-slate-500 whitespace-nowrap">
+                  <span className="text-xs whitespace-nowrap" style={{ color: "var(--muted)" }}>
                     {new Date(task.executeAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -281,18 +288,18 @@ export default function QueuePage() {
 }
 
 function StatusBadge({ status }: { status: PostStatus }) {
-  const config: Record<PostStatus, { label: string; className: string }> = {
-    draft: { label: "Draft", className: "glass-subtle text-slate-400" },
-    scheduled: { label: "Scheduled", className: "glass-badge text-blue-300" },
-    publishing: { label: "Publishing", className: "glass-badge text-amber-300" },
-    published: { label: "Published", className: "glass-badge text-green-300" },
-    failed: { label: "Failed", className: "glass-badge text-red-300" },
+  const statusConfig: Record<PostStatus, { label: string; style: React.CSSProperties }> = {
+    draft: { label: "Draft", style: { background: "var(--lg-bg)", color: "var(--muted)", border: "1px solid var(--lg-border)" } },
+    scheduled: { label: "Scheduled", style: { background: "rgba(124, 158, 201, 0.1)", color: "var(--info)", border: "1px solid rgba(124, 158, 201, 0.2)" } },
+    publishing: { label: "Publishing", style: { background: "rgba(229, 192, 123, 0.1)", color: "var(--accent-copper)", border: "1px solid rgba(229, 192, 123, 0.2)" } },
+    published: { label: "Published", style: { background: "rgba(124, 184, 124, 0.1)", color: "var(--success)", border: "1px solid rgba(124, 184, 124, 0.2)" } },
+    failed: { label: "Failed", style: { background: "rgba(224, 108, 117, 0.1)", color: "var(--danger)", border: "1px solid rgba(224, 108, 117, 0.2)" } },
   };
 
-  const { label, className } = config[status];
+  const { label, style } = statusConfig[status];
 
   return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${className}`}>
+    <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={style}>
       {label}
     </span>
   );
