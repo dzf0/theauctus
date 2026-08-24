@@ -145,9 +145,11 @@ export default function LandingPage() {
                   <Link href="/dashboard" className="glass-btn-primary text-[11px]">
                     Dashboard
                   </Link>
-                  <a href="/api/auth/signout" className="text-[11px] text-[#6b6560] hover:text-[#9a9590] transition-colors">
-                    Sign out
-                  </a>
+                  <form action="/api/auth/signout" method="POST" className="inline">
+                    <button type="submit" className="text-[11px] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+                      Sign out
+                    </button>
+                  </form>
                 </div>
               ) : (
                 <Link href="/auth/signup" className="glass-btn-primary text-[11px]">
@@ -181,9 +183,11 @@ export default function LandingPage() {
                 <Link href="/dashboard" className="block glass-btn-primary text-center text-[11px]">
                   Dashboard
                 </Link>
-                <a href="/api/auth/signout" className="block text-center text-[11px] text-[#6b6560] hover:text-[#9a9590]">
-                  Sign out
-                </a>
+                <form action="/api/auth/signout" method="POST">
+                  <button type="submit" className="block w-full text-center text-[11px] text-[#6b6560] hover:text-[#9a9590]">
+                    Sign out
+                  </button>
+                </form>
               </div>
             ) : (
               <Link href="/auth/signup" className="block glass-btn-primary text-center text-[11px]">

@@ -156,15 +156,17 @@ export default function DashboardLayout({
 
         {/* Sign out */}
         <div className="px-3 pb-4">
-          <a
-            href="/api/auth/signout"
-            className="flex items-center gap-3 px-3 py-2 rounded text-[12px] text-[#6b6560] hover:text-[#9a9590] hover:bg-white/[0.02] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="tracking-wide">Sign out</span>
-          </a>
+          <form action="/api/auth/signout" method="POST">
+            <button
+              type="submit"
+              className="flex items-center gap-3 px-3 py-2 rounded text-[12px] text-[#6b6560] hover:text-[#9a9590] hover:bg-white/[0.02] transition-colors w-full text-left"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="tracking-wide">Sign out</span>
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -200,9 +202,11 @@ export default function DashboardLayout({
             <div className="w-7 h-7 rounded-full bg-[#1e1e1e] border border-white/[0.08] flex items-center justify-center text-[10px] accent-text font-medium">
               {getInitials()}
             </div>
-            <a href="/api/auth/signout" className="text-[10px] uppercase tracking-[0.1em] text-[#6b6560] hover:text-[#9a9590] transition-colors">
-              Sign out
-            </a>
+            <form action="/api/auth/signout" method="POST" className="inline">
+              <button type="submit" className="text-[10px] uppercase tracking-[0.1em] text-[#6b6560] hover:text-[#9a9590] transition-colors">
+                Sign out
+              </button>
+            </form>
           </div>
         </header>
 

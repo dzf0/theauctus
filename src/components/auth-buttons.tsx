@@ -23,11 +23,13 @@ export function SignInButton() {
 
 export function SignOutButton() {
   return (
-    <a
-      href="/api/auth/signout"
-      className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
-    >
-      Sign out
-    </a>
+    <form action="/api/auth/signout" method="POST" className="inline">
+      <button
+        type="submit"
+        className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+      >
+        Sign out
+      </button>
+    </form>
   );
 }

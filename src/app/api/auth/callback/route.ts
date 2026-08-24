@@ -4,7 +4,12 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  let next = searchParams.get("next") ?? "/dashboard";
+
+  // Fix #1: Prevent open redirect — only allow internal relative paths
+  if (!next.startsWith("/") || next.startsWith("//") || next.includes("://")) {
+    next = "/dashboard";
+  }
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -14,6 +19,5 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return the user to an error page with instructions
   return NextResponse.redirect(`${origin}/auth/callback-error`);
 }

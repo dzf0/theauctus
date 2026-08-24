@@ -145,7 +145,7 @@ Return ONLY the JSON array, no markdown, no explanation.`;
       posts = JSON.parse(jsonStr);
     } catch {
       return NextResponse.json(
-        { error: "Failed to parse AI response", raw: text },
+        { error: "Failed to generate content. Please try again." },
         { status: 500 }
       );
     }

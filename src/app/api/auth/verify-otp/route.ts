@@ -6,6 +6,9 @@ import {
   RATE_LIMITS,
 } from "@/lib/rate-limit";
 
+// Fix #9: Whitelist allowed OTP types
+const VALID_OTP_TYPES = ["signup", "email", "magiclink"] as const;
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { email, token, type } = body;
@@ -44,11 +47,14 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient();
 
+  // Fix #9: Validate type against allowlist
+  const otpType = VALID_OTP_TYPES.includes(type) ? type : "signup";
+
   // Verify the OTP
-  const { data, error } = await supabase.auth.verifyOtp({
+  const { error } = await supabase.auth.verifyOtp({
     email,
     token,
-    type: (type as "signup" | "email" | "magiclink") || "signup",
+    type: otpType,
   });
 
   if (error) {
@@ -64,10 +70,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Fix #8: Don't leak user object
   return NextResponse.json(
     {
       message: "Email verified successfully",
-      user: data.user,
     },
     {
       headers: {

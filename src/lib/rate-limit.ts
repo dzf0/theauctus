@@ -16,6 +16,8 @@ const store = new Map<string, RateLimitEntry>();
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
 let lastCleanup = Date.now();
 
+const MAX_ENTRIES = 10_000;
+
 function cleanup() {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
@@ -25,6 +27,21 @@ function cleanup() {
   for (const [key, entry] of store) {
     entry.timestamps = entry.timestamps.filter((t) => now - t < maxWindow);
     if (entry.timestamps.length === 0) {
+      store.delete(key);
+    }
+  }
+
+  // Fix #13: Evict oldest entries if store is too large
+  if (store.size > MAX_ENTRIES) {
+    const entries = [...store.entries()]
+      .map(([key, entry]) => ({
+        key,
+        oldest: entry.timestamps.length > 0 ? Math.min(...entry.timestamps) : 0,
+      }))
+      .sort((a, b) => a.oldest - b.oldest);
+
+    const toRemove = entries.slice(0, Math.floor(entries.length / 2));
+    for (const { key } of toRemove) {
       store.delete(key);
     }
   }
@@ -86,16 +103,15 @@ export function checkRateLimit(
  * Handles Vercel, Cloudflare, and standard X-Forwarded-For.
  */
 export function getClientIp(request: Request): string {
-  // Vercel / Cloudflare
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp;
+
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
-
-  // Standard
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp;
+    const ips = forwarded.split(",").map((ip) => ip.trim());
+    // Use the last IP (added by the trusted proxy/Vercel edge)
+    // The first IPs are client-controlled and can be spoofed
+    return ips[ips.length - 1];
   }
 
   return "unknown";

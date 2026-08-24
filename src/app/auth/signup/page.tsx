@@ -76,14 +76,15 @@ export default function SignUpPage() {
     try {
       const supabase = createSupabaseClient();
 
-      // Check if username is already taken
-      const { data: existingUser } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", formData.username)
-        .single();
+      // Fix #7: Server-side username check (prevents client-side enumeration)
+      const usernameRes = await fetch("/api/auth/check-username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.username }),
+      });
+      const usernameData = await usernameRes.json();
 
-      if (existingUser) {
+      if (!usernameData.available) {
         setError("Username is already taken");
         setLoading(false);
         return;
