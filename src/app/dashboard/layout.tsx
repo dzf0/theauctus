@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useUser } from "@/components/user-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   {
@@ -199,6 +200,7 @@ export default function DashboardLayout({
               <div className="w-1.5 h-1.5 bg-[#7cb87c] rounded-full"></div>
               Operational
             </div>
+            <ThemeToggle />
             <div className="w-7 h-7 rounded-full bg-[#1e1e1e] border border-white/[0.08] flex items-center justify-center text-[10px] accent-text font-medium">
               {getInitials()}
             </div>
