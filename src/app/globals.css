@@ -1039,6 +1039,150 @@ section + section {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ══════════════════════════════════════════════════════════════ */
+
+/* Prevent text overflow on all elements */
+* {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Mobile viewport fix */
+@viewport {
+  width: device-width;
+  initial-scale: 1;
+  maximum-scale: 5;
+}
+
+/* Mobile breakpoints */
+@media (max-width: 640px) {
+  /* Reduce padding */
+  .px-6 { padding-left: 16px; padding-right: 16px; }
+  .px-8 { padding-left: 16px; padding-right: 16px; }
+  .px-12 { padding-left: 16px; padding-right: 16px; }
+  .lg\:px-12 { padding-left: 16px; padding-right: 16px; }
+  .lg\:px-8 { padding-left: 16px; padding-right: 16px; }
+
+  /* Reduce section padding */
+  .py-32 { padding-top: 64px; padding-bottom: 64px; }
+  .py-20 { padding-top: 48px; padding-bottom: 48px; }
+  .py-16 { padding-top: 40px; padding-bottom: 40px; }
+  .pt-32 { padding-top: 80px; }
+
+  /* Reduce hero heading size */
+  .font-headline.text-6xl,
+  .font-headline.text-7xl,
+  .font-headline.text-\[5\.5rem\] {
+    font-size: 2.25rem !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Reduce other large text */
+  .text-5xl { font-size: 2rem !important; }
+  .text-4xl { font-size: 1.75rem !important; }
+  .text-3xl { font-size: 1.5rem !important; }
+
+  /* Reduce stat numbers */
+  .font-headline.text-4xl,
+  .font-headline.text-5xl {
+    font-size: 2rem !important;
+  }
+
+  /* Fix grid layouts to stack */
+  .grid.lg\:grid-cols-2 { grid-template-columns: 1fr !important; }
+  .grid.md\:grid-cols-3 { grid-template-columns: 1fr !important; }
+  .grid.md\:grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid.sm\:grid-cols-2 { grid-template-columns: 1fr !important; }
+
+  /* Reduce gaps */
+  .gap-16 { gap: 32px; }
+  .gap-12 { gap: 24px; }
+  .gap-8 { gap: 16px; }
+
+  /* Fix max-width constraints */
+  .max-w-7xl { max-width: 100%; }
+  .max-w-6xl { max-width: 100%; }
+  .max-w-5xl { max-width: 100%; }
+  .max-w-4xl { max-width: 100%; }
+  .max-w-3xl { max-width: 100%; }
+
+  /* Fix hero visual overflow */
+  .perspective-2000 {
+    perspective: 1000px;
+    overflow: hidden;
+  }
+
+  /* Auth form max-width */
+  .max-w-md {
+    max-width: 100%;
+  }
+
+  /* Reduce min-height */
+  .min-h-\[90vh\] { min-height: auto; }
+
+  /* Fix hero grid */
+  .grid.lg\:grid-cols-2.gap-16 {
+    gap: 32px;
+  }
+
+  /* Fix buttons */
+  .liquid-btn-primary,
+  .liquid-btn {
+    padding: 10px 20px;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  /* Fix feature cards */
+  .p-8 { padding: 24px; }
+
+  /* Mobile nav adjustments */
+  .md\:hidden { display: block; }
+  .hidden.md\:flex { display: none; }
+
+  /* Fix footer */
+  footer .max-w-7xl {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Tablet adjustments */
+  .lg\:grid-cols-2 { grid-template-columns: 1fr; }
+  .lg\:grid-cols-3 { grid-template-columns: 1fr; }
+
+  /* Reduce hero heading */
+  .font-headline.text-\[5\.5rem\] {
+    font-size: 2.5rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet specific */
+  .lg\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .lg\:grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Safe area for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Smooth scroll with reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
    BACKWARD-COMPATIBLE ALIASES
    Old class names → liquid glass
    ══════════════════════════════════════════════════════════════ */
