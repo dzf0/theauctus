@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function SignInButton() {
   return (
@@ -23,15 +24,36 @@ export function SignInButton() {
 }
 
 export function SignOutButton() {
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      // Clear cookies client-side
+      document.cookie.split(";").forEach((c) => {
+        const name = c.split("=")[0].trim();
+        if (name.startsWith("sb-") || name === "auth-token") {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
+      });
+
+      // Call the API to sign out
+      await fetch("/api/auth/signout", { method: "POST" });
+
+      // Redirect to landing page
+      window.location.href = "/";
+    } catch {
+      // If API fails, just redirect
+      window.location.href = "/";
+    }
+  };
+
   return (
-    <form action="/api/auth/signout" method="POST" className="inline">
-      <button
-        type="submit"
-        className="text-xs transition-colors hover:opacity-70"
-        style={{ color: "var(--muted)" }}
-      >
-        Sign out
-      </button>
-    </form>
+    <button
+      onClick={handleSignOut}
+      className="text-xs transition-colors hover:opacity-70"
+      style={{ color: "var(--muted)" }}
+    >
+      Sign out
+    </button>
   );
 }

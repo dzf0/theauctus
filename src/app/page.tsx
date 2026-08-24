@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useUser } from "@/components/user-provider";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useInView } from "@/hooks/use-in-view";
 import { ThreeDCard } from "@/components/three-d-card";
@@ -111,13 +112,10 @@ export default function LandingPage() {
               <a href="#features" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">Features</a>
               <a href="#pricing" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">Pricing</a>
               <a href="#faq" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">FAQ</a>
-              <ThemeToggle />
-              {user ? (
+              <ThemeToggle />                  {user ? (
                 <div className="flex items-center gap-4">
                   <Link href="/dashboard" className="liquid-btn-primary text-[11px]">Dashboard</Link>
-                  <form action="/api/auth/signout" method="POST" className="inline">
-                    <button type="submit" className="text-[11px] text-[var(--muted)] hover:text-foreground transition-colors">Sign out</button>
-                  </form>
+                  <button onClick={async () => { document.cookie.split(';').forEach(c => { const n = c.split('=')[0].trim(); if (n.startsWith('sb-')) document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; }); await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {}); window.location.href = '/'; }} className="text-[11px] text-[var(--muted)] hover:text-foreground transition-colors">Sign out</button>
                 </div>
               ) : (
                 <Link href="/auth/signup" className="liquid-btn-primary text-[11px]">Get Started</Link>
@@ -142,7 +140,7 @@ export default function LandingPage() {
             {user ? (
               <div className="space-y-4">
                 <Link href="/dashboard" className="block liquid-btn-primary text-center text-[11px]">Dashboard</Link>
-                <form action="/api/auth/signout" method="POST"><button type="submit" className="block w-full text-center text-[11px] text-[var(--muted)]">Sign out</button></form>
+                <button onClick={async () => { document.cookie.split(';').forEach(c => { const n = c.split('=')[0].trim(); if (n.startsWith('sb-')) document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; }); await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {}); window.location.href = '/'; }} className="block w-full text-center text-[11px] text-[var(--muted)]">Sign out</button>
               </div>
             ) : (
               <Link href="/auth/signup" className="block liquid-btn-primary text-center text-[11px]">Get Started</Link>
