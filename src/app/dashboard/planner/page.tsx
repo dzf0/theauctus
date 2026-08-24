@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button, Card, CardHeader, CardTitle, Badge, Modal, Input, Select, Tabs, TabsList, TabsTrigger, TabsContent, useToast, ToastContainer } from "@/components/ui";
+import { AILoader, Skeleton } from "@/components/ui/Loading";
 
 interface Post {
   id: string;
@@ -255,7 +256,17 @@ export default function PlannerPage() {
           ) : (
             <div className="divide-y divide-[#2A2A2A]">
               {loading ? (
-                <div className="p-8 text-center text-[#6B6560]">Loading...</div>
+                <div className="p-8 space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3">
+                      <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-3 w-1/3" />
+                        <Skeleton className="h-3 w-2/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : posts.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="text-[#6B6560] mb-4">No posts yet</p>
@@ -393,8 +404,10 @@ export default function PlannerPage() {
         title="Generate Content"
         description="AI will create posts based on your brand profile"
         size="lg"
-      >
-        <div className="space-y-6">
+      >          {generating ? (
+            <AILoader step={0} />
+          ) : (
+          <div className="space-y-6">
           <Input
             label="Topic"
             placeholder="e.g., Sustainable fashion tips for Gen Z"
@@ -476,6 +489,7 @@ export default function PlannerPage() {
             </Button>
           </div>
         </div>
+          )}
       </Modal>
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />

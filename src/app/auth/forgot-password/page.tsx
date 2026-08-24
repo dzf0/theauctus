@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createSupabaseClient } from "@/lib/supabase";
+import { Spinner } from "@/components/ui/Loading";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -105,7 +106,11 @@ export default function ForgotPasswordPage() {
                 disabled={loading}
                 className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
               >
-                {loading ? "Sending link..." : "Send Reset Link"}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner size={14} /> Sending link...
+                  </span>
+                ) : "Send Reset Link"}
               </button>
             </form>
 

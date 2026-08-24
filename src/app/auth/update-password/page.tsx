@@ -10,6 +10,7 @@ import {
   getPasswordStrength,
   PASSWORD_RULES,
 } from "@/lib/validate";
+import { Spinner } from "@/components/ui/Loading";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
@@ -204,7 +205,11 @@ export default function UpdatePasswordPage() {
               disabled={loading}
               className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
             >
-              {loading ? "Updating..." : "Update Password"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner size={14} /> Updating...
+                </span>
+              ) : "Update Password"}
             </button>
           </form>
         )}

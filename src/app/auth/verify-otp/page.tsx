@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Spinner } from "@/components/ui/Loading";
 
 function OtpForm() {
   const router = useRouter();
@@ -169,7 +170,11 @@ function OtpForm() {
             disabled={loading}
             className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
           >
-            {loading ? "Verifying..." : "Verify Email"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner size={14} /> Verifying...
+              </span>
+            ) : "Verify Email"}
           </button>
         </form>
 
@@ -185,7 +190,11 @@ function OtpForm() {
               disabled={resendLoading}
               className="text-[12px] accent-text hover:text-[#dcc4a0] transition-colors disabled:opacity-50"
             >
-              {resendLoading ? "Sending..." : "Resend code"}
+              {resendLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner size={12} /> Sending...
+                </span>
+              ) : "Resend code"}
             </button>
           )}
         </div>

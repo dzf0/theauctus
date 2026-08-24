@@ -12,6 +12,7 @@ import {
   getPasswordStrength,
   PASSWORD_RULES,
 } from "@/lib/validate";
+import { Spinner } from "@/components/ui/Loading";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -323,7 +324,11 @@ export default function SignUpPage() {
             disabled={loading}
             className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner size={14} /> Creating account...
+              </span>
+            ) : "Create Account"}
           </button>
         </form>
 

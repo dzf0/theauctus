@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
+import { Spinner } from "@/components/ui/Loading";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -148,7 +149,11 @@ export default function SignInPage() {
             disabled={loading}
             className="w-full py-3 glass-btn-primary text-[13px] disabled:opacity-50"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner size={14} /> Signing in...
+              </span>
+            ) : "Sign In"}
           </button>
         </form>
 
