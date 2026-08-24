@@ -101,8 +101,8 @@ function OnboardingLoader({ onComplete }: { onComplete: () => void }) {
       <div className="relative z-10 text-center px-6 max-w-md">
         {/* Animated logo */}
         <div className="mb-12">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center animate-pulse-glow" style={{ background: "rgba(201, 168, 124, 0.1)", border: "1px solid rgba(201, 168, 124, 0.2)" }}>
-            <span className="text-4xl">🚀</span>
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl overflow-hidden animate-pulse-glow" style={{ background: "rgba(201, 168, 124, 0.1)", border: "1px solid rgba(201, 168, 124, 0.2)" }}>
+            <img src="/logo.png" alt="TheAuctus" className="w-full h-full object-cover" />
           </div>
           <h1 className="font-headline text-3xl mb-2" style={{ color: "var(--foreground)" }}>
             The<span className="accent-text">Auctus</span>
