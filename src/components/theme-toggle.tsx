@@ -8,7 +8,7 @@ interface ThemeToggleProps {
   height?: number;
 }
 
-export function ThemeToggle({ width = 60, height = 30 }: ThemeToggleProps) {
+export function ThemeToggle({ width = 68, height = 34 }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
