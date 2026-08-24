@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
 import { Spinner } from "@/components/ui/Loading";
+
+// Rate limiting config
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const ATTEMPT_WINDOW = 60 * 1000; // 1 minute window for tracking
 
 export default function SignInPage() {
   const router = useRouter();
@@ -12,9 +17,55 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutTime, setLockoutTime] = useState(0);
+  
+  // Rate limiting state
+  const attemptsRef = useRef<{ count: number; firstAttempt: number }>({
+    count: 0,
+    firstAttempt: 0,
+  });
+  const lockoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const checkRateLimit = (): boolean => {
+    const now = Date.now();
+    const attempts = attemptsRef.current;
+
+    // Reset if window has passed
+    if (now - attempts.firstAttempt > ATTEMPT_WINDOW) {
+      attempts.count = 0;
+      attempts.firstAttempt = now;
+    }
+
+    // Check if locked out
+    if (attempts.count >= MAX_ATTEMPTS) {
+      const timeLeft = Math.ceil((attempts.firstAttempt + LOCKOUT_DURATION - now) / 1000);
+      if (timeLeft > 0) {
+        setIsLocked(true);
+        setLockoutTime(timeLeft);
+        return false;
+      }
+      // Reset after lockout
+      attempts.count = 0;
+      attempts.firstAttempt = now;
+    }
+
+    attempts.count++;
+    if (attempts.count === 1) {
+      attempts.firstAttempt = now;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check rate limit
+    if (!checkRateLimit()) {
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -43,6 +94,10 @@ export default function SignInPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!checkRateLimit()) {
+      return;
+    }
+
     try {
       const supabase = createSupabaseClient();
       const { error } = await supabase.auth.signInWithOAuth({
@@ -57,6 +112,25 @@ export default function SignInPage() {
     } catch {
       setError("Something went wrong with Google sign-in.");
     }
+  };
+
+  // Update lockout timer
+  if (isLocked && lockoutTime > 0) {
+    setTimeout(() => {
+      const newTime = lockoutTime - 1;
+      if (newTime <= 0) {
+        setIsLocked(false);
+        attemptsRef.current = { count: 0, firstAttempt: 0 };
+      } else {
+        setLockoutTime(newTime);
+      }
+    }, 1000);
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -77,11 +151,19 @@ export default function SignInPage() {
           </p>
         </div>
 
+        {/* Rate limit warning */}
+        {isLocked && (
+          <div className="mb-6 p-3 liquid-card border border-amber-500/20 text-amber-400 text-[12px]">
+            Too many attempts. Please try again in {formatTime(lockoutTime)}.
+          </div>
+        )}
+
         {/* Social Login Buttons */}
         <div className="space-y-3 mb-8">
           <button
             onClick={handleGoogleSignIn}
-            className="flex items-center justify-center gap-3 w-full px-4 py-3 liquid-card hover:border-[var(--lg-border-strong)] transition-all duration-300"
+            disabled={isLocked}
+            className="flex items-center justify-center gap-3 w-full px-4 py-3 liquid-card hover:border-[var(--lg-border-strong)] transition-all duration-300 disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -123,6 +205,7 @@ export default function SignInPage() {
               placeholder="you@example.com"
               className="w-full px-4 py-3 liquid-input text-[13px]"
               required
+              disabled={isLocked}
             />
           </div>
 
@@ -137,6 +220,7 @@ export default function SignInPage() {
               placeholder="••••••••"
               className="w-full px-4 py-3 liquid-input text-[13px]"
               required
+              disabled={isLocked}
             />
           </div>
 
@@ -148,14 +232,18 @@ export default function SignInPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || isLocked}
             className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <Spinner size={14} /> Signing in...
               </span>
-            ) : "Sign In"}
+            ) : isLocked ? (
+              `Locked out for ${formatTime(lockoutTime)}`
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 
