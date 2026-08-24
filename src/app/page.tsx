@@ -6,6 +6,7 @@ import { useUser } from "@/components/user-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useInView } from "@/hooks/use-in-view";
 import { ThreeDCard } from "@/components/three-d-card";
+import { HeroVisual } from "@/components/hero-visual";
 
 // ── Reveal wrapper ──────────────────────────────────────────────
 function Reveal({
@@ -169,7 +170,12 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────── */}
-      <section className="pt-32 pb-20 px-6 lg:px-12 min-h-[90vh] flex items-center">
+      <section className="relative pt-32 pb-20 px-6 lg:px-12 min-h-[90vh] flex items-center overflow-hidden">
+        {/* Background gradient orbs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)", filter: "blur(80px)" }} />
+          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(124,158,201,0.04) 0%, transparent 60%)", filter: "blur(60px)" }} />
+        </div>
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="perspective-2000">
@@ -210,22 +216,10 @@ export default function LandingPage() {
               </Reveal>
             </div>
 
-            {/* Hero visual — floating 3D cards */}
+            {/* Hero visual — dashboard mockup with floating cards */}
             <div className="relative flex items-center justify-center perspective-2000">
               <Reveal direction="scale" delay={0.3}>
-                <div className="relative w-full max-w-lg aspect-square">
-                  <div className="absolute inset-0 rounded-full animate-float-slow" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.08) 0%, transparent 70%)", filter: "blur(40px)" }} />
-                  <ThreeDCard intensity={12} className="absolute top-8 left-0 liquid-card p-5 animate-float-slow" style={{ animationDelay: "0s" }}>
-                    <div className="spec-list relative z-10"><strong>Posts Scheduled</strong><br />47 this week<br />+12 vs last week</div>
-                  </ThreeDCard>
-                  <ThreeDCard intensity={12} className="absolute bottom-16 right-0 liquid-card p-5 animate-float-medium" style={{ animationDelay: "0.5s" }}>
-                    <p className="accent-text font-headline text-3xl tracking-tight relative z-10">30.1K</p>
-                    <p className="spec-list mt-1 relative z-10">Total followers</p>
-                  </ThreeDCard>
-                  <ThreeDCard intensity={12} className="absolute top-1/3 right-4 liquid-card p-4 animate-float-slow" style={{ animationDelay: "1s" }}>
-                    <p className="spec-list relative z-10"><strong>4.8%</strong> engagement<br /><strong>89.3K</strong> reach</p>
-                  </ThreeDCard>
-                </div>
+                <HeroVisual />
               </Reveal>
             </div>
           </div>
