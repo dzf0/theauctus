@@ -10,23 +10,23 @@ ALTER TABLE IF EXISTS content_calendars ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS connected_platforms ENABLE ROW LEVEL SECURITY;
 
 -- ══════════════════════════════════════════════════════════════
--- PROFILES TABLE
+-- PROFILES TABLE (uses 'id' column = auth.uid())
 -- ══════════════════════════════════════════════════════════════
 
 -- Users can only read their own profile
 CREATE POLICY "Users can view own profile"
   ON profiles FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = id);
 
--- Users can insert their own profile (signup trigger should handle this)
+-- Users can insert their own profile
 CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = id);
 
 -- Users can update their own profile
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = id);
 
 -- Users cannot delete profiles (admin only)
 CREATE POLICY "Users cannot delete profiles"
@@ -34,7 +34,7 @@ CREATE POLICY "Users cannot delete profiles"
   USING (false);
 
 -- ══════════════════════════════════════════════════════════════
--- POSTS TABLE
+-- POSTS TABLE (uses 'user_id' column)
 -- ══════════════════════════════════════════════════════════════
 
 -- Users can only read their own posts
@@ -58,7 +58,7 @@ CREATE POLICY "Users can delete own posts"
   USING (auth.uid() = user_id);
 
 -- ══════════════════════════════════════════════════════════════
--- CONTENT CALENDARS TABLE
+-- CONTENT CALENDARS TABLE (uses 'user_id' column)
 -- ══════════════════════════════════════════════════════════════
 
 -- Users can only read their own calendars
@@ -82,7 +82,7 @@ CREATE POLICY "Users can delete own calendars"
   USING (auth.uid() = user_id);
 
 -- ══════════════════════════════════════════════════════════════
--- CONNECTED PLATFORMS TABLE
+-- CONNECTED PLATFORMS TABLE (uses 'user_id' column)
 -- ══════════════════════════════════════════════════════════════
 
 -- Users can only read their own connected platforms
@@ -181,9 +181,8 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  INSERT INTO profiles (id, user_id, username, full_name, created_at, updated_at)
+  INSERT INTO profiles (id, username, full_name, created_at, updated_at)
   VALUES (
-    gen_random_uuid(),
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'username', ''),
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
@@ -222,7 +221,7 @@ ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 -- Only admins can view audit logs
 CREATE POLICY "Admins can view audit logs"
   ON audit_log FOR SELECT
-  USING (false); -- Implement admin check here
+  USING (false);
 
 -- System can insert audit logs
 CREATE POLICY "System can insert audit logs"
@@ -233,7 +232,7 @@ CREATE POLICY "System can insert audit logs"
 -- INDEXES FOR PERFORMANCE
 -- ══════════════════════════════════════════════════════════════
 
-CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_id ON profiles(id);
 CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles(username);
 CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
 CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status);
