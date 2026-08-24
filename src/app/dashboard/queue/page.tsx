@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mockPosts, platformConfig, scheduledTasks } from "@/lib/store";
 import type { ContentPost, PostStatus, Platform } from "@/lib/types";
 
@@ -10,6 +10,15 @@ export default function QueuePage() {
   const [filter, setFilter] = useState<QueueFilter>("all");
   const [filterPlatform, setFilterPlatform] = useState<Platform | "all">("all");
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const check = () => setIsDark(!document.documentElement.classList.contains("light"));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   const posts = mockPosts
     .filter((p) => (filter === "all" ? true : p.status === filter))
@@ -44,6 +53,18 @@ export default function QueuePage() {
     }
   };
 
+  const tabBg = (active: boolean) => active
+    ? "rgba(201, 168, 124, 0.12)"
+    : isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)";
+
+  const tabBorder = (active: boolean) => active
+    ? "rgba(201, 168, 124, 0.4)"
+    : isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)";
+
+  const tabColor = (active: boolean) => active
+    ? "#c9a87c"
+    : isDark ? "#7a756f" : "#6b6560";
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ── Header ──────────────────────────────────────────── */}
@@ -77,10 +98,11 @@ export default function QueuePage() {
           <button
             key={status}
             onClick={() => setFilter(filter === status ? "all" : status)}
-            className="p-3 rounded-xl border text-center transition-all"
+            className="p-3 rounded-xl border text-center transition-all duration-300"
             style={{
-              borderColor: filter === status ? "var(--accent-copper)" : "var(--lg-border)",
-              background: filter === status ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)",
+              borderColor: tabBorder(filter === status),
+              background: tabBg(filter === status),
+              color: tabColor(filter === status),
             }}
           >
             <p className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>{statusCounts[status]}</p>
@@ -95,11 +117,11 @@ export default function QueuePage() {
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         <button
           onClick={() => setFilterPlatform("all")}
-          className="px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors"
+          className="px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-all duration-300"
           style={{
-            background: filterPlatform === "all" ? "linear-gradient(135deg, var(--accent-copper), var(--primary-dark))" : "var(--lg-bg)",
-            color: filterPlatform === "all" ? "#0a0a0f" : "var(--muted)",
-            border: `1px solid ${filterPlatform === "all" ? "rgba(201, 168, 124, 0.3)" : "var(--lg-border)"}`,
+            background: filterPlatform === "all" ? "linear-gradient(135deg, #c9a87c, #b8935f)" : tabBg(false),
+            color: filterPlatform === "all" ? "#0a0a0f" : isDark ? "#7a756f" : "#6b6560",
+            border: `1px solid ${filterPlatform === "all" ? "rgba(201, 168, 124, 0.3)" : tabBorder(false)}`,
           }}
         >
           All Platforms
@@ -111,11 +133,11 @@ export default function QueuePage() {
               <button
                 key={platform}
                 onClick={() => setFilterPlatform(filterPlatform === platform ? "all" : platform)}
-                className="px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors"
+                className="px-3 py-1.5 rounded text-[10px] uppercase tracking-[0.1em] whitespace-nowrap transition-all duration-300"
                 style={{
-                  background: filterPlatform === platform ? "linear-gradient(135deg, var(--accent-copper), var(--primary-dark))" : "var(--lg-bg)",
-                  color: filterPlatform === platform ? "#0a0a0f" : "var(--muted)",
-                  border: `1px solid ${filterPlatform === platform ? "rgba(201, 168, 124, 0.3)" : "var(--lg-border)"}`,
+                  background: filterPlatform === platform ? "linear-gradient(135deg, #c9a87c, #b8935f)" : tabBg(false),
+                  color: filterPlatform === platform ? "#0a0a0f" : isDark ? "#7a756f" : "#6b6560",
+                  border: `1px solid ${filterPlatform === platform ? "rgba(201, 168, 124, 0.3)" : tabBorder(false)}`,
                 }}
               >
                 {config.icon} {config.label}
@@ -128,7 +150,7 @@ export default function QueuePage() {
       {/* ── Posts table ─────────────────────────────────────── */}
       <div className="liquid-card overflow-hidden">
         {/* Table header */}
-        <div className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-3 text-xs font-medium uppercase tracking-wider" style={{ borderBottom: "1px solid var(--lg-border)", color: "var(--muted)" }}>
+        <div className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-3 text-xs font-medium uppercase tracking-wider" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`, color: isDark ? "#7a756f" : "#6b6560" }}>
           <div>
             <input
               type="checkbox"
@@ -152,9 +174,9 @@ export default function QueuePage() {
           return (
             <div
               key={post.id}
-              className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-4 items-center transition-colors"
+              className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-4 items-center transition-colors duration-300"
               style={{
-                borderBottom: "1px solid var(--lg-border)",
+                borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
                 background: isSelected ? "rgba(124, 158, 201, 0.05)" : "transparent",
               }}
             >
@@ -195,7 +217,7 @@ export default function QueuePage() {
               </div>
 
               <div>
-                <StatusBadge status={post.status} />
+                <StatusBadge status={post.status} isDark={isDark} />
               </div>
 
               <div className="text-xs" style={{ color: "var(--muted)" }}>
@@ -236,7 +258,11 @@ export default function QueuePage() {
               return (
                 <div
                   key={task.id}
-                  className="flex items-center gap-4 p-3 rounded-lg liquid-subtle"
+                  className="flex items-center gap-4 p-3 rounded-lg"
+                  style={{
+                    background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                    border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
+                  }}
                 >
                   <div className="flex items-center gap-2">
                     <div
@@ -287,19 +313,47 @@ export default function QueuePage() {
   );
 }
 
-function StatusBadge({ status }: { status: PostStatus }) {
-  const statusConfig: Record<PostStatus, { label: string; style: React.CSSProperties }> = {
-    draft: { label: "Draft", style: { background: "var(--lg-bg)", color: "var(--muted)", border: "1px solid var(--lg-border)" } },
-    scheduled: { label: "Scheduled", style: { background: "rgba(124, 158, 201, 0.1)", color: "var(--info)", border: "1px solid rgba(124, 158, 201, 0.2)" } },
-    publishing: { label: "Publishing", style: { background: "rgba(229, 192, 123, 0.1)", color: "var(--accent-copper)", border: "1px solid rgba(229, 192, 123, 0.2)" } },
-    published: { label: "Published", style: { background: "rgba(124, 184, 124, 0.1)", color: "var(--success)", border: "1px solid rgba(124, 184, 124, 0.2)" } },
-    failed: { label: "Failed", style: { background: "rgba(224, 108, 117, 0.1)", color: "var(--danger)", border: "1px solid rgba(224, 108, 117, 0.2)" } },
+function StatusBadge({ status, isDark }: { status: PostStatus; isDark: boolean }) {
+  const statusConfig: Record<PostStatus, { label: string; bg: string; color: string; border: string }> = {
+    draft: {
+      label: "Draft",
+      bg: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+      color: isDark ? "#7a756f" : "#6b6560",
+      border: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+    },
+    scheduled: {
+      label: "Scheduled",
+      bg: "rgba(124, 158, 201, 0.1)",
+      color: "#7c9ec9",
+      border: "rgba(124, 158, 201, 0.2)",
+    },
+    publishing: {
+      label: "Publishing",
+      bg: "rgba(229, 192, 123, 0.1)",
+      color: "#c9a87c",
+      border: "rgba(229, 192, 123, 0.2)",
+    },
+    published: {
+      label: "Published",
+      bg: "rgba(124, 184, 124, 0.1)",
+      color: "#7cb87c",
+      border: "rgba(124, 184, 124, 0.2)",
+    },
+    failed: {
+      label: "Failed",
+      bg: "rgba(224, 108, 117, 0.1)",
+      color: "#c97c7c",
+      border: "rgba(224, 108, 117, 0.2)",
+    },
   };
 
-  const { label, style } = statusConfig[status];
+  const { label, bg, color, border } = statusConfig[status];
 
   return (
-    <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={style}>
+    <span
+      className="text-xs font-medium px-2 py-0.5 rounded-full"
+      style={{ background: bg, color, border: `1px solid ${border}` }}
+    >
       {label}
     </span>
   );

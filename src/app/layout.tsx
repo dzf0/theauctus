@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { UserProvider } from "@/components/user-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CookieConsent } from "@/components/cookie-consent";
 
 export const metadata: Metadata = {
   title: "TheAuctus — Automated Creator Growth Engine",
@@ -29,6 +30,7 @@ export default function RootLayout({
             <div className="relative z-10 flex-1 flex flex-col">
               {children}
             </div>
+            <CookieConsent />
           </UserProvider>
         </ThemeProvider>
       </body>
