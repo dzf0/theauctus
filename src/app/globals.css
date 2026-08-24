@@ -24,6 +24,14 @@
   --info: #7c9ec9;
   --warm-white: #f5f0eb;
   --cool-grey: #9a9590;
+
+  /* Premium timing tokens */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 350ms;
 }
 
 @theme inline {
@@ -67,6 +75,14 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection {
+  background: rgba(201, 168, 124, 0.3);
+  color: var(--foreground);
 }
 
 /* ── Serif Headlines ───────────────────────────────────────── */
@@ -89,7 +105,6 @@ body {
   position: relative;
 }
 
-/* Subtle grain texture overlay */
 .editorial-bg::after {
   content: '';
   position: fixed;
@@ -103,14 +118,47 @@ body {
   opacity: 0.4;
 }
 
-/* ── Glass Card — Editorial ────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM INTERACTIVE ELEMENTS
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Glass Card — Premium ──────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  transition:
+    transform var(--duration-slow) var(--ease-out-expo),
+    border-color var(--duration-slow) var(--ease-out-expo),
+    background var(--duration-slow) var(--ease-out-expo),
+    box-shadow var(--duration-slow) var(--ease-out-expo);
+  position: relative;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(201, 168, 124, 0.15);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(201, 168, 124, 0.05);
+}
+
+.glass-card:active {
+  transform: translateY(0);
+  transition-duration: var(--duration-fast);
+}
+
+/* ── Glass ─────────────────────────────────────────────────── */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  transition: all var(--duration-slow) var(--ease-out-expo);
 }
 
 .glass:hover {
@@ -123,7 +171,7 @@ body {
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .glass-subtle {
@@ -131,25 +179,10 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 6px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
 }
 
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(201, 168, 124, 0.15);
-}
-
-/* ── Glass Sidebar — Editorial ─────────────────────────────── */
+/* ── Glass Sidebar ─────────────────────────────────────────── */
 .glass-sidebar {
   background: rgba(11, 11, 11, 0.95);
   backdrop-filter: blur(40px);
@@ -157,100 +190,184 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-/* ── Editorial Button ──────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM BUTTONS
+   ══════════════════════════════════════════════════════════════ */
+
 .glass-btn {
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 10px 24px;
   color: var(--foreground);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 13px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--duration-fast) var(--ease-out-expo),
+    background var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+}
+
+/* Shine sweep on hover */
+.glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  transition: left 0.5s var(--ease-out-expo);
 }
 
 .glass-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.glass-btn:hover::before {
+  left: 100%;
+}
+
+.glass-btn:active {
+  transform: scale(0.98);
+  transition-duration: var(--duration-fast);
 }
 
 .glass-btn-primary {
-  background: var(--accent-copper);
+  background: linear-gradient(135deg, var(--accent-copper), var(--primary-dark));
   border: 1px solid rgba(201, 168, 124, 0.3);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 10px 24px;
   color: #111111;
   font-weight: 600;
   font-size: 13px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--duration-fast) var(--ease-out-expo),
+    background var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
+}
+
+/* Glow ring on hover */
+.glass-btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent-copper), var(--primary-light));
+  opacity: 0;
+  z-index: -1;
+  filter: blur(8px);
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
 }
 
 .glass-btn-primary:hover {
-  background: var(--primary-light);
+  background: linear-gradient(135deg, var(--primary-light), var(--accent-copper));
   border-color: rgba(201, 168, 124, 0.5);
+  box-shadow:
+    0 4px 16px rgba(201, 168, 124, 0.25),
+    0 0 0 1px rgba(201, 168, 124, 0.1);
 }
 
-/* ── Editorial Input ───────────────────────────────────────── */
+.glass-btn-primary:hover::after {
+  opacity: 0.3;
+}
+
+.glass-btn-primary:active {
+  transform: scale(0.98);
+  transition-duration: var(--duration-fast);
+  box-shadow: 0 2px 8px rgba(201, 168, 124, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM INPUTS
+   ══════════════════════════════════════════════════════════════ */
+
 .glass-input {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 12px 16px;
   color: var(--foreground);
   font-size: 14px;
   outline: none;
-  transition: all 0.3s ease;
+  transition:
+    border-color var(--duration-normal) var(--ease-out-expo),
+    background var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo);
   width: 100%;
 }
 
 .glass-input:focus {
-  border-color: rgba(201, 168, 124, 0.4);
+  border-color: rgba(201, 168, 124, 0.5);
   background: rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 0 0 3px rgba(201, 168, 124, 0.08),
+    0 0 20px rgba(201, 168, 124, 0.05);
+}
+
+.glass-input:hover:not(:focus) {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .glass-input::placeholder {
   color: rgba(107, 101, 96, 0.8);
 }
 
-/* ── Glass Badge — Editorial ───────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM BADGES & TABS
+   ══════════════════════════════════════════════════════════════ */
+
 .glass-badge {
   background: rgba(201, 168, 124, 0.1);
   border: 1px solid rgba(201, 168, 124, 0.15);
-  border-radius: 2px;
-  padding: 4px 10px;
+  border-radius: 100px;
+  padding: 4px 12px;
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: var(--accent-copper);
+  transition: all var(--duration-normal) var(--ease-out-expo);
 }
 
-/* ── Glass Tab — Editorial ─────────────────────────────────── */
 .glass-tab {
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 2px;
+  border-radius: 6px;
   padding: 8px 16px;
   color: var(--muted);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 12px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--duration-normal) var(--ease-out-expo);
 }
 
 .glass-tab:hover {
@@ -264,9 +381,13 @@ body {
   color: var(--accent-copper);
 }
 
-/* ── Accent Text ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   TEXT UTILITIES
+   ══════════════════════════════════════════════════════════════ */
+
 .accent-text {
   color: var(--accent-copper);
+  transition: color var(--duration-normal) var(--ease-out-expo);
 }
 
 .muted-text {
@@ -277,53 +398,137 @@ body {
   color: var(--headline-color);
 }
 
-/* ── Editorial Divider ─────────────────────────────────────── */
 .editorial-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
 }
 
-/* ── Animations ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM ANIMATIONS
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Entrance animations ───────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s var(--ease-out-expo) both;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s var(--ease-out-expo) both;
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-down {
+  animation: fade-in-down 0.4s var(--ease-out-expo) both;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slide-in 0.4s var(--ease-out-expo) both;
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s var(--ease-out-expo) both;
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scale-in 0.3s var(--ease-spring) both;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.8); }
+  70% { transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in {
+  animation: pop-in 0.4s var(--ease-out-expo) both;
+}
+
+/* ── Staggered entrance (use with animation-delay) ─────────── */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-stagger {
+  animation: stagger-in 0.5s var(--ease-out-expo) both;
+}
+
+/* ── Shimmer (for loading states) ──────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Pulse glow ────────────────────────────────────────────── */
 @keyframes pulse-glow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(201, 168, 124, 0); }
+  50% { opacity: 0.8; box-shadow: 0 0 20px 4px rgba(201, 168, 124, 0.1); }
 }
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ── Float ─────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out;
-}
-
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up {
-  animation: fade-in-up 0.7s ease-out;
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }
 
-@keyframes slide-in {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
+/* ── Gradient shift (for hero backgrounds) ─────────────────── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
-.animate-slide-in {
-  animation: slide-in 0.4s ease-out;
-}
-
-@keyframes scale-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
-}
-.animate-scale-in {
-  animation: scale-in 0.4s ease-out;
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
 }
 
+/* ── Ripple (button press) ────────────────────────────────── */
+@keyframes ripple {
+  to {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+/* ── Spin ──────────────────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -331,13 +536,188 @@ body {
   animation: spin 1s linear infinite;
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────── */
+/* ── Bounce subtle ─────────────────────────────────────────── */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INTERACTIVE UI PATTERNS
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Hover lift with glow ──────────────────────────────────── */
+.hover-lift {
+  transition:
+    transform var(--duration-slow) var(--ease-out-expo),
+    box-shadow var(--duration-slow) var(--ease-out-expo);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(201, 168, 124, 0.05);
+}
+
+/* ── Magnetic press ────────────────────────────────────────── */
+.press-effect {
+  transition: transform var(--duration-fast) var(--ease-out-expo);
+}
+.press-effect:active {
+  transform: scale(0.97);
+}
+
+/* ── Glow border on focus ──────────────────────────────────── */
+.glow-focus:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px rgba(201, 168, 124, 0.4),
+    0 0 20px rgba(201, 168, 124, 0.1);
+}
+
+/* ── Link underline animation ──────────────────────────────── */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent-copper);
+  transition: width var(--duration-slow) var(--ease-out-expo);
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* ── Nav active indicator ──────────────────────────────────── */
+.nav-item {
+  position: relative;
+  transition: color var(--duration-normal) var(--ease-out-expo);
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 0;
+  background: var(--accent-copper);
+  border-radius: 1px;
+  transition: height var(--duration-slow) var(--ease-out-expo);
+}
+
+.nav-item:hover::before,
+.nav-item.active::before {
+  height: 60%;
+}
+
+/* ── Card interactive glow ─────────────────────────────────── */
+.card-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 168, 124, 0.03),
+    transparent
+  );
+  transition: left 0.6s var(--ease-out-expo);
+  pointer-events: none;
+}
+
+.card-glow:hover::before {
+  left: 100%;
+}
+
+/* ── Toast slide in ────────────────────────────────────────── */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+
+.toast-enter {
+  animation: toast-in 0.4s var(--ease-spring) both;
+}
+
+.toast-exit {
+  animation: toast-out 0.3s var(--ease-out-expo) both;
+}
+
+/* ── Modal backdrop ────────────────────────────────────────── */
+@keyframes backdrop-in {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to { opacity: 1; backdrop-filter: blur(8px); }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-backdrop {
+  animation: backdrop-in 0.3s var(--ease-out-expo) both;
+}
+
+.modal-content {
+  animation: modal-in 0.35s var(--ease-spring) both;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ══════════════════════════════════════════════════════════════ */
+
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12); }
 
-/* ── Platform colors — muted ───────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   PLATFORM & METRIC COLORS
+   ══════════════════════════════════════════════════════════════ */
+
 .platform-twitter { color: #7cacec; }
 .platform-linkedin { color: #7ca8c9; }
 .platform-instagram { color: #c97c8a; }
@@ -345,23 +725,16 @@ body {
 .platform-tiktok { color: #7cc9c4; }
 .platform-threads { color: #c9c4a8; }
 
-/* ── Metric colors — muted copper palette ──────────────────── */
 .metric-copper { color: var(--accent-copper); }
 .metric-rose { color: var(--accent-rose); }
 .metric-blue { color: var(--info); }
 .metric-green { color: var(--success); }
 .metric-muted { color: var(--cool-grey); }
 
-/* ── Hover lift ────────────────────────────────────────────── */
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
+/* ══════════════════════════════════════════════════════════════
+   EDITORIAL DISPLAY
+   ══════════════════════════════════════════════════════════════ */
 
-/* ── Large number display — editorial ──────────────────────── */
 .editorial-number {
   font-family: var(--font-serif);
   font-weight: 400;
@@ -380,7 +753,6 @@ body {
   color: var(--foreground);
 }
 
-/* ── Spec list — like the Dribbble design ──────────────────── */
 .spec-list {
   font-size: 11px;
   line-height: 1.8;

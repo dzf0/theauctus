@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -20,11 +20,23 @@ export default function Modal({
   size = "md",
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      requestAnimationFrame(() => setIsAnimating(true));
+    } else if (isVisible) {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setIsVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isVisible]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && isOpen) onClose();
     };
 
     if (isOpen) {
@@ -38,9 +50,9 @@ export default function Modal({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isVisible) return null;
 
-  const sizes = {
+  const sizes: Record<string, string> = {
     sm: "max-w-[400px]",
     md: "max-w-[480px]",
     lg: "max-w-[640px]",
@@ -51,14 +63,24 @@ export default function Modal({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+        isAnimating
+          ? "bg-black/70 backdrop-blur-sm"
+          : "bg-black/0 backdrop-blur-0"
+      }`}
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
     >
       <div
-        ref={contentRef}
-        className={`w-full ${sizes[size]} bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-lg animate-scale-in`}
+        className={`w-full ${sizes[size]} bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl shadow-2xl transition-all duration-300 ${
+          isAnimating
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-95 translate-y-2"
+        }`}
+        style={{
+          transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
@@ -87,21 +109,11 @@ export default function Modal({
             </div>
             <button
               onClick={onClose}
-              className="p-1 -mt-1 -mr-1 text-[#6B6560] hover:text-[#F5F0EB] transition-colors rounded"
+              className="p-1.5 -mt-1 -mr-1 text-[#6B6560] hover:text-[#F5F0EB] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-150 rounded-lg"
               aria-label="Close"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
