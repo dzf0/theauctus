@@ -267,7 +267,8 @@ html.light .bg-gradient-to-br.from-\[rgba\(201\,168\,124\,0\.9\)\] {
 }
 
 /* Google button → light version */
-html.light [class*="bg-\[rgba\(255\,255\,255\,0\.05\)\"][class*="border-\[rgba\(255\,255\,255\,0\.08\)\]"] {
+html.light [class*="bg-[rgba(255,255,255,0.05)]"],
+html.light [class*="border-[rgba(255,255,255,0.08)]"] {
   background: rgba(255, 255, 255, 0.7) !important;
   border-color: rgba(0, 0, 0, 0.1) !important;
   color: #1a1816 !important;
@@ -378,13 +379,13 @@ body {
 }
 
 .editorial-bg::after {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background: repeating-conic-gradient(rgba(255,255,255,0.015) 0% 25%, transparent 0% 50%) 0 0 / 4px 4px;
   pointer-events: none;
   z-index: 0;
   opacity: 0.3;
@@ -409,7 +410,7 @@ body {
 
 /* Specular highlight — the liquid shine */
 .liquid-glass::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -468,7 +469,7 @@ body {
 }
 
 .liquid-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -531,9 +532,7 @@ body {
 select.liquid-input {
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a756f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-image: none;
   padding-right: 36px;
   cursor: pointer;
 }
@@ -573,7 +572,7 @@ html.light select.liquid-input option {
 }
 
 .liquid-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -622,7 +621,7 @@ html.light select.liquid-input option {
 }
 
 .liquid-btn-primary::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -874,7 +873,7 @@ html.light select.liquid-input option {
 }
 
 .mockup-glow-border::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -2px;
   border-radius: 18px;
@@ -986,7 +985,7 @@ html.light select.liquid-input option {
   text-decoration: none;
 }
 .link-underline::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -1309,14 +1308,14 @@ section + section {
 .glass { background: var(--lg-bg); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); border: 1px solid var(--lg-border); border-radius: var(--lg-radius); box-shadow: var(--lg-shadow), var(--lg-inset); transition: all 0.4s var(--ease-out-expo); }
 .glass:hover { background: var(--lg-bg-strong); border-color: var(--lg-border-strong); }
 .glass-card { background: var(--lg-bg); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-sm); box-shadow: var(--lg-shadow), var(--lg-inset); position: relative; overflow: hidden; transition: all 0.4s var(--ease-out-expo); }
-.glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 40%; background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%); border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0; pointer-events: none; opacity: 0.4; }
+.glass-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 40%; background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%); border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0; pointer-events: none; opacity: 0.4; }
 .glass-card:hover { border-color: var(--lg-border-strong); transform: translateY(-1px); box-shadow: var(--lg-shadow-lg), var(--lg-inset); }
 .glass-btn { background: var(--lg-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-xs); padding: 10px 24px; color: var(--foreground); font-weight: 500; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s var(--ease-out-expo); }
-.glass-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%); border-radius: var(--lg-radius-xs) var(--lg-radius-xs) 0 0; pointer-events: none; opacity: 0.4; }
+.glass-btn::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%); border-radius: var(--lg-radius-xs) var(--lg-radius-xs) 0 0; pointer-events: none; opacity: 0.4; }
 .glass-btn:hover { background: var(--lg-bg-strong); border-color: var(--lg-border-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
 .glass-btn:active { transform: scale(0.97); }
 .glass-btn-primary { background: linear-gradient(135deg, rgba(201, 168, 124, 0.9), rgba(184, 147, 95, 0.95)); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(201, 168, 124, 0.3); border-radius: var(--lg-radius-xs); padding: 10px 24px; color: #0a0a0f; font-weight: 600; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(201, 168, 124, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2); transition: all 0.2s var(--ease-out-expo); }
-.glass-btn-primary::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%); border-radius: var(--lg-radius-xs) var(--lg-radius-xs) 0 0; pointer-events: none; }
+.glass-btn-primary::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%); border-radius: var(--lg-radius-xs) var(--lg-radius-xs) 0 0; pointer-events: none; }
 .glass-btn-primary:hover { background: linear-gradient(135deg, rgba(220, 196, 160, 0.95), rgba(201, 168, 124, 1)); box-shadow: 0 8px 32px rgba(201, 168, 124, 0.35); }
 .glass-btn-primary:active { transform: scale(0.97); }
 .glass-input { background: var(--lg-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-xs); padding: 12px 16px; color: var(--foreground); font-size: 14px; outline: none; width: 100%; transition: all 0.3s var(--ease-out-expo); }
