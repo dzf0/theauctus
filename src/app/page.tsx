@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useUser } from "@/components/user-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useInView } from "@/hooks/use-in-view";
@@ -28,6 +28,59 @@ function Reveal({
       style={{ transitionDelay: `${delay}s` }}
     >
       {children}
+    </div>
+  );
+}
+
+// ── Hero headline with word-by-word stagger ────────────────────
+function HeroHeadline({ text }: { text: string }) {
+  const words = text.split(" ");
+  return (
+    <h1 className="font-headline text-4xl sm:text-5xl lg:text-[4.5rem] leading-[1.0] text-[var(--foreground)] mb-8">
+      {words.map((word, i) => (
+        <span
+          key={i}
+          className="hero-word-animate inline-block mr-[0.3em]"
+          style={{ "--word-delay": `${0.3 + i * 0.08}s` } as React.CSSProperties}
+        >
+          {word}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+// ── Particle field for hero background ─────────────────────────
+function ParticleField() {
+  const particles = useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      size: 1 + Math.random() * 2,
+      duration: 3 + Math.random() * 5,
+      delay: Math.random() * 6,
+      opacity: 0.2 + Math.random() * 0.4,
+    }));
+  }, []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="hero-particle"
+          style={{
+            left: p.left,
+            top: p.top,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            opacity: p.opacity,
+            "--twinkle-duration": `${p.duration}s`,
+            "--twinkle-delay": `${p.delay}s`,
+          } as React.CSSProperties}
+        />
+      ))}
     </div>
   );
 }
@@ -188,21 +241,27 @@ export default function LandingPage() {
 
       {/* ── Hero ────────────────────────────────────────────── */}
       <section className="relative pt-32 pb-20 px-6 lg:px-12 min-h-[90vh] flex items-center overflow-hidden">
-        {/* Background gradient orbs */}
+        {/* Animated background gradient orbs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)", filter: "blur(80px)" }} />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(124,158,201,0.04) 0%, transparent 60%)", filter: "blur(60px)" }} />
+          <div className="orb-1 absolute top-[-10%] right-[-5%] w-[700px] h-[700px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.08) 0%, transparent 60%)", filter: "blur(80px)" }} />
+          <div className="orb-2 absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(124,158,201,0.05) 0%, transparent 60%)", filter: "blur(60px)" }} />
+          <div className="orb-3 absolute top-[20%] left-[30%] w-[400px] h-[400px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 60%)", filter: "blur(70px)" }} />
         </div>
-        <div className="max-w-7xl mx-auto w-full">
+
+        {/* Particle field */}
+        <ParticleField />
+
+        <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <Reveal>
-                <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-8">AI-Powered Content Planning</p>
+                <div className="flex items-center gap-3 mb-8">
+                  <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
+                  <p className="text-[10px] uppercase tracking-[0.2em] accent-text">AI-Powered Content Planning</p>
+                </div>
               </Reveal>
               <Reveal delay={0.1}>
-                <h1 className="font-headline text-4xl sm:text-5xl lg:text-[4.5rem] leading-[1.0] text-[var(--foreground)] mb-8">
-                  Schedule 30 days of content across every platform — in minutes.
-                </h1>
+                <HeroHeadline text="Schedule 30 days of content across every platform — in minutes." />
               </Reveal>
               <Reveal delay={0.2}>
                 <p className="text-[14px] text-[var(--muted)] leading-relaxed max-w-md mb-10">
@@ -212,9 +271,9 @@ export default function LandingPage() {
               <Reveal delay={0.3}>
                 <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">
                   {user ? (
-                    <Link href="/dashboard" className="liquid-btn-primary text-[13px]">Go to Dashboard</Link>
+                    <Link href="/dashboard" className="liquid-btn-primary text-[13px] cta-glow">Go to Dashboard</Link>
                   ) : (
-                    <Link href="/auth/signup" className="liquid-btn-primary text-[13px]">Get Started</Link>
+                    <Link href="/auth/signup" className="liquid-btn-primary text-[13px] cta-glow">Get Started</Link>
                   )}
                 </div>
                 {!user && (
@@ -229,11 +288,13 @@ export default function LandingPage() {
               </Reveal>
             </div>
 
-            {/* Hero visual — simplified dashboard mockup */}
+            {/* Hero visual — floating dashboard mockup with gradient border */}
             <div className="relative flex items-center justify-center">
               <Reveal direction="scale" delay={0.3}>
-                <div className="relative w-full max-w-2xl aspect-[4/3]">
-                  <div className="absolute inset-0 liquid-card overflow-hidden" style={{ borderRadius: 16 }}>
+                <div className="relative w-full max-w-2xl aspect-[4/3] mockup-float">
+                  {/* Animated gradient border */}
+                  <div className="mockup-glow-border absolute inset-0" />
+                  <div className="relative liquid-card overflow-hidden" style={{ borderRadius: 16 }}>
                     {/* Mockup header bar */}
                     <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "var(--lg-border)" }}>
                       <div className="flex gap-1.5">
@@ -277,12 +338,13 @@ export default function LandingPage() {
                             {[40, 55, 45, 70, 65, 80, 75, 90, 85, 95, 88, 100].map((h, i) => (
                               <div
                                 key={i}
-                                className="flex-1 rounded-t"
+                                className="flex-1 rounded-t transition-all duration-1000"
                                 style={{
                                   height: `${h}%`,
                                   background: i >= 10
                                     ? "linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))"
                                     : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+                                  transitionDelay: `${i * 50}ms`,
                                 }}
                               />
                             ))}
@@ -294,7 +356,7 @@ export default function LandingPage() {
                             <div className="text-[10px] truncate" style={{ color: "var(--foreground)" }}>10 tips for sustainable fashion...</div>
                             <div className="text-[8px] mt-0.5" style={{ color: "var(--muted)" }}>Instagram · 2:00 PM</div>
                           </div>
-                          <div className="w-16 rounded-lg p-2 flex flex-col items-center justify-center" style={{ background: "rgba(201,168,124,0.1)", border: "1px solid rgba(201,168,124,0.2)" }}>
+                          <div className="w-16 rounded-lg p-2 flex flex-col items-center justify-center animate-pulse-glow" style={{ background: "rgba(201,168,124,0.1)", border: "1px solid rgba(201,168,124,0.2)" }}>
                             <div className="w-5 h-5" style={{ color: "var(--accent-copper)" }}>{icons.sparkles}</div>
                             <div className="text-[8px] mt-0.5" style={{ color: "var(--accent-copper)" }}>AI Ready</div>
                           </div>
@@ -324,7 +386,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
               <Reveal key={i} delay={i * 0.08}>
-                <div className="liquid-card p-8 h-full">
+                <div className="liquid-card p-8 h-full hover-lift">
                   <div className="text-[var(--accent-copper)] mb-6">{feature.icon}</div>
                   <h3 className="font-headline text-xl text-[var(--foreground)] mb-3">{feature.title}</h3>
                   <p className="text-[13px] text-[var(--muted)] leading-relaxed">{feature.description}</p>
@@ -336,7 +398,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ────────────────────────────────────── */}
-      <section className="py-32 px-6 lg:px-12 border-t border-[var(--lg-border)]">
+      <section className="py-32 px-6 lg:px-12 shimmer-divider">
         <div className="max-w-5xl mx-auto">
           <Reveal>
             <div className="mb-20">
@@ -368,7 +430,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing (Credit Packs) ──────────────────────────── */}
-      <section id="pricing" className="py-32 px-6 lg:px-12 border-t border-[var(--lg-border)]">
+      <section id="pricing" className="py-32 px-6 lg:px-12 shimmer-divider">
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="mb-8">
@@ -394,7 +456,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {CREDIT_PACKS.map((pack, i) => (
               <Reveal key={pack.id} delay={i * 0.1}>
-                <div className={`liquid-card p-8 h-full relative ${pack.popular ? "glow-breathe" : ""}`}>
+                <div className={`liquid-card p-8 h-full relative hover-lift ${pack.popular ? "glow-breathe" : ""}`}>
                   {pack.popular && <span className="liquid-badge absolute top-6 right-6 z-10">Best Value</span>}
                   <div className="text-[var(--accent-copper)] mb-4">{packIcons[pack.id]}</div>
                   <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-4 relative z-10">{pack.name}</p>
@@ -419,7 +481,7 @@ export default function LandingPage() {
           </div>
 
           <Reveal delay={0.3}>
-            <div className="liquid-card p-8 mt-8 max-w-md mx-auto text-center">
+            <div className="liquid-card p-8 mt-8 max-w-md mx-auto text-center hover-lift">
               <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-3">Or choose a custom amount</p>
               <p className="text-[13px] text-[var(--muted)] mb-4">
                 Enter any amount from ${CUSTOM_CREDIT_MIN_DOLLARS}+ — credits at ${CUSTOM_CREDIT_RATE.toFixed(2)}/credit
@@ -442,7 +504,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────── */}
-      <section id="faq" className="py-32 px-6 lg:px-12 border-t border-[var(--lg-border)]">
+      <section id="faq" className="py-32 px-6 lg:px-12 shimmer-divider">
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <div className="mb-16">
@@ -469,8 +531,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ───────────────────────────────────────── */}
-      <section className="py-32 px-6 lg:px-12 border-t border-[var(--lg-border)]">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-32 px-6 lg:px-12 shimmer-divider relative overflow-hidden">
+        {/* Subtle background glow for CTA section */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)", filter: "blur(60px)" }} />
+        </div>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <Reveal>
             <h2 className="font-headline text-5xl sm:text-6xl text-[var(--foreground)] mb-6 leading-[1.05]">
               Ready to build your<br />
@@ -483,7 +549,7 @@ export default function LandingPage() {
             </p>
           </Reveal>
           <Reveal delay={0.2}>
-            <Link href="/auth/signup" className="inline-block px-10 py-4 liquid-btn-primary text-[13px]">Get Started</Link>
+            <Link href="/auth/signup" className="inline-block px-10 py-4 liquid-btn-primary text-[13px] cta-glow">Get Started</Link>
             <p className="text-[11px] text-[var(--muted)] mt-6">10 free credits included · No credit card required</p>
           </Reveal>
         </div>
