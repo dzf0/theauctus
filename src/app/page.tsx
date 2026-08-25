@@ -253,43 +253,43 @@ export default function LandingPage() {
           </div>
         </div>
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[var(--lg-border)] px-6 py-6 space-y-4" style={{ background: "var(--lg-bg-strong)", backdropFilter: "blur(40px)" }}>
-            <a href="#features" className="block text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Features</a>
-            <a href="#pricing" className="block text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Credits</a>
-            <a href="#faq" className="block text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">FAQ</a>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">Theme</span>
+          <div className="md:hidden border-t border-[var(--lg-border)] px-6 py-4 space-y-1" style={{ background: 'var(--lg-bg-strong)', backdropFilter: 'blur(40px)' }}>
+            <a href="#features" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Features</a>
+            <a href="#pricing" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Credits</a>
+            <a href="#faq" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
+            <div className="flex items-center gap-2 py-3 px-3">
+              <span className="text-[13px] uppercase tracking-[0.1em] text-[var(--foreground)]">Theme</span>
               <ThemeToggle />
             </div>
             {user ? (
-              <div className="space-y-4">
-                <Link href="/dashboard" className="block liquid-btn-primary text-center text-[11px]">Dashboard</Link>
-                <button onClick={async () => { document.cookie.split(';').forEach(c => { const n = c.split('=')[0].trim(); if (n.startsWith('sb-')) document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; }); await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {}); window.location.href = '/'; }} className="block w-full text-center text-[11px] text-[var(--muted)]">Sign out</button>
+              <div className="space-y-2 pt-2">
+                <Link href="/dashboard" className="block liquid-btn-primary text-center text-[13px] py-3">Dashboard</Link>
+                <button onClick={async () => { document.cookie.split(';').forEach(c => { const n = c.split('=')[0].trim(); if (n.startsWith('sb-')) document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; }); await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {}); window.location.href = '/'; }} className="block w-full text-center py-3 text-[13px] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Sign out</button>
               </div>
             ) : (
-              <Link href="/auth/signup" className="block liquid-btn-primary text-center text-[11px]">Get Started</Link>
+              <Link href="/auth/signup" className="block liquid-btn-primary text-center text-[13px] py-3">Get Started</Link>
             )}
           </div>
         )}
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-20 px-6 lg:px-12 min-h-[90vh] flex items-center overflow-hidden">
+      <section className="relative pt-20 sm:pt-24 lg:pt-32 pb-10 sm:pb-16 lg:pb-20 px-5 sm:px-6 lg:px-12 min-h-[auto] sm:min-h-[90vh] flex items-center overflow-hidden">
         {/* Animated background gradient orbs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="orb-1 absolute top-[-10%] right-[-5%] w-[700px] h-[700px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.08) 0%, transparent 60%)", filter: "blur(80px)" }} />
-          <div className="orb-2 absolute bottom-[-15%] left-[-10%] w-[600px] h-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(124,158,201,0.05) 0%, transparent 60%)", filter: "blur(60px)" }} />
-          <div className="orb-3 absolute top-[20%] left-[30%] w-[400px] h-[400px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 60%)", filter: "blur(70px)" }} />
+          <div className="orb-1 absolute top-[-10%] right-[-5%] w-[300px] sm:w-[500px] lg:w-[700px] h-[300px] sm:h-[500px] lg:h-[700px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.08) 0%, transparent 60%)", filter: "blur(80px)" }} />
+          <div className="orb-2 absolute bottom-[-15%] left-[-10%] w-[250px] sm:w-[400px] lg:w-[600px] h-[250px] sm:h-[400px] lg:h-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(124,158,201,0.05) 0%, transparent 60%)", filter: "blur(60px)" }} />
+          <div className="orb-3 absolute top-[20%] left-[30%] w-[200px] sm:w-[300px] lg:w-[400px] h-[200px] sm:h-[300px] lg:h-[400px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 60%)", filter: "blur(70px)" }} />
         </div>
 
-        {/* Particle field */}
-        <ParticleField />
+        {/* Particle field - hidden on mobile */}
+        <div className="hidden sm:block"><ParticleField /></div>
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div>
               <Reveal>
-                <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-3 mb-6 lg:mb-8">
                   <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
                   <p className="text-[10px] uppercase tracking-[0.2em] accent-text">AI-Powered Content Planning</p>
                 </div>
@@ -298,16 +298,16 @@ export default function LandingPage() {
                 <HeroHeadline text="Schedule 30 days of content across every platform — in minutes." />
               </Reveal>
               <Reveal delay={0.2}>
-                <p className="text-[14px] text-[var(--muted)] leading-relaxed max-w-md mb-10">
+                <p className="text-[14px] text-[var(--muted)] leading-relaxed max-w-md mb-6 sm:mb-10">
                   TheAuctus plans your content, writes platform-specific posts, and schedules optimal timing — so you can focus on creating, not managing.
                 </p>
               </Reveal>
               <Reveal delay={0.3}>
-                <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 mb-6 sm:mb-8">
                   {user ? (
-                    <Link href="/dashboard" className="liquid-btn-primary text-[13px] cta-glow">Go to Dashboard</Link>
+                    <Link href="/dashboard" className="liquid-btn-primary text-[13px] cta-glow w-full sm:w-auto text-center">Go to Dashboard</Link>
                   ) : (
-                    <Link href="/auth/signup" className="liquid-btn-primary text-[13px] cta-glow">Get Started</Link>
+                    <Link href="/auth/signup" className="liquid-btn-primary text-[13px] cta-glow w-full sm:w-auto text-center">Get Started</Link>
                   )}
                 </div>
                 {!user && (
@@ -318,57 +318,58 @@ export default function LandingPage() {
                 )}
               </Reveal>
               <Reveal delay={0.4}>
-                <p className="text-[11px] text-[var(--muted)] mt-4">10 free credits included · No credit card required</p>
+                <p className="text-[11px] text-[var(--muted)] mt-3 sm:mt-4">10 free credits included · No credit card required</p>
               </Reveal>
             </div>
 
             {/* Hero visual — floating dashboard mockup with gradient border */}
-            <div className="relative flex items-center justify-center">
+            {/* Hidden on mobile, visible on sm+ screens */}
+            <div className="hidden sm:flex relative items-center justify-center">
               <Reveal direction="scale" delay={0.3}>
-                <div className="relative w-full max-w-2xl aspect-[4/3] mockup-float">
+                <div className="relative w-full max-w-[480px] lg:max-w-2xl aspect-[4/3] mockup-float">
                   {/* Animated gradient border */}
                   <div className="mockup-glow-border absolute inset-0" />
                   <div className="relative liquid-card overflow-hidden" style={{ borderRadius: 16 }}>
                     {/* Mockup header bar */}
-                    <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "var(--lg-border)" }}>
+                    <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 border-b" style={{ borderColor: "var(--lg-border)" }}>
                       <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+                        <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#ff5f57]" />
+                        <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#ffbd2e]" />
+                        <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#28c840]" />
                       </div>
                       <div className="flex-1 flex justify-center">
-                        <div className="px-4 py-1 rounded-md text-[10px] text-[var(--muted)]" style={{ background: "var(--lg-bg)" }}>
+                        <div className="px-2 sm:px-4 py-1 rounded-md text-[8px] sm:text-[10px] text-[var(--muted)]" style={{ background: "var(--lg-bg)" }}>
                           theauctus.in/dashboard
                         </div>
                       </div>
                     </div>
                     {/* Mockup body */}
-                    <div className="p-4 flex gap-3" style={{ height: "calc(100% - 36px)" }}>
-                      <div className="hidden sm:flex w-12 rounded-xl flex-col items-center gap-3 py-3" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
-                        <div className="w-6 h-6 rounded-md" style={{ background: "rgba(201,168,124,0.3)" }} />
-                        <div className="w-5 h-5 rounded" style={{ background: "var(--lg-bg)" }} />
-                        <div className="w-5 h-5 rounded" style={{ background: "var(--lg-bg)" }} />
-                        <div className="w-5 h-5 rounded" style={{ background: "var(--lg-bg)" }} />
+                    <div className="p-3 sm:p-4 flex gap-2 sm:gap-3" style={{ height: 'calc(100% - 32px)' }}>
+                      <div className="hidden md:flex w-12 rounded-xl flex-col items-center gap-3 py-3" style={{ background: 'var(--lg-bg)', border: '1px solid var(--lg-border)' }}>
+                        <div className="w-6 h-6 rounded-md" style={{ background: 'rgba(201,168,124,0.3)' }} />
+                        <div className="w-5 h-5 rounded" style={{ background: 'var(--lg-bg)' }} />
+                        <div className="w-5 h-5 rounded" style={{ background: 'var(--lg-bg)' }} />
+                        <div className="w-5 h-5 rounded" style={{ background: 'var(--lg-bg)' }} />
                       </div>
-                      <div className="flex-1 flex flex-col gap-3">
-                        <div className="grid grid-cols-3 gap-2">
+                      <div className="flex-1 flex flex-col gap-2 sm:gap-3">
+                        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                           {[
-                            { label: "Credits", value: "200", color: "var(--accent-copper)" },
-                            { label: "Posts", value: "28", color: "var(--success)" },
-                            { label: "Engagement", value: "4.8%", color: "var(--info)" },
+                            { label: 'Credits', value: '200', color: 'var(--accent-copper)' },
+                            { label: 'Posts', value: '28', color: 'var(--success)' },
+                            { label: 'Engagement', value: '4.8%', color: 'var(--info)' },
                           ].map((stat, i) => (
-                            <div key={i} className="rounded-lg p-2.5" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
-                              <div className="text-[8px] uppercase tracking-wider mb-1" style={{ color: "var(--muted)" }}>{stat.label}</div>
-                              <div className="font-headline text-sm" style={{ color: stat.color }}>{stat.value}</div>
+                            <div key={i} className="rounded-lg p-1.5 sm:p-2.5" style={{ background: 'var(--lg-bg)', border: '1px solid var(--lg-border)' }}>
+                              <div className="text-[7px] sm:text-[8px] uppercase tracking-wider mb-0.5 sm:mb-1" style={{ color: 'var(--muted)' }}>{stat.label}</div>
+                              <div className="font-headline text-xs sm:text-sm" style={{ color: stat.color }}>{stat.value}</div>
                             </div>
                           ))}
                         </div>
-                        <div className="flex-1 rounded-xl p-3" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[9px] uppercase tracking-wider" style={{ color: "var(--muted)" }}>Growth</span>
-                            <span className="text-[9px]" style={{ color: "var(--success)" }}>+12.4%</span>
+                        <div className="flex-1 rounded-xl p-2 sm:p-3" style={{ background: 'var(--lg-bg)', border: '1px solid var(--lg-border)' }}>
+                          <div className="flex items-center justify-between mb-1 sm:mb-2">
+                            <span className="text-[8px] sm:text-[9px] uppercase tracking-wider" style={{ color: 'var(--muted)' }}>Growth</span>
+                            <span className="text-[8px] sm:text-[9px]" style={{ color: 'var(--success)' }}>+12.4%</span>
                           </div>
-                          <div className="flex items-end gap-1 h-[60%] mt-2">
+                          <div className="flex items-end gap-0.5 h-[60%] mt-1 sm:mt-2">
                             {[40, 55, 45, 70, 65, 80, 75, 90, 85, 95, 88, 100].map((h, i) => (
                               <div
                                 key={i}
@@ -376,27 +377,67 @@ export default function LandingPage() {
                                 style={{
                                   height: `${h}%`,
                                   background: i >= 10
-                                    ? "linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))"
-                                    : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+                                    ? 'linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))'
+                                    : 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
                                   transitionDelay: `${i * 50}ms`,
                                 }}
                               />
                             ))}
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1 rounded-lg p-2" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
-                            <div className="text-[8px] uppercase tracking-wider mb-1" style={{ color: "var(--muted)" }}>Next post</div>
-                            <div className="text-[10px] truncate" style={{ color: "var(--foreground)" }}>10 tips for sustainable fashion...</div>
-                            <div className="text-[8px] mt-0.5" style={{ color: "var(--muted)" }}>Instagram · 2:00 PM</div>
+                        <div className="flex gap-1.5 sm:gap-2">
+                          <div className="flex-1 rounded-lg p-1.5 sm:p-2" style={{ background: 'var(--lg-bg)', border: '1px solid var(--lg-border)' }}>
+                            <div className="text-[7px] sm:text-[8px] uppercase tracking-wider mb-0.5 sm:mb-1" style={{ color: 'var(--muted)' }}>Next post</div>
+                            <div className="text-[9px] sm:text-[10px] truncate" style={{ color: 'var(--foreground)' }}>10 tips for sustainable fashion...</div>
+                            <div className="text-[7px] sm:text-[8px] mt-0.5" style={{ color: 'var(--muted)' }}>Instagram · 2:00 PM</div>
                           </div>
-                          <div className="w-16 rounded-lg p-2 flex flex-col items-center justify-center animate-pulse-glow" style={{ background: "rgba(201,168,124,0.1)", border: "1px solid rgba(201,168,124,0.2)" }}>
-                            <div className="w-5 h-5" style={{ color: "var(--accent-copper)" }}>{icons.sparkles}</div>
-                            <div className="text-[8px] mt-0.5" style={{ color: "var(--accent-copper)" }}>AI Ready</div>
+                          <div className="w-12 sm:w-16 rounded-lg p-1.5 sm:p-2 flex flex-col items-center justify-center animate-pulse-glow" style={{ background: 'rgba(201,168,124,0.1)', border: '1px solid rgba(201,168,124,0.2)' }}>
+                            <div className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: 'var(--accent-copper)' }}>{icons.sparkles}</div>
+                            <div className="text-[7px] sm:text-[8px] mt-0.5" style={{ color: 'var(--accent-copper)' }}>AI Ready</div>
                           </div>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+
+            {/* Mobile-only hero visual: compact stats preview */}
+            <div className="sm:hidden">
+              <Reveal direction="up" delay={0.2}>
+                <div className="liquid-card p-4 rounded-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-[#ff5f57]" />
+                      <div className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
+                      <div className="w-2 h-2 rounded-full bg-[#28c840]" />
+                    </div>
+                    <div className="text-[8px] text-[var(--muted)]">theauctus.in</div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    {[
+                      { label: 'Posts', value: '28', color: 'var(--success)' },
+                      { label: 'Growth', value: '+12.4%', color: 'var(--accent-copper)' },
+                      { label: 'Ready', value: '✓', color: 'var(--success)' },
+                    ].map((s, i) => (
+                      <div key={i} className="text-center rounded-lg py-2" style={{ background: 'var(--lg-bg)', border: '1px solid var(--lg-border)' }}>
+                        <div className="font-headline text-sm" style={{ color: s.color }}>{s.value}</div>
+                        <div className="text-[7px] uppercase tracking-wider mt-0.5" style={{ color: 'var(--muted)' }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-end gap-0.5 h-8">
+                    {[40, 55, 45, 70, 65, 80, 75, 90, 85, 95].map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-t-sm"
+                        style={{
+                          height: `${h}%`,
+                          background: i >= 7 ? 'linear-gradient(180deg, rgba(201,168,124,0.5), rgba(201,168,124,0.2))' : 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
+                        }}
+                      />
+                    ))}
                   </div>
                 </div>
               </Reveal>
@@ -406,22 +447,22 @@ export default function LandingPage() {
       </section>
 
       {/* ── Stats (animated counters) ──────────────────────── */}
-      <section className="py-24 px-6 lg:px-12 relative overflow-hidden">
+      <section className="py-16 sm:py-20 lg:py-24 px-5 sm:px-6 lg:px-12 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.05) 0%, transparent 60%)", filter: "blur(50px)" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[400px] lg:w-[600px] h-[150px] sm:h-[200px] lg:h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(201,168,124,0.05) 0%, transparent 60%)', filter: 'blur(50px)' }} />
         </div>
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+          <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4 lg:gap-4">
             {[
-              { target: 30, suffix: "K+", prefix: "", label: "Posts Planned" },
-              { target: 8, suffix: "", prefix: "", label: "Platforms Connected" },
-              { target: 98, suffix: "%", prefix: "", label: "On-Time Delivery" },
-              { target: 4, suffix: "x", prefix: "", label: "Avg. Growth Rate" },
+              { target: 30, suffix: 'K+', label: 'Posts' },
+              { target: 8, suffix: '', label: 'Platforms' },
+              { target: 98, suffix: '%', label: 'On-Time' },
+              { target: 4, suffix: 'x', label: 'Growth' },
             ].map((stat, i) => (
               <Reveal key={i} delay={i * 0.1}>
                 <div className="text-center">
-                  <CountUp target={stat.target} suffix={stat.suffix} prefix={stat.prefix} />
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--muted)] mt-3">{stat.label}</p>
+                  <CountUp target={stat.target} suffix={stat.suffix} />
+                  <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-[var(--muted)] mt-1 sm:mt-3">{stat.label}</p>
                 </div>
               </Reveal>
             ))}
@@ -430,24 +471,24 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ────────────────────────────────────────── */}
-      <section id="features" className="py-32 px-6 lg:px-12">
+      <section id="features" className="py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <Reveal>
-            <div className="mb-20">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">The Engine</p>
-              <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] max-w-2xl leading-[1.05]">
+            <div className="mb-10 sm:mb-14 lg:mb-20">
+              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3 lg:mb-4">The Engine</p>
+              <h2 className="font-headline text-3xl sm:text-4xl lg:text-6xl text-[var(--foreground)] max-w-2xl leading-[1.05]">
                 Your content pipeline,
                 <span className="text-[var(--muted)]"> fully automated.</span>
               </h2>
             </div>
           </Reveal>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
             {features.map((feature, i) => (
               <Reveal key={i} delay={i * 0.08}>
-                <div className="liquid-card p-8 h-full hover-lift">
-                  <div className="text-[var(--accent-copper)] mb-6">{feature.icon}</div>
-                  <h3 className="font-headline text-xl text-[var(--foreground)] mb-3">{feature.title}</h3>
-                  <p className="text-[13px] text-[var(--muted)] leading-relaxed">{feature.description}</p>
+                <div className="liquid-card p-5 sm:p-6 lg:p-8 h-full hover-lift">
+                  <div className="text-[var(--accent-copper)] mb-4 sm:mb-5 lg:mb-6">{feature.icon}</div>
+                  <h3 className="font-headline text-lg sm:text-xl text-[var(--foreground)] mb-2 sm:mb-3">{feature.title}</h3>
+                  <p className="text-[12px] sm:text-[13px] text-[var(--muted)] leading-relaxed">{feature.description}</p>
                 </div>
               </Reveal>
             ))}
@@ -456,12 +497,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works (visual cards + animated timeline) ── */}
-      <section className="py-32 px-6 lg:px-12 shimmer-divider">
+      <section className="py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12 shimmer-divider">
         <div className="max-w-6xl mx-auto">
           <Reveal>
-            <div className="mb-20">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">Process</p>
-              <h2 className="font-headline text-4xl sm:text-5xl text-[var(--foreground)] leading-[1.05]">
+            <div className="mb-12 lg:mb-20">
+              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3 lg:mb-4">Process</p>
+              <h2 className="font-headline text-3xl sm:text-4xl lg:text-5xl text-[var(--foreground)] leading-[1.05]">
                 From zero to 30 days of content.
                 <span className="text-[var(--muted)]"> Three steps.</span>
               </h2>
@@ -470,19 +511,19 @@ export default function LandingPage() {
 
           {/* Steps with visual cards */}
           <div className="relative">
-            {/* Connecting animated line */}
-            <div className="hidden lg:block absolute left-[calc(50%-0.5px)] top-0 bottom-0 w-[1px]" style={{ background: "linear-gradient(180deg, transparent, var(--lg-border) 10%, var(--lg-border) 90%, transparent)" }}>
-              <div className="timeline-pulse absolute w-[1px] h-16" style={{ background: "linear-gradient(180deg, transparent, rgba(201,168,124,0.5), transparent)" }} />
+            {/* Connecting animated line - desktop only */}
+            <div className="hidden lg:block absolute left-1/2 -translate-x-px top-0 bottom-0 w-[1px]" style={{ background: 'linear-gradient(180deg, transparent, var(--lg-border) 10%, var(--lg-border) 90%, transparent)' }}>
+              <div className="timeline-pulse absolute w-[1px] h-16" style={{ background: 'linear-gradient(180deg, transparent, rgba(201,168,124,0.5), transparent)' }} />
             </div>
 
-            <div className="space-y-8 lg:space-y-12">
+            <div className="space-y-8 lg:space-y-0">
               {[
                 {
-                  step: "01",
-                  title: "Tell AI about your brand",
-                  description: "Enter your niche, keywords, and brand voice. Connect your platforms. Takes 2 minutes.",
+                  step: '01',
+                  title: 'Tell AI about your brand',
+                  description: 'Enter your niche, keywords, and brand voice. Connect your platforms. Takes 2 minutes.',
                   icon: (
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
                     </svg>
                   ),
@@ -491,15 +532,15 @@ export default function LandingPage() {
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-[var(--accent-copper)]" />
-                          <div className="h-2 flex-1 rounded-full" style={{ background: "linear-gradient(90deg, rgba(201,168,124,0.3), transparent)" }} />
+                          <div className="h-2 flex-1 rounded-full" style={{ background: 'linear-gradient(90deg, rgba(201,168,124,0.3), transparent)' }} />
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ background: "var(--lg-border)" }} />
-                          <div className="h-2 flex-1 rounded-full" style={{ background: "var(--lg-bg)" }} />
+                          <div className="w-2 h-2 rounded-full" style={{ background: 'var(--lg-border)' }} />
+                          <div className="h-2 flex-1 rounded-full" style={{ background: 'var(--lg-bg)' }} />
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ background: "var(--lg-border)" }} />
-                          <div className="h-2 w-2/3 rounded-full" style={{ background: "var(--lg-bg)" }} />
+                          <div className="w-2 h-2 rounded-full" style={{ background: 'var(--lg-border)' }} />
+                          <div className="h-2 w-2/3 rounded-full" style={{ background: 'var(--lg-bg)' }} />
                         </div>
                         <div className="mt-3 text-[9px] text-[var(--muted)] uppercase tracking-wider">Brand voice loaded</div>
                       </div>
@@ -507,11 +548,11 @@ export default function LandingPage() {
                   ),
                 },
                 {
-                  step: "02",
-                  title: "Review your content calendar",
-                  description: "AI generates 30+ platform-specific posts with optimal timing, hashtags, and content pillars.",
+                  step: '02',
+                  title: 'Review your content calendar',
+                  description: 'AI generates 30+ platform-specific posts with optimal timing, hashtags, and content pillars.',
                   icon: (
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                     </svg>
                   ),
@@ -523,8 +564,8 @@ export default function LandingPage() {
                             key={i}
                             className="aspect-square rounded-sm transition-all duration-300"
                             style={{
-                              background: i < 4 ? "rgba(201,168,124,0.25)" : i % 7 === 0 ? "rgba(201,168,124,0.08)" : "var(--lg-bg)",
-                              border: i === 15 ? "1px solid var(--accent-copper)" : "1px solid var(--lg-border)",
+                              background: i < 4 ? 'rgba(201,168,124,0.25)' : i % 7 === 0 ? 'rgba(201,168,124,0.08)' : 'var(--lg-bg)',
+                              border: i === 15 ? '1px solid var(--accent-copper)' : '1px solid var(--lg-border)',
                               animationDelay: `${i * 30}ms`,
                             }}
                           />
@@ -538,11 +579,11 @@ export default function LandingPage() {
                   ),
                 },
                 {
-                  step: "03",
-                  title: "Watch it grow",
-                  description: "Content auto-publishes across all platforms. Analytics track everything. Growth engine suggests new tactics weekly.",
+                  step: '03',
+                  title: 'Watch it grow',
+                  description: 'Content auto-publishes across all platforms. Analytics track everything. Growth engine suggests new tactics weekly.',
                   icon: (
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                     </svg>
                   ),
@@ -556,27 +597,27 @@ export default function LandingPage() {
                             style={{
                               height: `${h}%`,
                               background: i >= 10
-                                ? "linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))"
-                                : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+                                ? 'linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))'
+                                : 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
                             }}
                           />
                         ))}
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">Growth +4.2x</span>
-                        <span className="text-[9px]" style={{ color: "var(--success)" }}>↑ Trending</span>
+                        <span className="text-[9px]" style={{ color: 'var(--success)' }}>↑ Trending</span>
                       </div>
                     </div>
                   ),
                 },
               ].map((step, i) => (
                 <Reveal key={i} delay={i * 0.15}>
-                  <div className={`grid lg:grid-cols-[1fr_60px_1fr] gap-6 lg:gap-0 items-center ${i % 2 === 1 ? "lg:direction-rtl" : ""}`}>
+                  <div className="mb-8 lg:mb-0 lg:grid lg:grid-cols-[1fr_60px_1fr] lg:gap-0 lg:items-center lg:min-h-[200px]">
                     {/* Content side */}
-                    <div className={`${i % 2 === 1 ? "lg:order-3 lg:text-left" : "lg:order-1"}`} style={{ direction: "ltr" }}>
-                      <div className="liquid-card p-6 sm:p-8 step-card-hover">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,124,0.1)", border: "1px solid rgba(201,168,124,0.15)" }}>
+                    <div className={i % 2 === 1 ? 'lg:order-3' : 'lg:order-1'}>
+                      <div className="liquid-card p-5 sm:p-6 lg:p-8 step-card-hover">
+                        <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(201,168,124,0.1)', border: '1px solid rgba(201,168,124,0.15)' }}>
                             <div className="text-[var(--accent-copper)]">{step.icon}</div>
                           </div>
                           <div>
@@ -587,14 +628,14 @@ export default function LandingPage() {
                         <p className="text-[13px] text-[var(--muted)] leading-relaxed">{step.description}</p>
                       </div>
                     </div>
-                    {/* Center node */}
+                    {/* Center node - desktop only */}
                     <div className="hidden lg:flex lg:order-2 justify-center relative z-10">
-                      <div className="step-node w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "var(--lg-bg-strong)", border: "2px solid var(--lg-border)", boxShadow: "0 0 24px rgba(201,168,124,0.1)" }}>
+                      <div className="step-node w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--lg-bg-strong)', border: '2px solid var(--lg-border)', boxShadow: '0 0 24px rgba(201,168,124,0.1)' }}>
                         <span className="font-headline text-sm text-[var(--accent-copper)]">{step.step}</span>
                       </div>
                     </div>
                     {/* Visual side */}
-                    <div className={`${i % 2 === 1 ? "lg:order-1" : "lg:order-3"}`} style={{ direction: "ltr" }}>
+                    <div className={i % 2 === 1 ? 'lg:order-1' : 'lg:order-3'}>
                       <div className="step-visual-wrapper">
                         {step.visual}
                       </div>
@@ -608,12 +649,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing (Credit Packs) ──────────────────────────── */}
-      <section id="pricing" className="py-32 px-6 lg:px-12 shimmer-divider">
+      <section id="pricing" className="py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12 shimmer-divider">
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="mb-8">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">Credits</p>
-              <h2 className="font-headline text-4xl sm:text-5xl text-[var(--foreground)] leading-[1.05]">
+              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3 lg:mb-4">Credits</p>
+              <h2 className="font-headline text-3xl sm:text-4xl lg:text-5xl text-[var(--foreground)] leading-[1.05]">
                 Pay for what you use.
                 <span className="text-[var(--muted)]"> No subscriptions.</span>
               </h2>
@@ -622,36 +663,36 @@ export default function LandingPage() {
 
           {/* Credit cost reference */}
           <Reveal delay={0.05}>
-            <div className="liquid-card p-4 mb-12 max-w-md">
-              <div className="flex items-center gap-6 text-[12px]" style={{ color: "var(--muted)" }}>
-            {CREDIT_COSTS.map((item, i) => (
-              <span key={i}>{item.action}: <span className="accent-text font-medium">{item.credits} cr</span></span>
-            ))}
+            <div className="liquid-card p-4 mb-8 lg:mb-12 max-w-full sm:max-w-md">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 sm:gap-x-6 text-[12px]" style={{ color: 'var(--muted)' }}>
+                {CREDIT_COSTS.map((item, i) => (
+                  <span key={i}>{item.action}: <span className='accent-text font-medium'>{item.credits} cr</span></span>
+                ))}
               </div>
             </div>
           </Reveal>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
             {CREDIT_PACKS.map((pack, i) => (
               <Reveal key={pack.id} delay={i * 0.1}>
-                <div className={`liquid-card p-8 h-full relative hover-lift ${pack.popular ? "glow-breathe" : ""}`}>
-                  {pack.popular && <span className="liquid-badge absolute top-6 right-6 z-10">Best Value</span>}
-                  <div className="text-[var(--accent-copper)] mb-4">{packIcons[pack.id]}</div>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-4 relative z-10">{pack.name}</p>
-                  <div className="flex items-baseline gap-1 mb-1 relative z-10">
-                    <span className="font-headline text-5xl text-[var(--foreground)]">${pack.price}</span>
+                <div className={`liquid-card p-5 sm:p-6 lg:p-8 h-full relative hover-lift ${pack.popular ? 'glow-breathe' : ''}`}>
+                  {pack.popular && <span className='liquid-badge absolute top-4 right-4 lg:top-6 lg:right-6 z-10'>Best Value</span>}
+                  <div className='text-[var(--accent-copper)] mb-3 sm:mb-4'>{packIcons[pack.id]}</div>
+                  <p className='text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-3 sm:mb-4 relative z-10'>{pack.name}</p>
+                  <div className='flex items-baseline gap-1 mb-1 relative z-10'>
+                    <span className='font-headline text-4xl sm:text-5xl text-[var(--foreground)]'>${pack.price}</span>
                   </div>
-                  <p className="text-[12px] text-[var(--muted)] mb-1 relative z-10">{pack.credits} credits</p>
-                  <p className="text-[11px] text-[var(--muted)] mb-8 relative z-10">{pack.pricePerCredit} per credit · {pack.description}</p>
-                  <ul className="space-y-3 mb-10 relative z-10">
+                  <p className='text-[12px] text-[var(--muted)] mb-1 relative z-10'>{pack.credits} credits</p>
+                  <p className='text-[11px] text-[var(--muted)] mb-6 lg:mb-8 relative z-10'>{pack.pricePerCredit} per credit · {pack.description}</p>
+                  <ul className='space-y-3 mb-8 lg:mb-10 relative z-10'>
                     {pack.features.map((f, j) => (
-                      <li key={j} className="flex items-start gap-2 text-[12px] text-[var(--cool-grey)]">
-                        <span className="text-[var(--accent-copper)]">{icons.check}</span>{f}
+                      <li key={j} className='flex items-start gap-2 text-[12px] text-[var(--cool-grey)]'>
+                        <span className='text-[var(--accent-copper)]'>{icons.check}</span>{f}
                       </li>
                     ))}
                   </ul>
-                  <Link href={user ? "/dashboard/billing" : "/auth/signup"} className={`block w-full text-center py-3 relative z-10 ${pack.popular ? "liquid-btn-primary" : "liquid-btn"}`}>
-                    {user ? "Buy Credits" : "Start Free"}
+                  <Link href={user ? '/dashboard/billing' : '/auth/signup'} className={`block w-full text-center py-3 relative z-10 ${pack.popular ? 'liquid-btn-primary' : 'liquid-btn'}`}>
+                    {user ? 'Buy Credits' : 'Start Free'}
                   </Link>
                 </div>
               </Reveal>
@@ -659,47 +700,47 @@ export default function LandingPage() {
           </div>
 
           <Reveal delay={0.3}>
-            <div className="liquid-card p-8 mt-8 max-w-md mx-auto text-center hover-lift">
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-3">Or choose a custom amount</p>
-              <p className="text-[13px] text-[var(--muted)] mb-4">
+            <div className='liquid-card p-6 sm:p-8 mt-8 max-w-md mx-auto text-center hover-lift'>
+              <p className='text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-3'>Or choose a custom amount</p>
+              <p className='text-[13px] text-[var(--muted)] mb-4'>
                 Enter any amount from ${CUSTOM_CREDIT_MIN_DOLLARS}+ — credits at ${CUSTOM_CREDIT_RATE.toFixed(2)}/credit
               </p>
               <Link
-                href={user ? "/dashboard/billing" : "/auth/signup"}
-                className="inline-block px-6 py-2.5 liquid-btn text-[12px]"
+                href={user ? '/dashboard/billing' : '/auth/signup'}
+                className='inline-block px-6 py-2.5 liquid-btn text-[12px]'
               >
-                {user ? "Choose Amount" : "Get Started"}
+                {user ? 'Choose Amount' : 'Get Started'}
               </Link>
             </div>
           </Reveal>
 
           <Reveal delay={0.35}>
-            <p className="text-center mt-8 text-[12px] text-[var(--muted)]">
-              All accounts start with <span className="accent-text font-medium">10 free credits</span> · No credit card required
+            <p className='text-center mt-8 text-[12px] text-[var(--muted)]'>
+              All accounts start with <span className='accent-text font-medium'>10 free credits</span> · No credit card required
             </p>
           </Reveal>
         </div>
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────── */}
-      <section id="faq" className="py-32 px-6 lg:px-12 shimmer-divider">
+      <section id="faq" className="py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12 shimmer-divider">
         <div className="max-w-3xl mx-auto">
           <Reveal>
-            <div className="mb-16">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">FAQ</p>
-              <h2 className="font-headline text-4xl sm:text-5xl text-[var(--foreground)]">Questions? Answered.</h2>
+            <div className="mb-10 sm:mb-12 lg:mb-16">
+              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3 lg:mb-4">FAQ</p>
+              <h2 className="font-headline text-3xl sm:text-4xl lg:text-5xl text-[var(--foreground)]">Questions? Answered.</h2>
             </div>
           </Reveal>
           <div className="space-y-0">
             {faqs.map((faq, i) => (
               <Reveal key={i} delay={i * 0.05}>
                 <div className="border-t border-[var(--lg-border)]">
-                  <button className="w-full py-5 text-left flex items-center justify-between group" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                    <span className="text-[14px] text-[var(--foreground)] group-hover:text-accent-text transition-colors">{faq.q}</span>
-                    <span className={`transition-transform duration-300 shrink-0 ml-4 ${openFaq === i ? "rotate-180" : ""}`}>{icons.chevronDown}</span>
+                  <button className="w-full py-4 sm:py-5 text-left flex items-center justify-between group min-h-[44px]" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                    <span className="text-[13px] sm:text-[14px] text-[var(--foreground)] group-hover:text-accent-text transition-colors pr-4">{faq.q}</span>
+                    <span className={`transition-transform duration-300 shrink-0 ${openFaq === i ? 'rotate-180' : ''}`}>{icons.chevronDown}</span>
                   </button>
-                  <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${openFaq === i ? "max-h-40 pb-5 opacity-100" : "max-h-0 opacity-0"}`}>
-                    <p className="text-[13px] text-[var(--muted)] leading-relaxed">{faq.a}</p>
+                  <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${openFaq === i ? 'max-h-40 pb-5 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <p className='text-[13px] text-[var(--muted)] leading-relaxed'>{faq.a}</p>
                   </div>
                 </div>
               </Reveal>
@@ -709,26 +750,24 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ───────────────────────────────────────── */}
-      <section className="py-32 px-6 lg:px-12 shimmer-divider relative overflow-hidden">
-        {/* Subtle background glow for CTA section */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)", filter: "blur(60px)" }} />
+      <section className='py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12 shimmer-divider relative overflow-hidden'>
+        <div className='absolute inset-0 pointer-events-none'>
+          <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[400px] lg:w-[500px] h-[300px] sm:h-[400px] lg:h-[500px] rounded-full' style={{ background: 'radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)', filter: 'blur(60px)' }} />
         </div>
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className='max-w-4xl mx-auto text-center relative z-10'>
           <Reveal>
-            <h2 className="font-headline text-5xl sm:text-6xl text-[var(--foreground)] mb-6 leading-[1.05]">
-              Ready to build your<br />
-              <span className="text-[var(--muted)]">growth engine?</span>
+            <h2 className='font-headline text-3xl sm:text-4xl lg:text-5xl text-[var(--foreground)] mb-4 sm:mb-6 leading-[1.05]'>
+              Ready to build your<br />{' '}<span className='text-[var(--muted)]'>growth engine?</span>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="text-[13px] text-[var(--muted)] mb-10 max-w-lg mx-auto">
+            <p className='text-[13px] text-[var(--muted)] mb-8 sm:mb-10 max-w-lg mx-auto'>
               Plan, write, and schedule 30 days of content across every platform — all with AI.
             </p>
           </Reveal>
           <Reveal delay={0.2}>
-            <Link href="/auth/signup" className="inline-block px-10 py-4 liquid-btn-primary text-[13px] cta-glow">Get Started</Link>
-            <p className="text-[11px] text-[var(--muted)] mt-6">10 free credits included · No credit card required</p>
+            <Link href='/auth/signup' className='inline-block px-8 sm:px-10 py-3 sm:py-4 liquid-btn-primary text-[13px] cta-glow'>Get Started</Link>
+            <p className='text-[11px] text-[var(--muted)] mt-6'>10 free credits included · No credit card required</p>
           </Reveal>
         </div>
       </section>
