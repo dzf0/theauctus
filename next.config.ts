@@ -103,23 +103,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Redirects for SEO and security
-  async redirects() {
-    return [
-      // Redirect www to apex domain
-      {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "www.theauctus.in",
-          },
-        ],
-        destination: "https://theauctus.in/:path*",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
