@@ -9,6 +9,7 @@ CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT,
   name TEXT,
+  full_name TEXT,
   avatar_url TEXT,
   
   -- Creator profile fields
