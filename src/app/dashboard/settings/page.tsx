@@ -1,32 +1,122 @@
 "use client";
 
-import { useState } from "react";
-import { creatorProfile, platformConfig } from "@/lib/store";
-import type { Platform } from "@/lib/types";
+import { useState, useEffect } from "react";
+import { Spinner } from "@/components/ui/Loading";
+
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  username: string;
+  name: string;
+  niche: string;
+  brand_voice: string;
+  target_audience: string;
+  goals: string;
+  keywords: string[];
+  onboarded: boolean;
+}
+
+const NICHE_OPTIONS = [
+  "Fashion & Beauty", "Food & Cooking", "Fitness & Health", "Travel & Adventure",
+  "Technology & Gadgets", "Business & Entrepreneurship", "Education & Learning",
+  "Entertainment & Comedy", "Art & Design", "Music & Audio", "Gaming",
+  "Parenting & Family", "Pets & Animals", "Home & Garden", "Sports & Outdoors",
+  "Finance & Investing", "Marketing & Social Media", "Health & Wellness",
+  "Sustainability & Environment", "Other",
+];
+
+const VOICE_OPTIONS = [
+  { id: "professional", label: "Professional", description: "Authoritative and trustworthy" },
+  { id: "casual", label: "Casual", description: "Friendly and approachable" },
+  { id: "humorous", label: "Humorous", description: "Witty and entertaining" },
+  { id: "inspirational", label: "Inspirational", description: "Motivating and uplifting" },
+  { id: "educational", label: "Educational", description: "Informative and helpful" },
+];
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<"profile" | "platforms" | "ai" | "notifications">("profile");
   const [saved, setSaved] = useState(false);
-  const [profile, setProfile] = useState({
-    name: creatorProfile.name,
-    email: creatorProfile.email,
-    niche: creatorProfile.niche,
-    targetAudience: creatorProfile.targetAudience,
-    brandVoice: creatorProfile.brandVoice,
-    keywords: creatorProfile.keywords.join(", "),
-    goals: creatorProfile.goals.join("\n"),
-  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  useEffect(() => {
+    fetch("/api/user")
+      .then((r) => r.json())
+      .then((data) => {
+        setProfile(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profile.name || profile.full_name,
+          full_name: profile.full_name,
+          niche: profile.niche,
+          brand_voice: profile.brand_voice,
+          target_audience: profile.target_audience,
+          goals: profile.goals,
+          keywords: profile.keywords,
+        }),
+      });
+
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false);
+    }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20" style={{ color: "var(--muted)" }}>
+        <Spinner size={20} />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="text-center py-20" style={{ color: "var(--muted)" }}>
+        <p>Failed to load profile.</p>
+      </div>
+    );
+  }
+
   const sections = [
-    { key: "profile", label: "Profile", icon: "👤" },
-    { key: "platforms", label: "Platforms", icon: "🔗" },
-    { key: "ai", label: "AI Preferences", icon: "🧠" },
-    { key: "notifications", label: "Notifications", icon: "🔔" },
+    { key: "profile", label: "Profile", icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+      </svg>
+    )},
+    { key: "platforms", label: "Platforms", icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+      </svg>
+    )},
+    { key: "ai", label: "AI Preferences", icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+      </svg>
+    )},
+    { key: "notifications", label: "Notifications", icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+      </svg>
+    )},
   ];
 
   return (
@@ -54,7 +144,7 @@ export default function SettingsPage() {
                 border: activeSection === item.key ? "1px solid var(--lg-border)" : "1px solid transparent",
               }}
             >
-              <span>{item.icon}</span>
+              {item.icon}
               {item.label}
             </button>
           ))}
@@ -65,66 +155,83 @@ export default function SettingsPage() {
             <div className="liquid-card p-6">
               <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Creator Profile</h3>
               <div className="grid md:grid-cols-2 gap-4">
-                {[
-                  { label: "Name", key: "name", type: "text" },
-                  { label: "Email", key: "email", type: "email" },
-                  { label: "Niche", key: "niche", type: "text" },
-                  { label: "Keywords", key: "keywords", type: "text", placeholder: "Comma-separated keywords" },
-                ].map((field) => (
-                  <div key={field.key}>
-                    <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>{field.label}</label>
-                    <input
-                      type={field.type}
-                      value={(profile as Record<string, string>)[field.key]}
-                      onChange={(e) => setProfile({ ...profile, [field.key]: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm"
-                      placeholder={field.placeholder}
-                    />
-                  </div>
-                ))}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>Target Audience</label>
-                  <textarea value={profile.targetAudience} onChange={(e) => setProfile({ ...profile, targetAudience: e.target.value })} className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm min-h-[80px]" />
+                <div>
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Full Name</label>
+                  <input
+                    type="text"
+                    value={profile.full_name || ""}
+                    onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm"
+                    placeholder="Your full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Email</label>
+                  <input
+                    type="email"
+                    value={profile.email || ""}
+                    readOnly
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm opacity-60 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Username</label>
+                  <input
+                    type="text"
+                    value={profile.username || ""}
+                    readOnly
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm opacity-60 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Niche *</label>
+                  <select
+                    value={profile.niche || ""}
+                    onChange={(e) => setProfile({ ...profile, niche: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm"
+                  >
+                    <option value="">Select your niche</option>
+                    {NICHE_OPTIONS.map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>Goals</label>
-                  <textarea value={profile.goals} onChange={(e) => setProfile({ ...profile, goals: e.target.value })} className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm min-h-[80px]" placeholder="One goal per line" />
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Keywords</label>
+                  <input
+                    type="text"
+                    value={(profile.keywords || []).join(", ")}
+                    onChange={(e) => setProfile({ ...profile, keywords: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm"
+                    placeholder="AI tools, productivity, automation"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Target Audience *</label>
+                  <textarea
+                    value={profile.target_audience || ""}
+                    onChange={(e) => setProfile({ ...profile, target_audience: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm min-h-[80px]"
+                    placeholder="Describe your ideal follower..."
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Goals</label>
+                  <textarea
+                    value={profile.goals || ""}
+                    onChange={(e) => setProfile({ ...profile, goals: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm min-h-[80px]"
+                    placeholder="One goal per line"
+                  />
                 </div>
               </div>
-              <button onClick={handleSave} className="mt-6 px-6 py-2.5 liquid-btn-primary transition-colors text-sm">Save Changes</button>
-            </div>
-          )}
-
-          {activeSection === "platforms" && (
-            <div className="liquid-card p-6">
-              <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Connected Platforms</h3>
-              <p className="text-sm mb-4" style={{ color: "var(--muted)" }}>Connect your social platforms to auto-publish content and track analytics</p>
-              <div className="space-y-3">
-                {creatorProfile.platforms.map((platform) => {
-                  const config = platformConfig[platform.platform];
-                  return (
-                    <div key={platform.platform} className="flex items-center gap-4 p-4 rounded-xl" style={{ border: "1px solid var(--lg-border)" }}>
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style={{ backgroundColor: `${config.color}15` }}>{config.icon}</div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>{config.label}</p>
-                        {platform.connected ? (
-                          <p className="text-xs" style={{ color: "var(--muted)" }}>{platform.username} · {platform.followers?.toLocaleString()} followers</p>
-                        ) : (
-                          <p className="text-xs" style={{ color: "var(--muted)" }}>Not connected</p>
-                        )}
-                      </div>
-                      {platform.connected ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(124, 184, 124, 0.1)", color: "var(--success)" }}>Connected</span>
-                          <button className="text-xs hover:opacity-80" style={{ color: "var(--muted)" }}>Disconnect</button>
-                        </div>
-                      ) : (
-                        <button className="px-4 py-2 text-xs font-medium rounded-lg liquid-btn-primary">Connect</button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <button
+                onClick={handleSave}
+                disabled={saving || !profile.niche || !profile.target_audience}
+                className="mt-6 px-6 py-2.5 liquid-btn-primary transition-colors text-sm disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           )}
 
@@ -133,59 +240,40 @@ export default function SettingsPage() {
               <div className="liquid-card p-6">
                 <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Brand Voice</h3>
                 <p className="text-sm mb-4" style={{ color: "var(--muted)" }}>Describe your brand voice so AI-generated content matches your style</p>
-                <textarea value={profile.brandVoice} onChange={(e) => setProfile({ ...profile, brandVoice: e.target.value })} className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm min-h-[120px]" />
-                <button onClick={handleSave} className="mt-4 px-6 py-2.5 liquid-btn-primary transition-colors text-sm">Save Brand Voice</button>
-              </div>
-              <div className="liquid-card p-6">
-                <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>AI Behavior</h3>
-                <div className="space-y-4">
-                  {[
-                    { label: "Auto-generate weekly content", description: "AI will automatically plan content every Monday", enabled: true },
-                    { label: "Include trending topics", description: "AI will incorporate current trends into your content", enabled: true },
-                    { label: "A/B test headlines", description: "Generate 2 variations and track which performs better", enabled: true },
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-lg" style={{ background: "var(--lg-bg)" }}>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>{setting.label}</p>
-                        <p className="text-xs" style={{ color: "var(--muted)" }}>{setting.description}</p>
-                      </div>
-                      <button className="w-10 h-6 rounded-full transition-colors" style={{ background: setting.enabled ? "var(--accent-copper)" : "var(--lg-border)" }}>
-                        <div className="w-4 h-4 bg-white rounded-full transition-transform mx-1" style={{ transform: setting.enabled ? "translateX(16px)" : "translateX(0)" }} />
-                      </button>
-                    </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                  {VOICE_OPTIONS.map((voice) => (
+                    <button
+                      key={voice.id}
+                      onClick={() => setProfile({ ...profile, brand_voice: voice.id })}
+                      className="p-3 rounded-xl text-left transition-colors"
+                      style={{
+                        border: `1px solid ${profile.brand_voice === voice.id ? "var(--accent-copper)" : "var(--lg-border)"}`,
+                        background: profile.brand_voice === voice.id ? "rgba(201, 168, 124, 0.08)" : "var(--lg-bg)",
+                      }}
+                    >
+                      <p className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>{voice.label}</p>
+                      <p className="text-[11px]" style={{ color: "var(--muted)" }}>{voice.description}</p>
+                    </button>
                   ))}
                 </div>
+                <textarea
+                  value={profile.brand_voice || ""}
+                  onChange={(e) => setProfile({ ...profile, brand_voice: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm min-h-[120px]"
+                  placeholder="Friendly, practical, no-BS. Uses short sentences..."
+                />
+                <button onClick={handleSave} disabled={saving} className="mt-4 px-6 py-2.5 liquid-btn-primary transition-colors text-sm disabled:opacity-50">
+                  {saving ? "Saving..." : "Save Brand Voice"}
+                </button>
               </div>
             </div>
           )}
 
-          {activeSection === "notifications" && (
+          {(activeSection === "platforms" || activeSection === "notifications") && (
             <div className="liquid-card p-6">
-              <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Notification Preferences</h3>
-              <div className="space-y-4">
-                {[
-                  { label: "Content published", description: "When a post goes live", email: true, push: true },
-                  { label: "Engagement milestones", description: "When you hit follower/engagement goals", email: true, push: true },
-                  { label: "Weekly analytics report", description: "Summary every Monday", email: true, push: false },
-                  { label: "AI content ready for review", description: "When new content is generated", email: false, push: true },
-                ].map((notif, i) => (
-                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg" style={{ background: "var(--lg-bg)" }}>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>{notif.label}</p>
-                      <p className="text-xs" style={{ color: "var(--muted)" }}>{notif.description}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <label className="flex items-center gap-1 text-xs" style={{ color: "var(--muted)" }}>
-                        <input type="checkbox" defaultChecked={notif.email} className="rounded" /> Email
-                      </label>
-                      <label className="flex items-center gap-1 text-xs" style={{ color: "var(--muted)" }}>
-                        <input type="checkbox" defaultChecked={notif.push} className="rounded" /> Push
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button onClick={handleSave} className="mt-6 px-6 py-2.5 liquid-btn-primary transition-colors text-sm">Save Preferences</button>
+              <p className="text-[13px] text-center py-8" style={{ color: "var(--muted)" }}>
+                {activeSection === "platforms" ? "Platform connections coming soon." : "Notification settings coming soon."}
+              </p>
             </div>
           )}
         </div>

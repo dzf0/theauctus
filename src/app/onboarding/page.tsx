@@ -233,8 +233,30 @@ export default function OnboardingPage() {
   };
 
   const handleSkip = async () => {
+    // Require at least niche and target audience even when skipping
+    if (!formData.niche || !formData.targetAudience || formData.targetAudience.length < 10) {
+      setError("Please fill in your niche and target audience (at least 10 characters) before continuing.");
+      return;
+    }
+    // Save what they have and mark onboarded
+    try {
+      await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          niche: formData.niche === "Other" ? formData.customNiche : formData.niche,
+          brandVoice: formData.brandVoice || "professional",
+          tonePreferences: formData.tonePreferences.length > 0 ? formData.tonePreferences : ["Friendly"],
+          targetAudience: formData.targetAudience,
+          contentGoals: formData.contentGoals.length > 0 ? formData.contentGoals : ["engagement"],
+          postingFrequency: formData.postingFrequency || "3-5x-week",
+          onboarded: true,
+        }),
+      });
+    } catch {
+      // Continue anyway
+    }
     setShowLoader(true);
-    await fetch("/api/profile/complete-onboarding", { method: "POST" });
   };
 
   const handleLoaderComplete = () => {

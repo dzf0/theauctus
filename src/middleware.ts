@@ -152,29 +152,49 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ── Onboarding + Pricing gate ───────────────────────────────
-  // Flow: sign-up → /auth/pricing → /onboarding → /dashboard
-  const isOnboardingFlow = pathname.startsWith("/onboarding") || pathname.startsWith("/auth/pricing");
+  // ── Onboarding gate (strict) ───────────────────────────────
+  // Flow: sign-up → /auth/username (if needed) → /auth/pricing → /onboarding → /dashboard
+  const isOnboardingFlow =
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/auth/pricing") ||
+    pathname.startsWith("/auth/username");
 
-  if (user && !isOnboardingFlow) {
+  // Auth pages that don't need onboarding checks
+  const isAuthPage = pathname.startsWith("/auth/signin") ||
+    pathname.startsWith("/auth/signup") ||
+    pathname.startsWith("/auth/verify-otp") ||
+    pathname.startsWith("/auth/forgot-password") ||
+    pathname.startsWith("/auth/update-password");
+
+  if (user && !isOnboardingFlow && !isAuthPage) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
-        .select("onboarded")
+        .select("onboarded, full_name, username")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (!error && profile && !profile.onboarded) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/auth/pricing";
-        return NextResponse.redirect(url);
+      if (!error && profile) {
+        // Not onboarded → go to pricing
+        if (!profile.onboarded) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/auth/pricing";
+          return NextResponse.redirect(url);
+        }
+
+        // Onboarded but missing profile data → back to username picker
+        if (profile.onboarded && (!profile.full_name || !profile.username)) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/auth/username";
+          return NextResponse.redirect(url);
+        }
       }
     } catch {
       // DB error — don't redirect
     }
   }
 
-  // ── Redirect onboarded users away from onboarding flow ──────
+  // ── Redirect completed users away from onboarding flow ──────
   if (user && isOnboardingFlow) {
     try {
       const { data: profile, error } = await supabase
@@ -191,6 +211,13 @@ export async function middleware(request: NextRequest) {
     } catch {
       // DB error — let them stay
     }
+  }
+
+  // ── Prevent back-button caching of dashboard ────────────────
+  if (pathname.startsWith("/dashboard")) {
+    supabaseResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    supabaseResponse.headers.set("Pragma", "no-cache");
+    supabaseResponse.headers.set("Expires", "0");
   }
 
   // ── Apply security headers to all pages ─────────────────────

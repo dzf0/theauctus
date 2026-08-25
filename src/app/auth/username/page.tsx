@@ -9,20 +9,54 @@ import { Spinner } from "@/components/ui/Loading";
 
 export default function UsernamePage() {
   const router = useRouter();
+  const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [provider, setProvider] = useState<string>("");
 
-  // Check if user is logged in
+  // Check if user is logged in and get their data
   useEffect(() => {
     const supabase = createSupabaseClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.push("/auth/signin");
+        return;
       }
+
+      // Detect provider
+      const userProvider = session.user.app_metadata?.provider || "email";
+      setProvider(userProvider);
+
+      // Pre-fill from Google metadata
+      if (userProvider === "google") {
+        const googleName = session.user.user_metadata?.full_name
+          || session.user.user_metadata?.name
+          || "";
+        if (googleName) setFullName(googleName);
+
+        // Pre-fill username from email prefix
+        const email = session.user.email || "";
+        const prefix = email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+        if (prefix && prefix.length >= 3) setUsername(prefix);
+      }
+
+      // Pre-fill from existing profile
+      supabase
+        .from("profiles")
+        .select("full_name, username")
+        .eq("id", session.user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            if (data.full_name) setFullName(data.full_name);
+            if (data.username && !data.username.match(/^user\d+$/)) {
+              // Don't pre-fill auto-generated usernames
+            }
+          }
+        });
     });
   }, [router]);
 
@@ -66,6 +100,11 @@ export default function UsernamePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!fullName.trim()) {
+      setError("Full name is required");
+      return;
+    }
+
     const err = validateUsername(username);
     if (err) {
       setError(err);
@@ -92,8 +131,9 @@ export default function UsernamePage() {
         return;
       }
 
+      // Update auth metadata
       const { error: updateError } = await supabase.auth.updateUser({
-        data: { username },
+        data: { username, full_name: fullName },
       });
 
       if (updateError) {
@@ -102,16 +142,16 @@ export default function UsernamePage() {
         return;
       }
 
-      // Update profile with username
+      // Update profile
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username, full_name: fullName }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Failed to save username");
+        setError(data.error || "Failed to save");
         setSaving(false);
         return;
       }
@@ -137,27 +177,52 @@ export default function UsernamePage() {
             </span>
           </Link>
           <h1 className="font-headline text-3xl mb-3" style={{ color: "var(--foreground)" }}>
-            Choose your username
+            Set up your profile
           </h1>
           <p className="text-[13px]" style={{ color: "var(--muted)" }}>
-            This is how other creators will see you on TheAuctus
+            {provider === "google"
+              ? "Complete your profile to get started"
+              : "Choose a username and display name"}
           </p>
         </div>
 
         <div className="liquid-card p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="p-3 liquid-card border border-red-500/20 text-red-400 text-[12px]">
                 {error}
               </div>
             )}
 
+            {/* Full Name — required for all users */}
             <div>
               <label
                 className="block text-[11px] uppercase tracking-[0.1em] mb-2"
                 style={{ color: "var(--muted)" }}
               >
-                Username
+                Full Name *
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => {
+                  setFullName(e.target.value);
+                  setError("");
+                }}
+                placeholder="Your full name"
+                className="w-full px-4 py-3 liquid-input text-[13px]"
+                autoFocus
+                required
+              />
+            </div>
+
+            {/* Username */}
+            <div>
+              <label
+                className="block text-[11px] uppercase tracking-[0.1em] mb-2"
+                style={{ color: "var(--muted)" }}
+              >
+                Username *
               </label>
               <div className="relative">
                 <span
@@ -175,7 +240,6 @@ export default function UsernamePage() {
                   }}
                   placeholder="yourusername"
                   className="w-full pl-8 pr-10 py-3 liquid-input text-[13px]"
-                  autoFocus
                   required
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -202,19 +266,28 @@ export default function UsernamePage() {
                   This username is already taken
                 </p>
               )}
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "var(--lg-bg)", color: "var(--muted)", border: "1px solid var(--lg-border)" }}>
-                  3-20 characters
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "var(--lg-bg)", color: "var(--muted)", border: "1px solid var(--lg-border)" }}>
-                  Letters, numbers, _
-                </span>
-              </div>
             </div>
+
+            {/* Email — shown for Google users as info */}
+            {provider === "google" && (
+              <div>
+                <label
+                  className="block text-[11px] uppercase tracking-[0.1em] mb-2"
+                  style={{ color: "var(--muted)" }}
+                >
+                  Email (from Google)
+                </label>
+                <input
+                  type="email"
+                  readOnly
+                  className="w-full px-4 py-3 liquid-input text-[13px] opacity-60 cursor-not-allowed"
+                />
+              </div>
+            )}
 
             <button
               type="submit"
-              disabled={!username || available === false || checking || saving}
+              disabled={!fullName.trim() || !username || available === false || checking || saving}
               className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50"
             >
               {saving ? (
