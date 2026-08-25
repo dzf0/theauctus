@@ -238,7 +238,7 @@ export default function OnboardingPage() {
   };
 
   const handleLoaderComplete = () => {
-    router.push("/dashboard");
+    router.push("/auth/pricing");
   };
 
   // Show animated loader

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from "@/components/ui";
-import { SkeletonDashboard, Spinner } from "@/components/ui/Loading";
+import { SkeletonDashboard } from "@/components/ui/Loading";
 
 interface Profile {
   niche: string;
@@ -20,60 +20,95 @@ interface Post {
   created_at: string;
 }
 
+interface UserStats {
+  credits: number;
+  totalPosts: number;
+  postsThisWeek: number;
+  postsByStatus: {
+    draft: number;
+    scheduled: number;
+    published: number;
+  };
+  engagement: {
+    totalLikes: number;
+    totalComments: number;
+    totalShares: number;
+    totalReach: number;
+    totalImpressions: number;
+    engagementRate: string;
+  };
+}
+
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/profile").then((r) => r.json()),
       fetch("/api/posts").then((r) => r.json()),
-    ]).then(([profileData, postsData]) => {
+      fetch("/api/user/stats").then((r) => r.json()),
+    ]).then(([profileData, postsData, statsData]) => {
       setProfile(profileData.profile);
       setPosts(postsData.posts || []);
+      setStats(statsData);
       setLoading(false);
     });
   }, []);
-
-  const stats = [
-    {
-      label: "Credits",
-      value: "42",
-      change: "+10",
-      positive: true,
-    },
-    {
-      label: "Posts This Week",
-      value: posts.filter((p) => {
-        const created = new Date(p.created_at);
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return created > weekAgo;
-      }).length.toString(),
-      change: "+5",
-      positive: true,
-    },
-    {
-      label: "Engagement Rate",
-      value: "4.2%",
-      change: "+0.8%",
-      positive: true,
-    },
-    {
-      label: "Followers",
-      value: "2.8K",
-      change: "+127",
-      positive: true,
-    },
-  ];
 
   if (loading) {
     return <SkeletonDashboard />;
   }
 
+  const statCards = [
+    {
+      label: "Credits",
+      value: stats?.credits?.toString() ?? "0",
+      sub: stats?.credits === 0 ? "Purchase credits to generate content" : "Available balance",
+    },
+    {
+      label: "Posts This Week",
+      value: stats?.postsThisWeek?.toString() ?? "0",
+      sub: `${stats?.totalPosts ?? 0} total posts`,
+    },
+    {
+      label: "Engagement Rate",
+      value: stats?.engagement?.engagementRate ?? "0.0%",
+      sub: `${stats?.engagement?.totalLikes ?? 0} likes · ${stats?.engagement?.totalComments ?? 0} comments`,
+    },
+    {
+      label: "Total Reach",
+      value: stats?.engagement?.totalReach?.toLocaleString() ?? "0",
+      sub: `${stats?.engagement?.totalImpressions?.toLocaleString() ?? 0} impressions`,
+    },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* Low credit warning */}
+      {stats && stats.credits < 5 && (
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: "rgba(201, 168, 124, 0.08)", border: "1px solid rgba(201, 168, 124, 0.2)" }}>
+          <svg className="w-5 h-5 shrink-0" style={{ color: "var(--accent-copper)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>
+              {stats.credits === 0 ? "You're out of credits" : `Only ${stats.credits} credit${stats.credits === 1 ? "" : "s"} left`}
+            </p>
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
+              {stats.credits === 0
+                ? "Purchase credits to keep generating content."
+                : "Generate a calendar (15 credits) or posts (5 credits) — buy more to continue."}
+            </p>
+          </div>
+          <Link href="/dashboard/billing" className="shrink-0 px-4 py-2 text-[12px] font-medium liquid-btn-primary">
+            Buy Credits
+          </Link>
+        </div>
+      )}
+
       {/* Welcome Header */}
       <div>
         <h1 className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>
@@ -86,7 +121,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <Card key={stat.label} variant="stat">
             <CardContent>
               <p className="text-[11px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--muted)" }}>
@@ -96,13 +131,10 @@ export default function DashboardPage() {
                 <span className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>
                   {stat.value}
                 </span>
-                <span
-                  className="text-[11px]"
-                  style={{ color: stat.positive ? "var(--success)" : "var(--danger)" }}
-                >
-                  {stat.change}
-                </span>
               </div>
+              <p className="text-[10px] mt-1" style={{ color: "var(--muted)" }}>
+                {stat.sub}
+              </p>
             </CardContent>
           </Card>
         ))}

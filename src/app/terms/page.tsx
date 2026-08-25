@@ -42,11 +42,11 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-headline text-xl mb-3" style={{ color: "var(--foreground)" }}>4. Subscriptions and Payments</h2>
+            <h2 className="font-headline text-xl mb-3" style={{ color: "var(--foreground)" }}>4. Credits and Payments</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong style={{ color: "var(--foreground)" }}>Free trial:</strong> 14 days, no credit card required</li>
-              <li><strong style={{ color: "var(--foreground)" }}>Billing:</strong> Subscriptions renew automatically unless cancelled</li>
-              <li><strong style={{ color: "var(--foreground)" }}>Refunds:</strong> Full refund within 7 days of initial purchase</li>
+              <li><strong style={{ color: "var(--foreground)" }}>Free credits:</strong> All new accounts receive 10 free credits to get started</li>
+              <li><strong style={{ color: "var(--foreground)" }}>Credit packs:</strong> Purchase credits starting at $5. Credits never expire</li>
+              <li><strong style={{ color: "var(--foreground)" }}>Refunds:</strong> Full refund within 7 days of purchase if credits are unused</li>
               <li><strong style={{ color: "var(--foreground)" }}>Price changes:</strong> We will notify you 30 days before any price increase</li>
             </ul>
           </section>
@@ -97,8 +97,9 @@ export default function TermsPage() {
           <section>
             <h2 className="font-headline text-xl mb-3" style={{ color: "var(--foreground)" }}>9. Termination</h2>
             <p>
-              We may suspend or terminate your account for violation of these Terms. You may cancel your
-              subscription at any time. Upon termination, your data will be deleted within 30 days.
+              We may suspend or terminate your account for violation of these Terms. Upon termination,
+              your data will be deleted within 30 days. Unused credits are non-refundable after
+              the 7-day window.
             </p>
           </section>
 

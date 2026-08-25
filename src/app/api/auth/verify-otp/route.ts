@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   // Rate limit: 5 attempts per 15 min per IP+email
   const ip = getClientIp(request);
   const rateLimitKey = `verify-otp:${ip}:${email}`;
-  const { allowed, remaining, retryAfterSeconds } = checkRateLimit(
+  const { allowed, remaining, retryAfterSeconds } = await checkRateLimit(
     rateLimitKey,
     RATE_LIMITS.verifyOtp.limit,
     RATE_LIMITS.verifyOtp.windowMs

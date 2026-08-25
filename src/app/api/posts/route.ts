@@ -1,152 +1,227 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/auth-helpers";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api-middleware";
+import { apiValidationError, apiNotFound } from "@/lib/errors";
 
 // GET /api/posts — Get all posts for the current user
-export async function GET(request: NextRequest) {
-  const user = await requireAuth();
-  const supabase = await createSupabaseServerClient();
+export const GET = withAuth(
+  async (request, { supabase, user }) => {
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get("status");
+    const platform = searchParams.get("platform");
 
-  const { searchParams } = new URL(request.url);
-  const status = searchParams.get("status");
-  const platform = searchParams.get("platform");
+    let query = supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("scheduled_at", { ascending: true });
 
-  let query = supabase
-    .from("posts")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("scheduled_at", { ascending: true });
+    if (status) {
+      query = query.eq("status", status);
+    }
+    if (platform) {
+      query = query.eq("platform", platform);
+    }
 
-  if (status) {
-    query = query.eq("status", status);
+    const { data: posts, error } = await query;
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(posts);
+  },
+  {
+    rateLimit: { limit: 30, windowMs: 60_000 },
+    rateLimitKey: "posts:GET",
   }
-  if (platform) {
-    query = query.eq("platform", platform);
-  }
-
-  const { data: posts, error } = await query;
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json(posts);
-}
+);
 
 // POST /api/posts — Create a new post
-export async function POST(request: NextRequest) {
-  const user = await requireAuth();
-  const supabase = await createSupabaseServerClient();
-
-  const body = await request.json();
-  const { title, content, platform, contentType, scheduledAt, hashtags, calendarId } = body;
-
-  if (!title || !content || !platform) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
-
-  const { data: post, error } = await supabase
-    .from("posts")
-    .insert({
-      user_id: user.id,
-      calendar_id: calendarId || null,
+export const POST = withAuth(
+  async (request, { supabase, user }) => {
+    const body = await request.json();
+    const {
       title,
       content,
       platform,
-      content_type: contentType || "text",
-      scheduled_at: scheduledAt || null,
-      hashtags: hashtags || [],
-      ai_generated: body.aiGenerated ?? true,
-    })
-    .select()
-    .single();
+      contentType,
+      scheduledAt,
+      hashtags,
+      calendarId,
+    } = body;
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!title || !content || !platform) {
+      return apiValidationError("Missing required fields");
+    }
+
+    // Validate platform
+    const validPlatforms = [
+      "twitter",
+      "instagram",
+      "linkedin",
+      "tiktok",
+      "youtube",
+      "threads",
+      "facebook",
+      "blog",
+    ];
+    if (!validPlatforms.includes(platform)) {
+      return apiValidationError("Invalid platform", "platform");
+    }
+
+    const { data: post, error } = await supabase
+      .from("posts")
+      .insert({
+        user_id: user.id,
+        calendar_id: calendarId || null,
+        title,
+        content,
+        platform,
+        content_type: contentType || "text",
+        scheduled_at: scheduledAt || null,
+        hashtags: Array.isArray(hashtags) ? hashtags : [],
+        ai_generated: body.aiGenerated ?? true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(post, { status: 201 });
+  },
+  {
+    rateLimit: { limit: 20, windowMs: 60_000 },
+    rateLimitKey: "posts:POST",
+    auditAction: "create_post",
   }
-
-  return NextResponse.json(post, { status: 201 });
-}
+);
 
 // PATCH /api/posts — Update a post
-export async function PATCH(request: NextRequest) {
-  const user = await requireAuth();
-  const supabase = await createSupabaseServerClient();
+export const PATCH = withAuth(
+  async (request, { supabase, user }) => {
+    const body = await request.json();
+    const { id, ...updates } = body;
 
-  const body = await request.json();
-  const { id, ...updates } = body;
+    if (!id) {
+      return apiValidationError("Missing post ID", "id");
+    }
 
-  if (!id) {
-    return NextResponse.json({ error: "Missing post ID" }, { status: 400 });
+    // Verify post belongs to user
+    const { data: existing } = await supabase
+      .from("posts")
+      .select("id")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!existing) {
+      return apiNotFound("Post");
+    }
+
+    // Map camelCase to snake_case with validation
+    const allowedFields = new Set([
+      "title",
+      "content",
+      "platform",
+      "contentType",
+      "status",
+      "scheduledAt",
+      "publishedAt",
+      "hashtags",
+    ]);
+
+    const updateData: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(updates)) {
+      if (!allowedFields.has(key)) continue;
+      switch (key) {
+        case "title":
+          updateData.title = value;
+          break;
+        case "content":
+          updateData.content = value;
+          break;
+        case "platform":
+          updateData.platform = value;
+          break;
+        case "contentType":
+          updateData.content_type = value;
+          break;
+        case "status":
+          updateData.status = value;
+          break;
+        case "scheduledAt":
+          updateData.scheduled_at = value;
+          break;
+        case "publishedAt":
+          updateData.published_at = value;
+          break;
+        case "hashtags":
+          updateData.hashtags = value;
+          break;
+      }
+    }
+    updateData.updated_at = new Date().toISOString();
+
+    if (Object.keys(updateData).length <= 1) {
+      // Only updated_at — nothing meaningful to update
+      return apiValidationError("No valid fields to update");
+    }
+
+    const { data: post, error } = await supabase
+      .from("posts")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(post);
+  },
+  {
+    rateLimit: { limit: 30, windowMs: 60_000 },
+    rateLimitKey: "posts:PATCH",
+    auditAction: "update_post",
   }
-
-  // Verify post belongs to user
-  const { data: existing } = await supabase
-    .from("posts")
-    .select("id")
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single();
-
-  if (!existing) {
-    return NextResponse.json({ error: "Post not found" }, { status: 404 });
-  }
-
-  // Map camelCase to snake_case
-  const updateData: Record<string, unknown> = {};
-  if (updates.title !== undefined) updateData.title = updates.title;
-  if (updates.content !== undefined) updateData.content = updates.content;
-  if (updates.platform !== undefined) updateData.platform = updates.platform;
-  if (updates.contentType !== undefined) updateData.content_type = updates.contentType;
-  if (updates.status !== undefined) updateData.status = updates.status;
-  if (updates.scheduledAt !== undefined) updateData.scheduled_at = updates.scheduledAt;
-  if (updates.publishedAt !== undefined) updateData.published_at = updates.publishedAt;
-  if (updates.hashtags !== undefined) updateData.hashtags = updates.hashtags;
-  updateData.updated_at = new Date().toISOString();
-
-  const { data: post, error } = await supabase
-    .from("posts")
-    .update(updateData)
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json(post);
-}
+);
 
 // DELETE /api/posts?id=xxx
-export async function DELETE(request: NextRequest) {
-  const user = await requireAuth();
-  const supabase = await createSupabaseServerClient();
+export const DELETE = withAuth(
+  async (request, { supabase, user }) => {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
 
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+    if (!id) {
+      return apiValidationError("Missing post ID", "id");
+    }
 
-  if (!id) {
-    return NextResponse.json({ error: "Missing post ID" }, { status: 400 });
+    // Verify post belongs to user
+    const { data: existing } = await supabase
+      .from("posts")
+      .select("id")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!existing) {
+      return apiNotFound("Post");
+    }
+
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  },
+  {
+    rateLimit: { limit: 20, windowMs: 60_000 },
+    rateLimitKey: "posts:DELETE",
+    auditAction: "delete_post",
   }
-
-  // Verify post belongs to user
-  const { data: existing } = await supabase
-    .from("posts")
-    .select("id")
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single();
-
-  if (!existing) {
-    return NextResponse.json({ error: "Post not found" }, { status: 404 });
-  }
-
-  const { error } = await supabase.from("posts").delete().eq("id", id);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
-}
+);

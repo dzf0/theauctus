@@ -88,8 +88,8 @@ function OtpForm() {
         return;
       }
 
-      // Success - redirect to dashboard
-      router.push("/dashboard");
+      // Success - redirect to pricing/credits page
+      router.push("/auth/pricing");
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);

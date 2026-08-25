@@ -1,7 +1,96 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// ══════════════════════════════════════════════════════════════
+// SECURITY HEADERS
+// ══════════════════════════════════════════════════════════════
+
+const isProd = process.env.NODE_ENV === "production";
+
+const SECURITY_HEADERS: Record<string, string> = {
+  // Prevent MIME sniffing
+  "X-Content-Type-Options": "nosniff",
+  // Prevent clickjacking
+  "X-Frame-Options": "DENY",
+  // XSS protection (legacy browsers)
+  "X-XSS-Protection": "1; mode=block",
+  // Control referrer information
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  // Restrict browser features
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()",
+  // Prevent DNS prefetching
+  "X-DNS-Prefetch-Control": "off",
+  // Force HTTPS (production only)
+  ...(isProd
+    ? {
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+      }
+    : {}),
+};
+
+// ══════════════════════════════════════════════════════════════
+// CONTENT SECURITY POLICY
+// ══════════════════════════════════════════════════════════════
+
+// In production, drop unsafe-eval to prevent code injection.
+// Dev keeps it for Next.js HMR / fast refresh.
+const CSP_DIRECTIVES = [
+  "default-src 'self'",
+  `script-src 'self' ${isProd ? "'unsafe-inline'" : "'unsafe-inline' 'unsafe-eval'"} https://fonts.googleapis.com`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  // Tighten img-src: only self, data URIs for inline icons, and known hosts
+  "img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com https://lh3.googleusercontent.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
+
+// ══════════════════════════════════════════════════════════════
+// CORS CONFIGURATION
+// ══════════════════════════════════════════════════════════════
+
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_APP_URL || "https://www.theauctus.in",
+  "https://theauctus.in",
+  "http://localhost:3000",
+];
+
+function setCorsHeaders(
+  response: NextResponse,
+  request: NextRequest
+): void {
+  const origin = request.headers.get("origin");
+  const allowedOrigin =
+    origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
+  response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, X-Requested-With");
+  response.headers.set("Access-Control-Allow-Credentials", "true");
+  response.headers.set("Access-Control-Max-Age", "86400");
+}
+
+function handleCorsPreflight(request: NextRequest): NextResponse | null {
+  if (request.method === "OPTIONS") {
+    const response = new NextResponse(null, { status: 204 });
+    setCorsHeaders(response, request);
+    return response;
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAIN MIDDLEWARE
+// ══════════════════════════════════════════════════════════════
+
 export async function middleware(request: NextRequest) {
+  // ── CORS preflight ──────────────────────────────────────────
+  const preflightResponse = handleCorsPreflight(request);
+  if (preflightResponse) return preflightResponse;
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -29,18 +118,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired - required for Server Components
+  // Refresh session if expired
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
 
-  // Skip middleware for static assets and API routes (already in matcher,
-  // but double-check to be safe)
+  // ── API routes: apply CORS + security headers ──────────────
+  if (pathname.startsWith("/api")) {
+    setCorsHeaders(supabaseResponse, request);
+    for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+      supabaseResponse.headers.set(key, value);
+    }
+    supabaseResponse.headers.set("Content-Security-Policy", CSP_DIRECTIVES);
+    return supabaseResponse;
+  }
+
+  // ── Static assets: skip deeper checks ──────────────────────
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
     pathname.endsWith(".svg") ||
     pathname.endsWith(".png") ||
     pathname.endsWith(".ico")
@@ -48,16 +145,18 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Protect dashboard routes — redirect to signin if not logged in
+  // ── Protect dashboard routes ────────────────────────────────
   if (pathname.startsWith("/dashboard") && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/signin";
     return NextResponse.redirect(url);
   }
 
-  // For authenticated users on dashboard, check onboarding status
-  // Use a try-catch to prevent redirect loops if the DB query fails
-  if (user && pathname.startsWith("/dashboard")) {
+  // ── Onboarding + Pricing gate ───────────────────────────────
+  // Flow: sign-up → /auth/pricing → /onboarding → /dashboard
+  const isOnboardingFlow = pathname.startsWith("/onboarding") || pathname.startsWith("/auth/pricing");
+
+  if (user && !isOnboardingFlow) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -65,21 +164,18 @@ export async function middleware(request: NextRequest) {
         .eq("id", user.id)
         .maybeSingle();
 
-      // Only redirect if we successfully got the profile and user hasn't onboarded
       if (!error && profile && !profile.onboarded) {
         const url = request.nextUrl.clone();
-        url.pathname = "/onboarding";
+        url.pathname = "/auth/pricing";
         return NextResponse.redirect(url);
       }
-      // If there's an error or no profile, let them through — the client
-      // will handle it with its own auth check
     } catch {
-      // DB error — don't redirect, let client handle it
+      // DB error — don't redirect
     }
   }
 
-  // If user is on onboarding but already onboarded, send to dashboard
-  if (user && pathname === "/onboarding") {
+  // ── Redirect onboarded users away from onboarding flow ──────
+  if (user && isOnboardingFlow) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -93,15 +189,21 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
       }
     } catch {
-      // DB error — let them stay on onboarding
+      // DB error — let them stay
     }
   }
+
+  // ── Apply security headers to all pages ─────────────────────
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    supabaseResponse.headers.set(key, value);
+  }
+  supabaseResponse.headers.set("Content-Security-Policy", CSP_DIRECTIVES);
 
   return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|_next/data|favicon.ico|api/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|_next/data|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

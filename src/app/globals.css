@@ -866,14 +866,15 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   3D & SCROLL ANIMATIONS — Apple-style
+   SCROLL REVEAL ANIMATIONS
+   Only two: fade-in-up and scale-in
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Scroll reveal (use with useInView hook) ──────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
 }
 
 .reveal.visible {
@@ -881,32 +882,10 @@ body {
   transform: translateY(0);
 }
 
-.reveal-left {
-  opacity: 0;
-  transform: translateX(-40px);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
-}
-
-.reveal-left.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.reveal-right {
-  opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
-}
-
-.reveal-right.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
 .reveal-scale {
   opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+  transform: scale(0.95);
+  transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
 }
 
 .reveal-scale.visible {
@@ -914,97 +893,7 @@ body {
   transform: scale(1);
 }
 
-.reveal-3d {
-  opacity: 0;
-  transform: perspective(1000px) rotateX(8deg) translateY(30px);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
-}
-
-.reveal-3d.visible {
-  opacity: 1;
-  transform: perspective(1000px) rotateX(0deg) translateY(0);
-}
-
-/* ── Stagger delays (apply to children) ───────────────────── */
-.stagger-1 { transition-delay: 0.05s; }
-.stagger-2 { transition-delay: 0.1s; }
-.stagger-3 { transition-delay: 0.15s; }
-.stagger-4 { transition-delay: 0.2s; }
-.stagger-5 { transition-delay: 0.25s; }
-.stagger-6 { transition-delay: 0.3s; }
-.stagger-7 { transition-delay: 0.35s; }
-.stagger-8 { transition-delay: 0.4s; }
-
-/* ── 3D Perspective container ─────────────────────────────── */
-.perspective-1000 { perspective: 1000px; }
-.perspective-2000 { perspective: 2000px; }
-.preserve-3d { transform-style: preserve-3d; }
-
-/* ── 3D Card tilt (hover) ─────────────────────────────────── */
-.tilt-card {
-  transition: transform 0.2s ease-out, box-shadow 0.3s ease-out;
-  transform-style: preserve-3d;
-}
-
-.tilt-card:hover {
-  box-shadow: var(--lg-shadow-lg);
-}
-
-/* ── Floating animation ───────────────────────────────────── */
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  33% { transform: translateY(-8px) rotate(0.5deg); }
-  66% { transform: translateY(-4px) rotate(-0.3deg); }
-}
-
-.animate-float-slow {
-  animation: float-slow 6s ease-in-out infinite;
-}
-
-@keyframes float-medium {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
-
-.animate-float-medium {
-  animation: float-medium 4s ease-in-out infinite;
-}
-
-/* ── Parallax layers ──────────────────────────────────────── */
-.parallax-slow { will-change: transform; }
-.parallax-medium { will-change: transform; }
-.parallax-fast { will-change: transform; }
-
-/* ── Hero text character animation ────────────────────────── */
-@keyframes char-reveal {
-  from { opacity: 0; transform: translateY(20px) rotateX(-40deg); }
-  to { opacity: 1; transform: translateY(0) rotateX(0deg); }
-}
-
-.char-animate {
-  display: inline-block;
-  opacity: 0;
-  animation: char-reveal 0.6s var(--ease-out-expo) forwards;
-  transform-origin: bottom center;
-}
-
-/* ── Gradient text shimmer ────────────────────────────────── */
-@keyframes gradient-text {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.gradient-text-animated {
-  background: linear-gradient(135deg, var(--accent-copper), var(--primary-light), var(--accent-copper));
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-text 4s ease infinite;
-}
-
-/* ── Glow pulse on scroll ─────────────────────────────────── */
+/* ── Glow pulse on popular pricing card ───────────────────── */
 @keyframes glow-breathe {
   0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 124, 0.05); }
   50% { box-shadow: 0 0 40px rgba(201, 168, 124, 0.12); }
@@ -1012,21 +901,6 @@ body {
 
 .glow-breathe {
   animation: glow-breathe 4s ease-in-out infinite;
-}
-
-/* ── Number count-up shimmer ──────────────────────────────── */
-@keyframes number-shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.number-shimmer {
-  background: linear-gradient(90deg, var(--foreground) 40%, var(--accent-copper) 50%, var(--foreground) 60%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: number-shimmer 3s ease-in-out infinite;
 }
 
 /* ── Smooth section transitions ───────────────────────────── */

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/components/user-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -44,11 +44,11 @@ const navItems = [
     ),
   },
   {
-    label: "Billing",
+    label: "Credits",
     href: "/dashboard/billing",
     icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
       </svg>
     ),
   },
@@ -125,6 +125,31 @@ function TopBarSignOut() {
   );
 }
 
+function CreditBalance() {
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/user/stats")
+      .then((r) => r.json())
+      .then((data) => setCredits(data.credits ?? 0))
+      .catch(() => {});
+  }, []);
+
+  return (
+    <div className="liquid-subtle p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--accent-copper)" }}></div>
+        <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>Credits</span>
+      </div>
+      <p className="text-2xl font-headline mb-2" style={{ color: "var(--foreground)" }}>
+        {credits !== null ? credits : "—"}
+      </p>
+      <p className="text-[10px] mb-2" style={{ color: "var(--muted)" }}>Available balance</p>
+      <Link href="/dashboard/billing" className="text-[10px] uppercase tracking-[0.1em] accent-text hover:opacity-80 transition-opacity">Buy More →</Link>
+    </div>
+  );
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -173,14 +198,7 @@ export default function DashboardLayout({
         </nav>
 
         <div className="px-3 pb-4">
-          <div className="liquid-subtle p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--accent-copper)" }}></div>
-              <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>Growth Plan</span>
-            </div>
-            <p className="text-[10px] mb-2" style={{ color: "var(--muted)" }}>Renews Sep 22, 2026</p>
-            <Link href="/dashboard/billing" className="text-[10px] uppercase tracking-[0.1em] accent-text hover:opacity-80 transition-opacity">Manage →</Link>
-          </div>
+          <CreditBalance />
         </div>
 
         <div className="px-3 pb-4">

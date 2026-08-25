@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   // Rate limit: 3 requests per 5 min per IP+email
   const ip = getClientIp(request);
   const rateLimitKey = `resend-otp:${ip}:${email}`;
-  const { allowed, remaining, retryAfterSeconds } = checkRateLimit(
+  const { allowed, remaining, retryAfterSeconds } = await checkRateLimit(
     rateLimitKey,
     RATE_LIMITS.resendOtp.limit,
     RATE_LIMITS.resendOtp.windowMs

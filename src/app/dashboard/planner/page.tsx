@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button, Card, CardHeader, CardTitle, Badge, Modal, Input, Select, Tabs, TabsList, TabsTrigger, TabsContent, useToast, ToastContainer } from "@/components/ui";
 import { AILoader, Skeleton } from "@/components/ui/Loading";
+import { CREDIT_COSTS } from "@/lib/constants";
 
 interface Post {
   id: string;
@@ -42,8 +43,19 @@ export default function PlannerPage() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["instagram"]);
   const [postCount, setPostCount] = useState(10);
   const [generating, setGenerating] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
 
-  useEffect(() => { fetchPosts(); }, []);
+  // Credit cost per post
+  const creditCostPerPost = CREDIT_COSTS.find((c) => c.action === "Single social post")?.credits ?? 5;
+  const totalCreditCost = postCount * creditCostPerPost;
+
+  useEffect(() => {
+    fetchPosts();
+    fetch("/api/user/stats")
+      .then((r) => r.json())
+      .then((data) => setCredits(data.credits ?? 0))
+      .catch(() => {});
+  }, []);
 
   const fetchPosts = async () => {
     try {
@@ -113,6 +125,9 @@ export default function PlannerPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
             </svg>
             Generate
+            <span className="ml-2 px-1.5 py-0.5 text-[10px] rounded-full" style={{ background: "rgba(0,0,0,0.15)" }}>
+              {creditCostPerPost} cr/post
+            </span>
           </Button>
         </div>
       </div>
@@ -308,16 +323,26 @@ export default function PlannerPage() {
             <div className="p-4 rounded-lg" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
               <div className="flex items-center justify-between text-[13px]">
                 <span style={{ color: "var(--muted)" }}>Credits needed:</span>
-                <span className="font-medium" style={{ color: "var(--foreground)" }}>{postCount} credits</span>
+                <span className="font-medium" style={{ color: totalCreditCost > (credits ?? 0) ? "var(--danger)" : "var(--foreground)" }}>
+                  {totalCreditCost} credits
+                </span>
               </div>
               <div className="flex items-center justify-between text-[13px] mt-1">
                 <span style={{ color: "var(--muted)" }}>Your balance:</span>
-                <span className="font-medium accent-text">42 credits</span>
+                <span className="font-medium accent-text">{credits ?? "—"} credits</span>
               </div>
+              {credits !== null && totalCreditCost > credits && (
+                <p className="text-[11px] mt-2" style={{ color: "var(--danger)" }}>
+                  Not enough credits. You need {totalCreditCost - credits} more.
+                </p>
+              )}
             </div>
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setGenerateModalOpen(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleGenerate} loading={generating} disabled={!topic.trim() || selectedPlatforms.length === 0} className="flex-1">Generate {postCount} Posts</Button>
+              <Button onClick={handleGenerate} loading={generating} disabled={!topic.trim() || selectedPlatforms.length === 0 || (credits !== null && totalCreditCost > credits)} className="flex-1">
+                Generate {postCount} Posts
+                <span className="ml-2 text-[10px] opacity-75">({totalCreditCost} cr)</span>
+              </Button>
             </div>
           </div>
         )}

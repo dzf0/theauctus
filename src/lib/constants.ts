@@ -10,67 +10,87 @@ export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.theauctus
 export const APP_DOMAIN = "theauctus.in";
 
 // ══════════════════════════════════════════════════════════════
-// PRICING TIERS
+// CREDIT PACKS — single source of truth
+// Used by: landing page, pricing page, billing page, API
+// Minimum purchase: $5
 // ══════════════════════════════════════════════════════════════
 
-export interface PricingTier {
-  id: PlanTier;
+export interface CreditPack {
+  id: string;
   name: string;
-  price: number;
+  credits: number;
+  price: number;            // dollars (e.g. 5)
+  pricePerCredit: string;   // display string (e.g. "$0.20")
   description: string;
   features: string[];
   popular: boolean;
-  stripePriceId?: string; // Add Stripe price IDs when ready
+  stripePriceId?: string;
 }
 
-export const PRICING_TIERS: PricingTier[] = [
+export const CREDIT_PACKS: CreditPack[] = [
   {
     id: "starter",
     name: "Starter",
-    price: 29,
-    description: "For creators ready to systematize their content",
+    credits: 25,
+    price: 5,
+    pricePerCredit: "$0.20",
+    description: "Try AI content generation with a small batch",
     features: [
-      "AI content calendar (30 posts/mo)",
-      "3 connected platforms",
-      "Basic analytics",
-      "Content scheduling",
-      "Email support",
+      "25 AI credits",
+      "Generate ~1 content calendar",
+      "All platforms supported",
     ],
     popular: false,
   },
   {
     id: "growth",
     name: "Growth",
-    price: 79,
-    description: "For serious creators scaling their audience",
+    credits: 100,
+    price: 15,
+    pricePerCredit: "$0.15",
+    description: "For creators who post consistently",
     features: [
-      "Unlimited AI generation",
-      "All platforms connected",
-      "Advanced analytics + revenue",
-      "Content repurposing engine",
-      "Growth tactics engine",
+      "100 AI credits",
+      "Generate ~6 content calendars",
+      "All platforms supported",
       "Priority support",
-      "Referral program",
     ],
     popular: true,
   },
   {
-    id: "scale",
-    name: "Scale",
-    price: 199,
-    description: "For creators and teams building empires",
+    id: "pro",
+    name: "Pro",
+    credits: 500,
+    price: 49,
+    pricePerCredit: "$0.10",
+    description: "Maximum value for power creators",
     features: [
-      "Everything in Growth",
-      "Team seats (up to 5)",
-      "Custom AI training",
-      "White-label reporting",
-      "API access",
-      "Dedicated account manager",
-      "Custom integrations",
+      "500 AI credits",
+      "Generate ~33 content calendars",
+      "All platforms supported",
+      "Dedicated support",
+      "Content repurposing",
     ],
     popular: false,
   },
 ];
+
+// Credit costs for AI actions
+export const CREDIT_COSTS = [
+  { action: "30-day content calendar", credits: 15, description: "Full month of platform-specific posts" },
+  { action: "Single social post", credits: 5, description: "One AI-generated post" },
+  { action: "Repurpose across platforms", credits: 3, description: "Adapt content for another platform" },
+  { action: "Hashtags & captions", credits: 2, description: "Generate hashtags and captions" },
+] as const;
+
+// Free credits given on signup
+export const FREE_CREDITS_ON_SIGNUP = 10;
+
+// Custom credit amount: $0.20 per credit (same as Starter rate)
+// Users enter a dollar amount and get credits calculated at this rate
+export const CUSTOM_CREDIT_RATE = 0.20; // dollars per credit
+export const CUSTOM_CREDIT_MIN_DOLLARS = 5; // minimum purchase
+export const CUSTOM_CREDIT_MAX_DOLLARS = 500; // maximum purchase
 
 // ══════════════════════════════════════════════════════════════
 // PLATFORMS

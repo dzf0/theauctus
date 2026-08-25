@@ -25,3 +25,7 @@ export { createSupabaseServerClient } from "./supabase-server";
 
 // Rate limiting
 export { checkRateLimit, getClientIp } from "./rate-limit";
+
+// API middleware
+export { withAuth, auditLog, generateCsrfToken, verifyCsrfToken } from "./api-middleware";
+export type { AuthContext, MiddlewareOptions } from "./api-middleware";

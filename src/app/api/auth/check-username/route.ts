@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
   // Rate limit: 20 checks per minute per IP (prevent enumeration)
   const ip = getClientIp(request);
-  const { allowed } = checkRateLimit(`username-check:${ip}`, 20, 60_000);
+  const { allowed } = await checkRateLimit(`username-check:${ip}`, 20, 60_000);
 
   if (!allowed) {
     return NextResponse.json(

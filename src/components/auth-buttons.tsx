@@ -17,7 +17,7 @@ export function SignInButton() {
         href="/auth/signup"
         className="text-sm font-medium liquid-btn-primary"
       >
-        Start Free Trial
+        Get Started
       </Link>
     </div>
   );

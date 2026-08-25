@@ -1,180 +1,325 @@
--- TheAuctus Database Schema for Supabase
--- Run this in Supabase SQL Editor (https://supabase.com/dashboard → SQL Editor)
+-- ══════════════════════════════════════════════════════════════
+-- Freebuff / TheAuctus — Single Source of Truth
+-- ══════════════════════════════════════════════════════════════
+-- This is the canonical Supabase schema. Every table, column,
+-- RLS policy, function, trigger, index, and storage bucket that
+-- the application depends on is defined here.
+--
+-- For fresh databases: run this file top-to-bottom.
+-- For existing databases: run migrations/000_baseline.sql instead
+-- (it is idempotent and handles ALTERs / OR REPLACE).
+-- ══════════════════════════════════════════════════════════════
 
--- Enable UUID extension
+-- ── Extensions ────────────────────────────────────────────────
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table (extends Supabase auth.users)
+-- ══════════════════════════════════════════════════════════════
+-- TABLES
+-- ══════════════════════════════════════════════════════════════
+
+-- ── profiles (extends auth.users) ────────────────────────────
 CREATE TABLE public.profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  email TEXT,
-  name TEXT,
-  full_name TEXT,
-  avatar_url TEXT,
-  
-  -- Creator profile fields
-  niche TEXT,
-  brand_voice TEXT,
-  target_audience TEXT,
-  goals TEXT,
-  keywords TEXT[],
-  onboarded BOOLEAN DEFAULT FALSE,
-  
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id              UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email           TEXT,
+  name            TEXT,
+  full_name       TEXT,
+  avatar_url      TEXT,
+  username        TEXT UNIQUE,
+
+  -- Creator / brand profile fields
+  niche                TEXT,
+  brand_voice          TEXT CHECK (brand_voice IN ('professional','casual','humorous','inspirational','educational')),
+  target_audience      TEXT,
+  goals                TEXT,
+  keywords             TEXT[],
+  tone_preferences     TEXT[],
+  content_goals        TEXT[],
+  posting_frequency    TEXT CHECK (posting_frequency IN ('daily','3-5x-week','1-2x-week','weekly')),
+  example_posts        TEXT[],
+  brand_fingerprint    JSONB,
+  onboarded            BOOLEAN DEFAULT FALSE,
+
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Subscriptions table
+-- ── subscriptions ─────────────────────────────────────────────
 CREATE TABLE public.subscriptions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
-  plan TEXT DEFAULT 'starter' CHECK (plan IN ('starter', 'growth', 'enterprise')),
-  stripe_customer_id TEXT,
-  stripe_subscription_id TEXT,
-  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'canceled', 'past_due')),
-  current_period_end TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id                      UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id                 UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  plan                    TEXT DEFAULT 'starter' CHECK (plan IN ('starter','growth','enterprise')),
+  stripe_customer_id      TEXT,
+  stripe_subscription_id  TEXT,
+  status                  TEXT DEFAULT 'active' CHECK (status IN ('active','canceled','past_due')),
+  current_period_end      TIMESTAMPTZ,
+  created_at              TIMESTAMPTZ DEFAULT NOW(),
+  updated_at              TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Connected platforms (Instagram, TikTok, etc.)
+-- ── connected_platforms ───────────────────────────────────────
 CREATE TABLE public.connected_platforms (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  platform TEXT NOT NULL CHECK (platform IN ('instagram', 'tiktok', 'youtube', 'twitter', 'linkedin')),
-  username TEXT,
-  access_token TEXT,
+  id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  platform      TEXT NOT NULL CHECK (platform IN ('instagram','tiktok','youtube','twitter','linkedin')),
+  username      TEXT,
+  access_token  TEXT,
   refresh_token TEXT,
-  followers INTEGER DEFAULT 0,
-  connected BOOLEAN DEFAULT FALSE,
-  last_sync TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  followers     INTEGER DEFAULT 0,
+  connected     BOOLEAN DEFAULT FALSE,
+  last_sync     TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, platform)
 );
 
--- Content calendars
+-- ── content_calendars ─────────────────────────────────────────
 CREATE TABLE public.content_calendars (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  month INTEGER NOT NULL CHECK (month BETWEEN 1 AND 12),
-  year INTEGER NOT NULL,
-  generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  month         INTEGER NOT NULL CHECK (month BETWEEN 1 AND 12),
+  year          INTEGER NOT NULL,
+  generated_at  TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, month, year)
 );
 
--- Posts/Content
+-- ── posts ─────────────────────────────────────────────────────
 CREATE TABLE public.posts (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  calendar_id UUID REFERENCES public.content_calendars(id) ON DELETE SET NULL,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  platform TEXT NOT NULL,
-  content_type TEXT NOT NULL DEFAULT 'post',
-  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'published', 'failed')),
-  scheduled_at TIMESTAMP WITH TIME ZONE,
-  published_at TIMESTAMP WITH TIME ZONE,
-  hashtags TEXT[],
-  ai_generated BOOLEAN DEFAULT TRUE,
-  
+  id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  calendar_id   UUID REFERENCES public.content_calendars(id) ON DELETE SET NULL,
+  user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  title         TEXT NOT NULL,
+  content       TEXT NOT NULL,
+  platform      TEXT NOT NULL,
+  content_type  TEXT NOT NULL DEFAULT 'post',
+  status        TEXT DEFAULT 'draft' CHECK (status IN ('draft','scheduled','published','failed')),
+  scheduled_at  TIMESTAMPTZ,
+  published_at  TIMESTAMPTZ,
+  hashtags      TEXT[],
+  ai_generated  BOOLEAN DEFAULT TRUE,
+
   -- Analytics
-  likes INTEGER DEFAULT 0,
-  comments INTEGER DEFAULT 0,
-  shares INTEGER DEFAULT 0,
-  saves INTEGER DEFAULT 0,
-  reach INTEGER DEFAULT 0,
+  likes       INTEGER DEFAULT 0,
+  comments    INTEGER DEFAULT 0,
+  shares      INTEGER DEFAULT 0,
+  saves       INTEGER DEFAULT 0,
+  reach       INTEGER DEFAULT 0,
   impressions INTEGER DEFAULT 0,
-  clicks INTEGER DEFAULT 0,
-  
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  clicks      INTEGER DEFAULT 0,
+
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Row Level Security (RLS) policies
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.connected_platforms ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.content_calendars ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+-- ── credit_balances ───────────────────────────────────────────
+CREATE TABLE public.credit_balances (
+  id          UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id     UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  balance     INTEGER DEFAULT 0,
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
 
--- Profiles: users can only read/write their own profile
-CREATE POLICY "Users can view own profile" ON public.profiles
-  FOR SELECT USING (auth.uid() = id);
+-- ── credit_history ────────────────────────────────────────────
+CREATE TABLE public.credit_history (
+  id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  amount        INTEGER NOT NULL,
+  type          TEXT NOT NULL CHECK (type IN ('purchase','refund','usage','bonus')),
+  description   TEXT,
+  reference_id  UUID,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
 
-CREATE POLICY "Users can update own profile" ON public.profiles
-  FOR UPDATE USING (auth.uid() = id);
+-- ── audit_log ─────────────────────────────────────────────────
+CREATE TABLE public.audit_log (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     UUID REFERENCES auth.users(id),
+  action      TEXT NOT NULL,
+  table_name  TEXT,
+  record_id   UUID,
+  old_data    JSONB,
+  new_data    JSONB,
+  ip_address  TEXT,
+  user_agent  TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
 
-CREATE POLICY "Users can insert own profile" ON public.profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+-- ══════════════════════════════════════════════════════════════
+-- ROW LEVEL SECURITY
+-- ══════════════════════════════════════════════════════════════
 
--- Subscriptions: users can only read/write their own subscription
-CREATE POLICY "Users can view own subscription" ON public.subscriptions
-  FOR SELECT USING (auth.uid() = user_id);
+ALTER TABLE public.profiles             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscriptions        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.connected_platforms  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.content_calendars    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.posts                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.credit_balances      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.credit_history       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_log            ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can update own subscription" ON public.subscriptions
-  FOR UPDATE USING (auth.uid() = user_id);
+-- ── profiles ──────────────────────────────────────────────────
+CREATE POLICY "Users can view own profile"      ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile"    ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can update own profile"    ON public.profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users cannot delete profiles"    ON public.profiles FOR DELETE USING (false);
 
-CREATE POLICY "Users can insert own subscription" ON public.subscriptions
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- ── subscriptions ─────────────────────────────────────────────
+CREATE POLICY "Users can view own subscription"     ON public.subscriptions FOR SELECT  USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own subscription"   ON public.subscriptions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own subscription"   ON public.subscriptions FOR UPDATE USING (auth.uid() = user_id);
 
--- Connected platforms: users can only read/write their own platforms
-CREATE POLICY "Users can view own platforms" ON public.connected_platforms
-  FOR SELECT USING (auth.uid() = user_id);
+-- ── connected_platforms ───────────────────────────────────────
+CREATE POLICY "Users can view own platforms"      ON public.connected_platforms FOR SELECT  USING (auth.uid() = user_id);
+CREATE POLICY "Users can connect own platforms"   ON public.connected_platforms FOR INSERT  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own platforms"    ON public.connected_platforms FOR UPDATE  USING (auth.uid() = user_id);
+CREATE POLICY "Users can disconnect own platforms" ON public.connected_platforms FOR DELETE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own platforms" ON public.connected_platforms
-  FOR UPDATE USING (auth.uid() = user_id);
+-- ── content_calendars ─────────────────────────────────────────
+CREATE POLICY "Users can view own calendars"    ON public.content_calendars FOR SELECT  USING (auth.uid() = user_id);
+CREATE POLICY "Users can create own calendars"  ON public.content_calendars FOR INSERT  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own calendars"  ON public.content_calendars FOR UPDATE  USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own calendars"  ON public.content_calendars FOR DELETE  USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own platforms" ON public.connected_platforms
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- ── posts ─────────────────────────────────────────────────────
+CREATE POLICY "Users can view own posts"    ON public.posts FOR SELECT  USING (auth.uid() = user_id);
+CREATE POLICY "Users can create own posts"  ON public.posts FOR INSERT  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own posts"  ON public.posts FOR UPDATE  USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own posts"  ON public.posts FOR DELETE  USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete own platforms" ON public.connected_platforms
-  FOR DELETE USING (auth.uid() = user_id);
+-- ── credit_balances ───────────────────────────────────────────
+CREATE POLICY "Users can view own credit balance"    ON public.credit_balances FOR SELECT  USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own credit balance"  ON public.credit_balances FOR UPDATE  USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own credit balance"  ON public.credit_balances FOR INSERT  WITH CHECK (auth.uid() = user_id);
 
--- Content calendars: users can only read/write their own calendars
-CREATE POLICY "Users can view own calendars" ON public.content_calendars
-  FOR SELECT USING (auth.uid() = user_id);
+-- ── credit_history ────────────────────────────────────────────
+CREATE POLICY "Users can view own credit history"   ON public.credit_history FOR SELECT  USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own credit history" ON public.credit_history FOR INSERT  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own calendars" ON public.content_calendars
-  FOR UPDATE USING (auth.uid() = user_id);
+-- ── audit_log ─────────────────────────────────────────────────
+CREATE POLICY "Admins can view audit logs"   ON public.audit_log FOR SELECT  USING (false);
+CREATE POLICY "System can insert audit logs" ON public.audit_log FOR INSERT  WITH CHECK (true);
 
-CREATE POLICY "Users can insert own calendars" ON public.content_calendars
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- ══════════════════════════════════════════════════════════════
+-- STORAGE BUCKETS & POLICIES
+-- ══════════════════════════════════════════════════════════════
 
--- Posts: users can only read/write their own posts
-CREATE POLICY "Users can view own posts" ON public.posts
-  FOR SELECT USING (auth.uid() = user_id);
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true), ('media', 'media', false)
+ON CONFLICT (id) DO NOTHING;
 
-CREATE POLICY "Users can update own posts" ON public.posts
-  FOR UPDATE USING (auth.uid() = user_id);
+-- Avatars
+CREATE POLICY "Users can upload own avatar" ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Anyone can view avatars"     ON storage.objects FOR SELECT
+  USING (bucket_id = 'avatars');
+CREATE POLICY "Users can delete own avatar" ON storage.objects FOR DELETE
+  USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY "Users can insert own posts" ON public.posts
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Media
+CREATE POLICY "Users can upload own media" ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'media' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can view own media"   ON storage.objects FOR SELECT
+  USING (bucket_id = 'media' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Users can delete own media" ON storage.objects FOR DELETE
+  USING (bucket_id = 'media' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-CREATE POLICY "Users can delete own posts" ON public.posts
-  FOR DELETE USING (auth.uid() = user_id);
+-- ══════════════════════════════════════════════════════════════
+-- FUNCTIONS & TRIGGERS
+-- ══════════════════════════════════════════════════════════════
 
--- Function to create profile on signup
+-- ── handle_new_user() ────────────────────────────────────────
+-- Runs after every auth.users INSERT. Creates a profile row,
+-- generates a unique username, and creates default subscriptions.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  base_username TEXT;
+  candidate     TEXT;
+  suffix        INT := 0;
 BEGIN
-  INSERT INTO public.profiles (id, email, name, avatar_url)
+  base_username := COALESCE(
+    NULLIF(NEW.raw_user_meta_data->>'username', ''),
+    split_part(COALESCE(NEW.email, ''), '@', 1),
+    'user'
+  );
+
+  -- Sanitize: alphanumerics + underscores only, max 20 chars
+  base_username := regexp_replace(base_username, '[^a-zA-Z0-9_]', '', 'g');
+  IF base_username IS NULL OR base_username = '' THEN
+    base_username := 'user';
+  END IF;
+  base_username := lower(left(base_username, 20));
+
+  -- Resolve collisions by appending _1, _2, …
+  candidate := base_username;
+  WHILE EXISTS (
+    SELECT 1 FROM public.profiles WHERE username = candidate AND id <> NEW.id
+  ) LOOP
+    suffix   := suffix + 1;
+    candidate := left(base_username, 15) || '_' || suffix::text;
+  END LOOP;
+
+  INSERT INTO public.profiles (id, username, full_name, created_at, updated_at)
   VALUES (
     NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture')
-  );
-  
-  -- Create default subscription
+    candidate,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    NOW(),
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE
+    SET username   = EXCLUDED.username,
+        full_name  = EXCLUDED.full_name,
+        updated_at = NOW();
+
+  -- Default subscription
   INSERT INTO public.subscriptions (user_id, plan)
-  VALUES (NEW.id, 'starter');
-  
+  VALUES (NEW.id, 'starter')
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- 10 free credits
+  INSERT INTO public.credit_balances (user_id, balance)
+  VALUES (NEW.id, 10)
+  ON CONFLICT (user_id) DO NOTHING;
+
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
--- Trigger to create profile on signup
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- ── check_username_available() ────────────────────────────────
+CREATE OR REPLACE FUNCTION public.check_username_available(p_username TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN NOT EXISTS (
+    SELECT 1 FROM public.profiles WHERE lower(username) = lower(p_username)
+  );
+END;
+$$;
+
+-- ══════════════════════════════════════════════════════════════
+-- INDEXES
+-- ══════════════════════════════════════════════════════════════
+
+CREATE INDEX IF NOT EXISTS idx_profiles_id                       ON public.profiles(id);
+CREATE INDEX IF NOT EXISTS idx_profiles_username                 ON public.profiles(username);
+CREATE INDEX IF NOT EXISTS idx_profiles_onboarded                ON public.profiles(onboarded);
+CREATE INDEX IF NOT EXISTS idx_posts_user_id                     ON public.posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_posts_status                      ON public.posts(status);
+CREATE INDEX IF NOT EXISTS idx_posts_scheduled_at                ON public.posts(scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_content_calendars_user_id         ON public.content_calendars(user_id);
+CREATE INDEX IF NOT EXISTS idx_connected_platforms_user_id       ON public.connected_platforms(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_user_id                 ON public.audit_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_created_at              ON public.audit_log(created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_username_lower_idx    ON public.profiles(lower(username));

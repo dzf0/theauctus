@@ -116,7 +116,7 @@ export default function SignUpPage() {
         return;
       }
 
-      if (data.session) { router.push("/onboarding"); router.refresh(); }
+      if (data.session) { router.push("/auth/pricing"); router.refresh(); }
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -129,7 +129,7 @@ export default function SignUpPage() {
       const supabase = createSupabaseClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding` },
+        options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/auth/username` },
       });
       if (error) setError(error.message);
     } catch {
@@ -160,7 +160,7 @@ export default function SignUpPage() {
             </span>
           </Link>
           <h1 className="font-headline text-3xl mb-3" style={{ color: "var(--foreground)" }}>Create your account</h1>
-          <p className="text-[13px]" style={{ color: "var(--muted)" }}>Start your 14-day free trial. No credit card required.</p>
+          <p className="text-[13px]" style={{ color: "var(--muted)" }}>10 free credits included. No credit card required.</p>
         </div>
 
         {isLocked && (
