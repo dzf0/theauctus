@@ -955,7 +955,12 @@ html.light select.liquid-input option {
   100% { background-position: 200% 0; }
 }
 
-.shimmer-divider {
+.shimmer-divider::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 1px;
   background: linear-gradient(
     90deg,

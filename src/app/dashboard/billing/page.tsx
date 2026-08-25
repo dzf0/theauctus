@@ -405,7 +405,7 @@ export default function BillingPage() {
           <button
             onClick={handleCustomPurchase}
             disabled={purchasing !== null || !customAmount || parseFloat(customAmount) < CUSTOM_CREDIT_MIN_DOLLARS}
-            className="px-6 py-2.5 liquid-btn-primary text-[12px] disabled:opacity-50 whitespace-nowrap"
+            className="px-6 py-2.5 liquid-btn-primary text-[12px] disabled:opacity-50 whitespace-nowrap w-fit"
           >
             {purchasing === "custom" ? (
               <span className="flex items-center justify-center gap-2">
