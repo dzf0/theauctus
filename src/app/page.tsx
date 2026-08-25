@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useUser } from "@/components/user-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useInView } from "@/hooks/use-in-view";
@@ -82,6 +82,40 @@ function ParticleField() {
         />
       ))}
     </div>
+  );
+}
+
+// ── Animated counter ─────────────────────────────────────────────
+function CountUp({ target, suffix = "", prefix = "", duration = 2000 }: {
+  target: number;
+  suffix?: string;
+  prefix?: string;
+  duration?: number;
+}) {
+  const [ref, isInView] = useInView({ threshold: 0.3 });
+  const [value, setValue] = useState(0);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (!isInView || hasAnimated.current) return;
+    hasAnimated.current = true;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out-expo
+      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setValue(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(animate);
+      else setValue(target);
+    };
+    requestAnimationFrame(animate);
+  }, [isInView, target, duration]);
+
+  return (
+    <span ref={ref} className="font-headline text-5xl sm:text-6xl lg:text-7xl text-[var(--foreground)] tabular-nums">
+      {prefix}{value}{suffix}
+    </span>
   );
 }
 
@@ -371,6 +405,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Stats (animated counters) ──────────────────────── */}
+      <section className="py-24 px-6 lg:px-12 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.05) 0%, transparent 60%)", filter: "blur(50px)" }} />
+        </div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+            {[
+              { target: 30, suffix: "K+", prefix: "", label: "Posts Planned" },
+              { target: 8, suffix: "", prefix: "", label: "Platforms Connected" },
+              { target: 98, suffix: "%", prefix: "", label: "On-Time Delivery" },
+              { target: 4, suffix: "x", prefix: "", label: "Avg. Growth Rate" },
+            ].map((stat, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <div className="text-center">
+                  <CountUp target={stat.target} suffix={stat.suffix} prefix={stat.prefix} />
+                  <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--muted)] mt-3">{stat.label}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Features ────────────────────────────────────────── */}
       <section id="features" className="py-32 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
@@ -397,9 +455,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── How it works ────────────────────────────────────── */}
+      {/* ── How it works (visual cards + animated timeline) ── */}
       <section className="py-32 px-6 lg:px-12 shimmer-divider">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="mb-20">
               <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">Process</p>
@@ -409,22 +467,142 @@ export default function LandingPage() {
               </h2>
             </div>
           </Reveal>
-          <div className="space-y-0">
-            {[
-              { step: "01", title: "Tell AI about your brand", description: "Enter your niche, keywords, and brand voice. Connect your platforms. Takes 2 minutes." },
-              { step: "02", title: "Review your content calendar", description: "AI generates 30+ platform-specific posts with optimal timing, hashtags, and content pillars." },
-              { step: "03", title: "Watch it grow", description: "Content auto-publishes across all platforms. Analytics track everything. Growth engine suggests new tactics weekly." },
-            ].map((step, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <div className="grid grid-cols-[80px_1fr] gap-8 py-10 border-t border-[var(--lg-border)]">
-                  <span className="font-headline text-3xl text-[var(--muted)] opacity-40">{step.step}</span>
-                  <div>
-                    <h3 className="font-headline text-2xl text-[var(--foreground)] mb-3">{step.title}</h3>
-                    <p className="text-[13px] text-[var(--muted)] leading-relaxed max-w-lg">{step.description}</p>
+
+          {/* Steps with visual cards */}
+          <div className="relative">
+            {/* Connecting animated line */}
+            <div className="hidden lg:block absolute left-[calc(50%-0.5px)] top-0 bottom-0 w-[1px]" style={{ background: "linear-gradient(180deg, transparent, var(--lg-border) 10%, var(--lg-border) 90%, transparent)" }}>
+              <div className="timeline-pulse absolute w-[1px] h-16" style={{ background: "linear-gradient(180deg, transparent, rgba(201,168,124,0.5), transparent)" }} />
+            </div>
+
+            <div className="space-y-8 lg:space-y-12">
+              {[
+                {
+                  step: "01",
+                  title: "Tell AI about your brand",
+                  description: "Enter your niche, keywords, and brand voice. Connect your platforms. Takes 2 minutes.",
+                  icon: (
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                    </svg>
+                  ),
+                  visual: (
+                    <div className="step-visual-card liquid-card p-4">
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-[var(--accent-copper)]" />
+                          <div className="h-2 flex-1 rounded-full" style={{ background: "linear-gradient(90deg, rgba(201,168,124,0.3), transparent)" }} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ background: "var(--lg-border)" }} />
+                          <div className="h-2 flex-1 rounded-full" style={{ background: "var(--lg-bg)" }} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full" style={{ background: "var(--lg-border)" }} />
+                          <div className="h-2 w-2/3 rounded-full" style={{ background: "var(--lg-bg)" }} />
+                        </div>
+                        <div className="mt-3 text-[9px] text-[var(--muted)] uppercase tracking-wider">Brand voice loaded</div>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  step: "02",
+                  title: "Review your content calendar",
+                  description: "AI generates 30+ platform-specific posts with optimal timing, hashtags, and content pillars.",
+                  icon: (
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                  ),
+                  visual: (
+                    <div className="step-visual-card liquid-card p-4">
+                      <div className="grid grid-cols-7 gap-1">
+                        {Array.from({ length: 28 }, (_, i) => (
+                          <div
+                            key={i}
+                            className="aspect-square rounded-sm transition-all duration-300"
+                            style={{
+                              background: i < 4 ? "rgba(201,168,124,0.25)" : i % 7 === 0 ? "rgba(201,168,124,0.08)" : "var(--lg-bg)",
+                              border: i === 15 ? "1px solid var(--accent-copper)" : "1px solid var(--lg-border)",
+                              animationDelay: `${i * 30}ms`,
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">30 posts scheduled</span>
+                        <span className="text-[9px] accent-text">✓ Ready</span>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  step: "03",
+                  title: "Watch it grow",
+                  description: "Content auto-publishes across all platforms. Analytics track everything. Growth engine suggests new tactics weekly.",
+                  icon: (
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                    </svg>
+                  ),
+                  visual: (
+                    <div className="step-visual-card liquid-card p-4">
+                      <div className="flex items-end gap-0.5 h-16">
+                        {[25, 30, 28, 40, 45, 38, 55, 50, 65, 70, 68, 85, 80, 95].map((h, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 rounded-t-sm"
+                            style={{
+                              height: `${h}%`,
+                              background: i >= 10
+                                ? "linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))"
+                                : "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))",
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">Growth +4.2x</span>
+                        <span className="text-[9px]" style={{ color: "var(--success)" }}>↑ Trending</span>
+                      </div>
+                    </div>
+                  ),
+                },
+              ].map((step, i) => (
+                <Reveal key={i} delay={i * 0.15}>
+                  <div className={`grid lg:grid-cols-[1fr_60px_1fr] gap-6 lg:gap-0 items-center ${i % 2 === 1 ? "lg:direction-rtl" : ""}`}>
+                    {/* Content side */}
+                    <div className={`${i % 2 === 1 ? "lg:order-3 lg:text-left" : "lg:order-1"}`} style={{ direction: "ltr" }}>
+                      <div className="liquid-card p-6 sm:p-8 step-card-hover">
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,124,0.1)", border: "1px solid rgba(201,168,124,0.15)" }}>
+                            <div className="text-[var(--accent-copper)]">{step.icon}</div>
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">Step {step.step}</span>
+                          </div>
+                        </div>
+                        <h3 className="font-headline text-xl sm:text-2xl text-[var(--foreground)] mb-3">{step.title}</h3>
+                        <p className="text-[13px] text-[var(--muted)] leading-relaxed">{step.description}</p>
+                      </div>
+                    </div>
+                    {/* Center node */}
+                    <div className="hidden lg:flex lg:order-2 justify-center relative z-10">
+                      <div className="step-node w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "var(--lg-bg-strong)", border: "2px solid var(--lg-border)", boxShadow: "0 0 24px rgba(201,168,124,0.1)" }}>
+                        <span className="font-headline text-sm text-[var(--accent-copper)]">{step.step}</span>
+                      </div>
+                    </div>
+                    {/* Visual side */}
+                    <div className={`${i % 2 === 1 ? "lg:order-1" : "lg:order-3"}`} style={{ direction: "ltr" }}>
+                      <div className="step-visual-wrapper">
+                        {step.visual}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>

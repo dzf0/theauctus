@@ -1095,6 +1095,57 @@ html.light select.liquid-input option {
   animation: glow-breathe 4s ease-in-out infinite;
 }
 
+/* ── Timeline pulse (gradient traveling down the line) ────── */
+@keyframes timeline-pulse-move {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.timeline-pulse {
+  animation: timeline-pulse-move 4s ease-in-out infinite;
+}
+
+/* ── Step node breathing glow ───────────────────────────── */
+@keyframes step-node-glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(201, 168, 124, 0.08), 0 0 24px rgba(201, 168, 124, 0.04); }
+  50% { box-shadow: 0 0 24px rgba(201, 168, 124, 0.15), 0 0 48px rgba(201, 168, 124, 0.06); }
+}
+
+.step-node {
+  animation: step-node-glow 3s ease-in-out infinite;
+}
+
+/* ── Step card hover glow ────────────────────────────────── */
+@keyframes step-card-glow {
+  0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(201, 168, 124, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2); }
+}
+
+.step-card-hover:hover {
+  animation: step-card-glow 2s ease-in-out infinite;
+}
+
+/* ── Step visual wrapper — subtle float on hover ────────── */
+.step-visual-wrapper {
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.step-visual-wrapper:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ── Step visual card — mini mockup styling ──────────────── */
+.step-visual-card {
+  border-radius: var(--lg-radius-sm);
+  transition: border-color 0.3s var(--ease-out-expo);
+}
+
+.step-visual-card:hover {
+  border-color: var(--lg-border-strong);
+}
+
 /* ── Smooth section transitions ───────────────────────────── */
 section {
   position: relative;
