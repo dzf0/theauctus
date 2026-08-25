@@ -132,7 +132,7 @@ CREATE TABLE public.credit_history (
 -- ── audit_log ─────────────────────────────────────────────────
 CREATE TABLE public.audit_log (
   id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id     UUID REFERENCES auth.users(id),
+  user_id     UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   action      TEXT NOT NULL,
   table_name  TEXT,
   record_id   UUID,
