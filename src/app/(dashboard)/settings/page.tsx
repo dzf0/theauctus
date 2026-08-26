@@ -3,6 +3,17 @@
 import { useState, useEffect } from "react";
 import { Spinner } from "@/components/ui/Loading";
 
+interface Platform {
+  id: string;
+  label: string;
+  color: string;
+  connected: boolean;
+  platformName: string | null;
+  username: string | null;
+  followers: number;
+  lastSync: string | null;
+}
+
 interface UserProfile {
   id: string;
   email: string;
@@ -33,6 +44,121 @@ const VOICE_OPTIONS = [
   { id: "inspirational", label: "Inspirational", description: "Motivating and uplifting" },
   { id: "educational", label: "Educational", description: "Informative and helpful" },
 ];
+
+function PlatformsSection() {
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [connecting, setConnecting] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPlatforms();
+    // Check URL params for connection status
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get("connected");
+    if (connected) {
+      fetchPlatforms();
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    const error = params.get("error");
+    if (error) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
+  const fetchPlatforms = async () => {
+    try {
+      const res = await fetch("/api/platforms");
+      const data = await res.json();
+      setPlatforms(data.platforms || []);
+    } catch { /* ignore */ } finally { setLoading(false); }
+  };
+
+  const handleConnect = (platformId: string) => {
+    setConnecting(platformId);
+    window.location.href = `/api/platforms/${platformId}/connect`;
+  };
+
+  const handleDisconnect = async (platformId: string) => {
+    await fetch(`/api/platforms/${platformId}/disconnect`, { method: "POST" });
+    fetchPlatforms();
+  };
+
+  if (loading) {
+    return (
+      <div className="liquid-card p-6">
+        <div className="flex items-center justify-center py-8">
+          <Spinner size={16} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="liquid-card p-6">
+        <h3 className="font-semibold mb-2" style={{ color: "var(--foreground)" }}>Platform Connections</h3>
+        <p className="text-[13px] mb-6" style={{ color: "var(--muted)" }}>
+          Connect your social platforms to enable auto-publishing. Posts will be published automatically at their scheduled time.
+        </p>
+        <div className="space-y-3">
+          {platforms.map((platform) => (
+            <div
+              key={platform.id}
+              className="flex items-center justify-between p-4 rounded-xl transition-colors"
+              style={{ background: "var(--lg-bg)", border: `1px solid ${platform.connected ? "rgba(124, 184, 124, 0.3)" : "var(--lg-border)"}` }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold" style={{ background: `${platform.color}15`, color: platform.color }}>
+                  {platform.id === "twitter" ? "X" : platform.id === "instagram" ? "IG" : platform.id === "linkedin" ? "in" : platform.id === "tiktok" ? "TT" : platform.id === "youtube" ? "YT" : platform.id === "threads" ? "@" : platform.id === "facebook" ? "f" : "//"}
+                </div>
+                <div>
+                  <p className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>{platform.label}</p>
+                  {platform.connected ? (
+                    <p className="text-[11px]" style={{ color: "var(--muted)" }}>
+                      Connected as {platform.platformName || platform.username || "--"}
+                      {platform.followers > 0 ? ` · ${platform.followers.toLocaleString()} followers` : ""}
+                    </p>
+                  ) : (
+                    <p className="text-[11px]" style={{ color: "var(--muted)" }}>Not connected</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                {platform.connected ? (
+                  <button
+                    onClick={() => handleDisconnect(platform.id)}
+                    className="px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors"
+                    style={{ color: "var(--danger)", border: "1px solid rgba(224, 108, 117, 0.2)" }}
+                  >
+                    Disconnect
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleConnect(platform.id)}
+                    disabled={connecting !== null}
+                    className="px-3 py-1.5 text-[11px] font-medium rounded-lg liquid-btn-primary disabled:opacity-50"
+                  >
+                    {connecting === platform.id ? "Connecting..." : "Connect"}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="liquid-card p-6">
+        <h3 className="font-semibold mb-2" style={{ color: "var(--foreground)" }}>How Auto-Publishing Works</h3>
+        <div className="space-y-2 text-[13px]" style={{ color: "var(--muted)" }}>
+          <p>1. Connect your platforms above</p>
+          <p>2. Generate or create content in the Content Planner</p>
+          <p>3. Schedule posts for specific dates/times</p>
+          <p>4. The system publishes automatically when the time arrives</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<"profile" | "platforms" | "ai" | "notifications">("profile");
@@ -269,10 +395,12 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {(activeSection === "platforms" || activeSection === "notifications") && (
+          {activeSection === "platforms" && <PlatformsSection />}
+
+          {activeSection === "notifications" && (
             <div className="liquid-card p-6">
               <p className="text-[13px] text-center py-8" style={{ color: "var(--muted)" }}>
-                {activeSection === "platforms" ? "Platform connections coming soon." : "Notification settings coming soon."}
+                Notification settings coming soon.
               </p>
             </div>
           )}
