@@ -1,0 +1,14 @@
+# Hide AI/dev tool files from GitHub UI and downloads
+AGENTS.md linguist-generated=true export-ignore
+CLAUDE.md linguist-generated=true export-ignore
+ARCHITECTURE.md linguist-generated=true export-ignore
+skills-lock.json linguist-generated=true export-ignore
+
+# Hide .agents directory
+.agents/** linguist-generated=true export-ignore
+
+# Hide .claude directory
+.claude/** linguist-generated=true export-ignore
+
+# Hide .windsurf directory
+.windsurf/** linguist-generated=true export-ignore
