@@ -173,7 +173,9 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/auth/update-password");
 
   // Only enforce onboarding gate on non-dashboard, non-auth, non-onboarding pages
-  if (user && !isProtectedRoute && !isOnboardingFlow && !isAuthPage) {
+  // Also skip the root landing page — it's public
+  const isLanding = pathname === "/";
+  if (user && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
