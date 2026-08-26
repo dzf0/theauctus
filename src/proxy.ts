@@ -154,6 +154,8 @@ export async function proxy(request: NextRequest) {
 
   // ── Onboarding gate (strict) ───────────────────────────────
   // Flow: sign-up → /auth/username (if needed) → /auth/pricing → /onboarding → /dashboard
+  // Skip onboarding checks for dashboard routes — user is already past onboarding
+  const isDashboard = pathname.startsWith("/dashboard");
   const isOnboardingFlow =
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/auth/pricing") ||
@@ -166,7 +168,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/auth/forgot-password") ||
     pathname.startsWith("/auth/update-password");
 
-  if (user && !isOnboardingFlow && !isAuthPage) {
+  // Only enforce onboarding gate on non-dashboard, non-auth, non-onboarding pages
+  if (user && !isDashboard && !isOnboardingFlow && !isAuthPage) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
