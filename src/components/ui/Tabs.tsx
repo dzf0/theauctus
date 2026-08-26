@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useRef, useEffect, HTMLAttributes, ReactNode } from "react";
+import { createContext, useContext, useState, useRef, useEffect, useMemo, useCallback, HTMLAttributes, ReactNode } from "react";
 
 interface TabsContextType {
   activeTab: string;
@@ -21,12 +21,12 @@ export function Tabs({ defaultValue, children, className = "" }: TabsProps) {
   const [tabRects, setTabRects] = useState<Record<string, DOMRect>>({});
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const registerTab = (value: string, el: HTMLButtonElement | null) => {
+  const registerTab = useCallback((value: string, el: HTMLButtonElement | null) => {
     tabRefs.current[value] = el;
     if (el) {
       setTabRects((prev) => ({ ...prev, [value]: el.getBoundingClientRect() }));
     }
-  };
+  }, []);
 
   // Recalculate rects on resize
   useEffect(() => {
@@ -41,8 +41,13 @@ export function Tabs({ defaultValue, children, className = "" }: TabsProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ activeTab, setActiveTab, registerTab, tabRects }),
+    [activeTab, registerTab, tabRects]
+  );
+
   return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab, registerTab, tabRects }}>
+    <TabsContext.Provider value={contextValue}>
       <div className={className}>{children}</div>
     </TabsContext.Provider>
   );
@@ -61,7 +66,7 @@ export function TabsList({ children, className = "" }: TabsListProps) {
     if (listRef.current) {
       setListRect(listRef.current.getBoundingClientRect());
     }
-  });
+  }, []);
 
   // Emil: calculate indicator position from the active tab's rect
   const activeRect = context?.tabRects[context.activeTab];
@@ -114,7 +119,9 @@ export function TabsTrigger({ value, children, className = "", ...props }: TabsT
 
   useEffect(() => {
     context.registerTab(value, ref.current);
-  }, [value, context]);
+  // ponytail: omit context from deps — registerTab is stable via useCallback
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   return (
     <button
