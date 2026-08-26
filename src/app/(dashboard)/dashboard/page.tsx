@@ -103,7 +103,7 @@ export default function DashboardPage() {
                 : "Generate a calendar (15 credits) or posts (5 credits) — buy more to continue."}
             </p>
           </div>
-          <Link href="/dashboard/billing" className="shrink-0 px-4 py-2 text-[12px] font-medium liquid-btn-primary">
+          <Link href="/billing" className="shrink-0 px-4 py-2 text-[12px] font-medium liquid-btn-primary">
             Buy Credits
           </Link>
         </div>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-3 gap-4">
-        <Link href="/dashboard/planner">
+        <Link href="/planner">
           <Card variant="interactive">
             <CardContent className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: "rgba(201, 168, 124, 0.1)" }}>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/planner">
+        <Link href="/planner">
           <Card variant="interactive">
             <CardContent className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: "rgba(124, 184, 124, 0.1)" }}>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/analytics">
+        <Link href="/analytics">
           <Card variant="interactive">
             <CardContent className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: "rgba(124, 158, 201, 0.1)" }}>
@@ -196,7 +196,7 @@ export default function DashboardPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Recent Posts</CardTitle>
-            <Link href="/dashboard/planner" className="text-[12px] accent-text hover:opacity-80 transition-opacity">
+            <Link href="/planner" className="text-[12px] accent-text hover:opacity-80 transition-opacity">
               View All →
             </Link>
           </div>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
           {posts.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-[13px] mb-4" style={{ color: "var(--muted)" }}>No posts yet</p>
-              <Link href="/dashboard/planner">
+              <Link href="/planner">
                 <Button>Generate Your First Posts</Button>
               </Link>
             </div>

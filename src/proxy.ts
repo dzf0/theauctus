@@ -145,8 +145,12 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // ── Protect dashboard routes ────────────────────────────────
-  if (pathname.startsWith("/dashboard") && !user) {
+  // ── Protect app routes ──────────────────────────────────────
+  const PROTECTED_ROUTES = ["/dashboard", "/planner", "/queue", "/analytics", "/billing", "/settings"];
+  const isProtected = PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
+
+  if (isProtected && !user) {
+    console.error("[PROXY] No user for protected route:", pathname, "— redirecting to signin");
     const url = request.nextUrl.clone();
     url.pathname = "/auth/signin";
     return NextResponse.redirect(url);
@@ -155,7 +159,7 @@ export async function proxy(request: NextRequest) {
   // ── Onboarding gate (strict) ───────────────────────────────
   // Flow: sign-up → /auth/username (if needed) → /auth/pricing → /onboarding → /dashboard
   // Skip onboarding checks for dashboard routes — user is already past onboarding
-  const isDashboard = pathname.startsWith("/dashboard");
+  const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
   const isOnboardingFlow =
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/auth/pricing") ||
@@ -169,7 +173,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/auth/update-password");
 
   // Only enforce onboarding gate on non-dashboard, non-auth, non-onboarding pages
-  if (user && !isDashboard && !isOnboardingFlow && !isAuthPage) {
+  if (user && !isProtectedRoute && !isOnboardingFlow && !isAuthPage) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -217,7 +221,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── Prevent back-button caching of dashboard ────────────────
-  if (pathname.startsWith("/dashboard")) {
+  if (isProtectedRoute) {
     supabaseResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
     supabaseResponse.headers.set("Pragma", "no-cache");
     supabaseResponse.headers.set("Expires", "0");

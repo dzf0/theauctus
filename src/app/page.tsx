@@ -639,7 +639,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href={user ? "/dashboard/billing" : "/auth/signup"} className={`block w-full text-center py-3 relative z-10 ${pack.popular ? "liquid-btn-primary" : "liquid-btn"}`}>
+                <Link href={user ? "/billing" : "/auth/signup"} className={`block w-full text-center py-3 relative z-10 ${pack.popular ? "liquid-btn-primary" : "liquid-btn"}`}>
                   {user ? "Buy Credits" : "Start Free"}
                 </Link>
               </TiltCard>
@@ -652,7 +652,7 @@ export default function LandingPage() {
               <p className="text-[13px] text-[var(--muted)] mb-4">
                 Enter any amount from ${CUSTOM_CREDIT_MIN_DOLLARS}+ — credits at ${CUSTOM_CREDIT_RATE.toFixed(2)}/credit
               </p>
-              <Link href={user ? "/dashboard/billing" : "/auth/signup"} className="inline-block px-6 py-2.5 liquid-btn text-[12px]">
+              <Link href={user ? "/billing" : "/auth/signup"} className="inline-block px-6 py-2.5 liquid-btn text-[12px]">
                 {user ? "Choose Amount" : "Get Started"}
               </Link>
             </div>

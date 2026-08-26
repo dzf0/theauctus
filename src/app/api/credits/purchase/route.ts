@@ -144,8 +144,8 @@ export const POST = withAuth(async (request, { user }) => {
         pack: packData.id,
         credits: String(packData.credits),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.theauctus.in"}/dashboard/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.theauctus.in"}/dashboard/billing?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.theauctus.in"}/billing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.theauctus.in"}/billing?canceled=true`,
     });
 
     return NextResponse.json({
