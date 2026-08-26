@@ -109,12 +109,12 @@ export interface PlatformConfig {
 export const PLATFORMS: PlatformConfig[] = [
   { id: "twitter", name: "Twitter/X", icon: "𝕏", color: "#1DA1F2", maxPostLength: 280, supportsMedia: true, supportsHashtags: true },
   { id: "linkedin", name: "LinkedIn", icon: "in", color: "#0A66C2", maxPostLength: 3000, supportsMedia: true, supportsHashtags: true },
-  { id: "instagram", name: "Instagram", icon: "📷", color: "#E4405F", maxPostLength: 2200, supportsMedia: true, supportsHashtags: true },
-  { id: "tiktok", name: "TikTok", icon: "♪", color: "#000000", maxPostLength: 2200, supportsMedia: true, supportsHashtags: true },
-  { id: "youtube", name: "YouTube", icon: "▶", color: "#FF0000", maxPostLength: 5000, supportsMedia: true, supportsHashtags: true },
+  { id: "instagram", name: "Instagram", icon: "IG", color: "#E4405F", maxPostLength: 2200, supportsMedia: true, supportsHashtags: true },
+  { id: "tiktok", name: "TikTok", icon: "TT", color: "#000000", maxPostLength: 2200, supportsMedia: true, supportsHashtags: true },
+  { id: "youtube", name: "YouTube", icon: "YT", color: "#FF0000", maxPostLength: 5000, supportsMedia: true, supportsHashtags: true },
   { id: "threads", name: "Threads", icon: "@", color: "#000000", maxPostLength: 500, supportsMedia: true, supportsHashtags: true },
   { id: "facebook", name: "Facebook", icon: "f", color: "#1877F2", maxPostLength: 63206, supportsMedia: true, supportsHashtags: true },
-  { id: "blog", name: "Blog", icon: "📝", color: "#FF6B6B", maxPostLength: 50000, supportsMedia: true, supportsHashtags: false },
+  { id: "blog", name: "Blog", icon: "//", color: "#FF6B6B", maxPostLength: 50000, supportsMedia: true, supportsHashtags: false },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -188,12 +188,12 @@ export interface GoalOption {
 }
 
 export const GOAL_OPTIONS: GoalOption[] = [
-  { id: "engagement", label: "Increase Engagement", icon: "❤️" },
-  { id: "sales", label: "Drive Sales", icon: "💰" },
-  { id: "awareness", label: "Build Brand Awareness", icon: "📢" },
-  { id: "education", label: "Educate Audience", icon: "📚" },
-  { id: "entertainment", label: "Entertain Followers", icon: "🎭" },
-  { id: "community", label: "Grow Community", icon: "👥" },
+  { id: "engagement", label: "Increase Engagement", icon: "*" },
+  { id: "sales", label: "Drive Sales", icon: "$" },
+  { id: "awareness", label: "Build Brand Awareness", icon: "~" },
+  { id: "education", label: "Educate Audience", icon: "#" },
+  { id: "entertainment", label: "Entertain Followers", icon: "%" },
+  { id: "community", label: "Grow Community", icon: "+" },
 ];
 
 // ══════════════════════════════════════════════════════════════

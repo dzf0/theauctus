@@ -78,7 +78,7 @@ export const mockPosts: ContentPost[] = [
   makePost(
     "post_001",
     "I replaced my entire content team with one AI workflow",
-    "Here's the exact system I built in 2 hours that now creates 30 days of content across 4 platforms.\n\nNoVA, no content calendar spreadsheets, no hiring.\n\nThread 🧵👇",
+    "Here's the exact system I built in 2 hours that now creates 30 days of content across 4 platforms.\n\nNoVA, no content calendar spreadsheets, no hiring.\n\nThread:",
     "twitter",
     "published",
     "thread",
@@ -136,7 +136,7 @@ export const mockPosts: ContentPost[] = [
   makePost(
     "post_007",
     "The AI content stack I use every single day",
-    "🧠 Planning: ChatGPT for strategy\n✍️ Writing: Claude for drafts\n🎨 Design: Canva AI for visuals\n📅 Scheduling: Auto-publisher\n📊 Analytics: Growth dashboard\n\nTotal time: 15 min/day",
+    "Planning: ChatGPT for strategy\nWriting: Claude for drafts\nDesign: Canva AI for visuals\nScheduling: Auto-publisher\nAnalytics: Growth dashboard\n\nTotal time: 15 min/day",
     "twitter",
     "scheduled",
     "carousel",
@@ -302,12 +302,12 @@ export function getPostsInRange(start: string, end: string): ContentPost[] {
 
 // ── Helper: platform display info ──────────────────────────────
 export const platformConfig: Record<Platform, { label: string; color: string; icon: string }> = {
-  twitter: { label: "Twitter / X", color: "#1DA1F2", icon: "𝕏" },
-  instagram: { label: "Instagram", color: "#E4405F", icon: "📷" },
-  linkedin: { label: "LinkedIn", color: "#0A66C2", icon: "💼" },
-  tiktok: { label: "TikTok", color: "#000000", icon: "🎵" },
-  youtube: { label: "YouTube", color: "#FF0000", icon: "▶️" },
+  twitter: { label: "Twitter / X", color: "#1DA1F2", icon: "X" },
+  instagram: { label: "Instagram", color: "#E4405F", icon: "IG" },
+  linkedin: { label: "LinkedIn", color: "#0A66C2", icon: "in" },
+  tiktok: { label: "TikTok", color: "#000000", icon: "TT" },
+  youtube: { label: "YouTube", color: "#FF0000", icon: "YT" },
   threads: { label: "Threads", color: "#000000", icon: "@" },
-  facebook: { label: "Facebook", color: "#1877F2", icon: "📘" },
-  blog: { label: "Blog", color: "#6366F1", icon: "✍️" },
+  facebook: { label: "Facebook", color: "#1877F2", icon: "f" },
+  blog: { label: "Blog", color: "#6366F1", icon: "//" },
 };

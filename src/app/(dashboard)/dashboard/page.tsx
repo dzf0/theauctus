@@ -218,11 +218,11 @@ export default function DashboardPage() {
               >
                 <div className="flex items-center gap-3">
                   <span className="text-[14px]">
-                    {post.platform === "instagram" && "📸"}
-                    {post.platform === "tiktok" && "🎵"}
-                    {post.platform === "twitter" && "🐦"}
-                    {post.platform === "linkedin" && "💼"}
-                    {post.platform === "facebook" && "👤"}
+                    {post.platform === "instagram" && "IG"}
+                    {post.platform === "tiktok" && "TT"}
+                    {post.platform === "twitter" && "X"}
+                    {post.platform === "linkedin" && "in"}
+                    {post.platform === "facebook" && "f"}
                   </span>
                   <div>
                     <p className="text-[13px] truncate max-w-[300px]" style={{ color: "var(--foreground)" }}>

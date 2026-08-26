@@ -17,11 +17,11 @@ interface Post {
 }
 
 const PLATFORMS = [
-  { value: "instagram", label: "Instagram", icon: "📸" },
-  { value: "tiktok", label: "TikTok", icon: "🎵" },
-  { value: "twitter", label: "Twitter/X", icon: "🐦" },
-  { value: "linkedin", label: "LinkedIn", icon: "💼" },
-  { value: "facebook", label: "Facebook", icon: "👤" },
+  { value: "instagram", label: "Instagram", icon: "IG" },
+  { value: "tiktok", label: "TikTok", icon: "TT" },
+  { value: "twitter", label: "Twitter/X", icon: "X" },
+  { value: "linkedin", label: "LinkedIn", icon: "in" },
+  { value: "facebook", label: "Facebook", icon: "f" },
 ];
 
 const STATUS_COLORS: Record<string, "default" | "primary" | "success" | "warning" | "error"> = {

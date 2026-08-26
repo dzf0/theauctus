@@ -33,7 +33,7 @@ const hooks = [
 
 const ctaEndings = [
   "\n\nFollow @alexbuilds for more AI-powered growth strategies.",
-  "\n\nSave this for later. You'll need it. 🔖",
+  "\n\nSave this for later. You'll need it.",
   "\n\nWhat's your biggest {topic} challenge? Drop it below 👇",
   "\n\nRepost if this was helpful. I'll share the full breakdown.",
   "\n\nWant the template? Comment \"TEMPLATE\" and I'll DM it to you.",

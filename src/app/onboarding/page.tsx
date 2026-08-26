@@ -33,12 +33,12 @@ const BRAND_VOICE_OPTIONS = [
 const TONE_OPTIONS = ["Formal", "Friendly", "Urgent", "Playful", "Authoritative", "Empathetic", "Bold", "Minimal"];
 
 const GOAL_OPTIONS = [
-  { id: "engagement", label: "Increase Engagement", icon: "❤️" },
-  { id: "sales", label: "Drive Sales", icon: "💰" },
-  { id: "awareness", label: "Build Brand Awareness", icon: "📢" },
-  { id: "education", label: "Educate Audience", icon: "📚" },
-  { id: "entertainment", label: "Entertain Followers", icon: "🎭" },
-  { id: "community", label: "Grow Community", icon: "👥" },
+  { id: "engagement", label: "Increase Engagement", icon: "*" },
+  { id: "sales", label: "Drive Sales", icon: "$" },
+  { id: "awareness", label: "Build Brand Awareness", icon: "~" },
+  { id: "education", label: "Educate Audience", icon: "#" },
+  { id: "entertainment", label: "Entertain Followers", icon: "%" },
+  { id: "community", label: "Grow Community", icon: "+" },
 ];
 
 const FREQUENCY_OPTIONS = [
@@ -54,10 +54,10 @@ function OnboardingLoader({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
 
   const messages = [
-    { icon: "🚀", text: "Setting up your workspace..." },
-    { icon: "✨", text: "Preparing your dashboard..." },
-    { icon: "🎯", text: "Almost ready..." },
-    { icon: "🎉", text: "Welcome to TheAuctus!" },
+    { icon: ">", text: "Setting up your workspace..." },
+    { icon: "*", text: "Preparing your dashboard..." },
+    { icon: "^", text: "Almost ready..." },
+    { icon: "!", text: "Welcome to TheAuctus!" },
   ];
 
   useEffect(() => {

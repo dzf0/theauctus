@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
           onClick={() => setShowReferral(!showReferral)}
           className="px-4 py-2 text-sm font-medium rounded-xl liquid-btn-primary"
         >
-          🎁 Referral Program
+          Referral Program
         </button>
       </div>
 
@@ -56,10 +56,10 @@ export default function AnalyticsPage() {
           {/* Key metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: "Total Followers", value: growthMetrics.totalFollowers.toLocaleString(), change: `+${growthMetrics.followersGrowth.toLocaleString()}`, icon: "👥" },
-              { label: "Engagement Rate", value: `${growthMetrics.engagementRate}%`, change: "+0.6%", icon: "💬" },
-              { label: "Total Reach", value: `${(growthMetrics.totalReach / 1000).toFixed(1)}K`, change: "+23%", icon: "📡" },
-              { label: "Revenue", value: `$${growthMetrics.revenue.toLocaleString()}`, change: "+32%", icon: "💰" },
+              { label: "Total Followers", value: growthMetrics.totalFollowers.toLocaleString(), change: `+${growthMetrics.followersGrowth.toLocaleString()}`, icon: "*" },
+              { label: "Engagement Rate", value: `${growthMetrics.engagementRate}%`, change: "+0.6%", icon: "%" },
+              { label: "Total Reach", value: `${(growthMetrics.totalReach / 1000).toFixed(1)}K`, change: "+23%", icon: "~" },
+              { label: "Revenue", value: `$${growthMetrics.revenue.toLocaleString()}`, change: "+32%", icon: "$" },
             ].map((metric, i) => (
               <div key={i} className="liquid-card p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -148,7 +148,7 @@ export default function AnalyticsPage() {
           {/* Top performing post */}
           {growthMetrics.topPerformingPost && (
             <div className="liquid-card p-6">
-              <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>🏆 Top Performing Post</h3>
+              <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Top Performing Post</h3>
               <div className="p-4 rounded-xl" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="px-2 py-0.5 rounded-lg text-xs font-medium" style={{ backgroundColor: `${platformConfig[growthMetrics.topPerformingPost.platform].color}15`, color: platformConfig[growthMetrics.topPerformingPost.platform].color }}>
@@ -165,11 +165,11 @@ export default function AnalyticsPage() {
                   {growthMetrics.topPerformingPost.content}
                 </p>
                 <div className="flex items-center gap-4 text-xs" style={{ color: "var(--muted)" }}>
-                  <span>❤️ {growthMetrics.topPerformingPost.engagement.likes.toLocaleString()}</span>
-                  <span>💬 {growthMetrics.topPerformingPost.engagement.comments.toLocaleString()}</span>
-                  <span>🔄 {growthMetrics.topPerformingPost.engagement.shares.toLocaleString()}</span>
-                  <span>🔖 {growthMetrics.topPerformingPost.engagement.saves.toLocaleString()}</span>
-                  <span>📡 {(growthMetrics.topPerformingPost.engagement.reach / 1000).toFixed(1)}K reach</span>
+                  <span>{growthMetrics.topPerformingPost.engagement.likes.toLocaleString()} likes</span>
+                  <span>{growthMetrics.topPerformingPost.engagement.comments.toLocaleString()} comments</span>
+                  <span>{growthMetrics.topPerformingPost.engagement.shares.toLocaleString()} shares</span>
+                  <span>{growthMetrics.topPerformingPost.engagement.saves.toLocaleString()} saves</span>
+                  <span>{(growthMetrics.topPerformingPost.engagement.reach / 1000).toFixed(1)}K reach</span>
                 </div>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
           <div className="liquid-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold" style={{ color: "var(--foreground)" }}>🎯 AI Growth Tactics</h3>
+              <h3 className="font-semibold" style={{ color: "var(--foreground)" }}>AI Growth Tactics</h3>
               <span className="text-xs liquid-badge">Personalized for {creatorProfile.niche}</span>
             </div>
             <div className="space-y-3">
@@ -252,7 +252,7 @@ export default function AnalyticsPage() {
             <div className="space-y-3">
               {growthStrategy.competitorInsights.map((insight, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "var(--lg-bg)" }}>
-                  <span>💡</span>
+                  <span className="text-[var(--accent-copper)]">i</span>
                   <p className="text-sm" style={{ color: "var(--foreground)" }}>{insight}</p>
                 </div>
               ))}
@@ -260,7 +260,7 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="liquid-card p-6">
-            <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>⏰ Optimal Posting Times</h3>
+            <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Optimal Posting Times</h3>
             <div className="grid sm:grid-cols-2 gap-3">
               {growthStrategy.bestTimes.map((time, i) => {
                 const config = platformConfig[time.platform];
@@ -278,7 +278,7 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="liquid-card p-6">
-            <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>#️⃣ Hashtag Strategy</h3>
+            <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Hashtag Strategy</h3>
             <div className="space-y-4">
               {growthStrategy.hashtags.map((group, i) => (
                 <div key={i}>
@@ -300,7 +300,7 @@ export default function AnalyticsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="liquid-card max-w-lg w-full p-6 animate-fade-in">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>🎁 Referral Program</h3>
+              <h3 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>Referral Program</h3>
               <button onClick={() => setShowReferral(false)} className="hover:opacity-70" style={{ color: "var(--muted)" }}>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -324,21 +324,21 @@ export default function AnalyticsPage() {
                 <p className="text-xs" style={{ color: "var(--muted)" }}>Credits earned</p>
               </div>
               <div className="p-3 text-center rounded-xl" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
-                <p className="text-xl font-bold">🥈</p>
+                <p className="text-xl font-bold">II</p>
                 <p className="text-xs" style={{ color: "var(--muted)" }}>Silver tier</p>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-sm">
-                <span style={{ color: "var(--muted)" }}>🥉 Bronze:</span>
+                <span style={{ color: "var(--muted)" }}>III Bronze:</span>
                 <span style={{ color: "var(--foreground)" }}>1-10 referrals → $10 credit each</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <span style={{ color: "var(--muted)" }}>🥈 Silver:</span>
+                <span style={{ color: "var(--muted)" }}>II Silver:</span>
                 <span style={{ color: "var(--foreground)" }}>11-50 referrals → $15 credit each</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <span style={{ color: "var(--muted)" }}>🥇 Gold:</span>
+                <span style={{ color: "var(--muted)" }}>I Gold:</span>
                 <span style={{ color: "var(--foreground)" }}>51+ referrals → 1 month free per 10 referrals</span>
               </div>
             </div>
