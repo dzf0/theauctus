@@ -43,10 +43,22 @@
   --lg-radius-sm: 14px;
   --lg-radius-xs: 10px;
 
-  /* Timing */
+  /* Timing — Apple-style spring curves */
+  /* Emil Kowalski: strong ease-out for UI interactions */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Emil Kowalski: strong ease-in-out for on-screen movement */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* Emil Kowalski: iOS-like drawer curve */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-fast: 120ms;
+  /* Critically damped spring (damping 1.0, response ~0.35s) — default UI */
+  --ease-spring-critical: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Under-damped spring (damping ~0.8, response ~0.35s) — momentum/flick */
+  --ease-spring-bounce: cubic-bezier(0.34, 1.4, 0.64, 1);
+  /* Snappy spring for press反馈 (response ~0.15s) */
+  --ease-spring-snappy: cubic-bezier(0.2, 1.2, 0.4, 1);
+  --duration-fast: 80ms;
   --duration-normal: 200ms;
   --duration-slow: 350ms;
 }
@@ -317,19 +329,20 @@ html.light .auth-container * {
    GLOBAL THEME TRANSITION
    ══════════════════════════════════════════════════════════════ */
 html {
-  transition: background-color 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.6s var(--ease-spring-critical);
 }
 
 html * {
   transition-property: background-color, color, border-color, box-shadow, opacity;
-  transition-duration: 0.6s;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 0.5s;
+  transition-timing-function: var(--ease-spring-critical);
 }
 
+/* Apple: interactive elements respond fast — 120ms for direct manipulation feel */
 html a, html button, html input, html [role="button"], html [role="tab"] {
   transition-property: transform, box-shadow, opacity, background, background-color, border-color, color;
-  transition-duration: 0.15s;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 0.12s;
+  transition-timing-function: var(--ease-spring-critical);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -344,9 +357,16 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   letter-spacing: 0.01em;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.7s var(--ease-out-expo), color 0.6s var(--ease-out-expo);
+}
+
+/* Apple: smooth scroll for anchor navigation */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
 }
 
 ::selection {
@@ -357,13 +377,15 @@ body {
 .font-headline {
   font-family: var(--font-serif);
   font-weight: 400;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  font-optical-sizing: auto;
 }
 
 .font-headline-bold {
   font-family: var(--font-serif);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
+  font-optical-sizing: auto;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -402,10 +424,10 @@ body {
   position: relative;
   overflow: hidden;
   transition:
-    background 0.6s var(--ease-out-expo),
-    border-color 0.5s var(--ease-out-expo),
-    box-shadow 0.5s var(--ease-out-expo),
-    transform 0.3s var(--ease-out-expo);
+    background 0.5s var(--ease-spring-critical),
+    border-color 0.4s var(--ease-spring-critical),
+    box-shadow 0.4s var(--ease-spring-critical),
+    transform 0.3s var(--ease-spring-critical);
 }
 
 /* Specular highlight — the liquid shine */
@@ -462,10 +484,10 @@ body {
   position: relative;
   overflow: hidden;
   transition:
-    background 0.6s var(--ease-out-expo),
-    border-color 0.5s var(--ease-out-expo),
-    box-shadow 0.5s var(--ease-out-expo),
-    transform 0.3s var(--ease-out-expo);
+    background 0.5s var(--ease-spring-critical),
+    border-color 0.4s var(--ease-spring-critical),
+    box-shadow 0.4s var(--ease-spring-critical),
+    transform 0.3s var(--ease-spring-critical);
 }
 
 .liquid-card::before {
@@ -505,9 +527,9 @@ body {
   outline: none;
   width: 100%;
   transition:
-    border-color 0.3s var(--ease-out-expo),
-    background 0.4s var(--ease-out-expo),
-    box-shadow 0.4s var(--ease-out-expo);
+    border-color 0.3s var(--ease-spring-critical),
+    background 0.35s var(--ease-spring-critical),
+    box-shadow 0.35s var(--ease-spring-critical);
 }
 
 .liquid-input:focus {
@@ -564,11 +586,12 @@ html.light select.liquid-input option {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  /* Apple: springs for interactive elements — velocity-aware, interruptible */
   transition:
-    transform var(--duration-fast) var(--ease-out-expo),
-    background 0.3s var(--ease-out-expo),
-    border-color 0.3s var(--ease-out-expo),
-    box-shadow 0.3s var(--ease-out-expo);
+    transform 0.15s var(--ease-spring-critical),
+    background 0.25s var(--ease-spring-critical),
+    border-color 0.25s var(--ease-spring-critical),
+    box-shadow 0.25s var(--ease-spring-critical);
 }
 
 .liquid-btn::before {
@@ -590,9 +613,11 @@ html.light select.liquid-input option {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), var(--lg-inset);
 }
 
+/* Apple: respond on pointer-down, not release — instant scale feedback */
 .liquid-btn:active {
   transform: scale(0.97);
-  transition-duration: var(--duration-fast);
+  transition-duration: 60ms;
+  transition-timing-function: var(--ease-spring-snappy);
 }
 
 .liquid-btn-primary {
@@ -614,10 +639,11 @@ html.light select.liquid-input option {
     0 4px 16px rgba(201, 168, 124, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  /* Apple: spring transition for primary CTA — feels alive */
   transition:
-    transform var(--duration-fast) var(--ease-out-expo),
-    background 0.3s var(--ease-out-expo),
-    box-shadow 0.3s var(--ease-out-expo);
+    transform 0.15s var(--ease-spring-critical),
+    background 0.25s var(--ease-spring-critical),
+    box-shadow 0.25s var(--ease-spring-critical);
 }
 
 .liquid-btn-primary::before {
@@ -640,9 +666,15 @@ html.light select.liquid-input option {
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
+/* Apple: instant press feedback — the moment lag appears, directness falls off a cliff */
 .liquid-btn-primary:active {
-  transform: scale(0.97);
-  transition-duration: var(--duration-fast);
+  transform: scale(0.96);
+  transition-duration: 60ms;
+  transition-timing-function: var(--ease-spring-snappy);
+  box-shadow:
+    0 2px 8px rgba(201, 168, 124, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
 /* ── Liquid Badge ──────────────────────────────────────────── */
@@ -661,7 +693,7 @@ html.light select.liquid-input option {
   color: var(--accent-copper);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: all 0.3s var(--ease-out-expo);
+  transition: background 0.3s var(--ease-out), border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
 }
 
 /* ── Liquid Tab ────────────────────────────────────────────── */
@@ -676,7 +708,7 @@ html.light select.liquid-input option {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s var(--ease-out-expo);
+  transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
 .liquid-tab:hover {
@@ -787,8 +819,9 @@ html.light select.liquid-input option {
   to { opacity: 0; transform: translateX(100%) scale(0.95); }
 }
 
-.toast-enter { animation: toast-in 0.4s var(--ease-spring) both; }
-.toast-exit { animation: toast-out 0.3s var(--ease-out-expo) both; }
+/* Emil: slightly slower than typical UI, uses ease for elegance — matches Sonner's personality */
+.toast-enter { animation: toast-in 0.35s var(--ease-spring-critical) both; }
+.toast-exit { animation: toast-out 0.25s var(--ease-out) both; }
 
 @keyframes blob-rotate {
   0% { transform: rotate(0deg) scale(1); }
@@ -925,10 +958,11 @@ html.light select.liquid-input option {
   }
 }
 
+/* Apple: word-by-word stagger uses spring — each word settles naturally */
 .hero-word-animate {
   display: inline-block;
   opacity: 0;
-  animation: hero-word-in 0.7s var(--ease-out-expo) forwards;
+  animation: hero-word-in 0.65s var(--ease-spring-critical) forwards;
   animation-delay: var(--word-delay, 0s);
   perspective: 800px;
 }
@@ -944,7 +978,7 @@ html.light select.liquid-input option {
   display: inline-block;
   height: 1px;
   background: var(--accent-copper);
-  animation: accent-line-sweep 0.8s var(--ease-out-expo) forwards;
+  animation: accent-line-sweep 0.7s var(--ease-spring-critical) forwards;
   animation-delay: var(--line-delay, 0.5s);
   width: 0;
 }
@@ -976,13 +1010,21 @@ html.light select.liquid-input option {
 
 /* ══════════════════════════════════════════════════════════════
    INTERACTIVE PATTERNS
-   ══════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════ *//* Apple: hover uses critically damped spring — smooth settle, no bounce */
 .hover-lift {
-  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo);
+  transition: transform 0.4s var(--ease-spring-critical), box-shadow 0.4s var(--ease-out-expo);
 }
+
 .hover-lift:hover {
   transform: translateY(-2px);
   box-shadow: var(--lg-shadow-lg);
+}
+
+/* Apple: press is instant — 60ms snappy spring */
+.hover-lift:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 60ms;
+  transition-timing-function: var(--ease-spring-snappy);
 }
 
 .link-underline {
@@ -997,9 +1039,48 @@ html.light select.liquid-input option {
   width: 0;
   height: 1px;
   background: var(--accent-copper);
-  transition: width 0.3s var(--ease-out-expo);
+  transition: width 0.35s var(--ease-spring-critical);
+  transform-origin: left;
 }
 .link-underline:hover::after { width: 100%; }
+
+/* ══════════════════════════════════════════════════════════════
+   NAV SCROLL EDGE EFFECT — Apple pattern
+   Soft gradient mask where content meets floating chrome
+   ══════════════════════════════════════════════════════════════ */
+.nav-scroll-edge::after {
+  content: "";
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 15, 0.6) 0%,
+    rgba(10, 10, 15, 0.3) 40%,
+    transparent 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out-expo);
+  z-index: -1;
+}
+
+html.light .nav-scroll-edge::after {
+  background: linear-gradient(
+    180deg,
+    rgba(245, 243, 238, 0.6) 0%,
+    rgba(245, 243, 238, 0.3) 40%,
+    transparent 100%
+  );
+}
+
+.nav-scrolled .nav-scroll-edge::after {
+  opacity: 1;
+}
 
 /* ══════════════════════════════════════════════════════════════
    SCROLLBAR
@@ -1067,10 +1148,11 @@ html.light select.liquid-input option {
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Scroll reveal (use with useInView hook) ──────────────── */
+/* Apple: scroll reveals use critically damped spring — no overshoot, smooth settle */
 .reveal {
   opacity: 0;
   transform: translateY(32px);
-  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+  transition: opacity 0.7s var(--ease-spring-critical), transform 0.7s var(--ease-spring-critical);
 }
 
 .reveal.visible {
@@ -1081,7 +1163,7 @@ html.light select.liquid-input option {
 .reveal-scale {
   opacity: 0;
   transform: scale(0.93) translateY(16px);
-  transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+  transition: opacity 0.8s var(--ease-spring-critical), transform 0.8s var(--ease-spring-critical);
 }
 
 .reveal-scale.visible {
@@ -1141,13 +1223,65 @@ html.light select.liquid-input option {
 }
 
 /* ── Step visual card — mini mockup styling ──────────────── */
+/* Mobile: transparent (sits inside parent card). Desktop: own glass card */
 .step-visual-card {
+  position: relative;
+  overflow: hidden;
   border-radius: var(--lg-radius-sm);
-  transition: border-color 0.3s var(--ease-out-expo);
+  transition: border-color 0.3s var(--ease-spring-critical);
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
-.step-visual-card:hover {
-  border-color: var(--lg-border-strong);
+.step-visual-card::before {
+  display: none;
+}
+
+/* Desktop: restore glass card appearance */
+@media (min-width: 1024px) {
+  .step-visual-card {
+    background: var(--lg-bg);
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    border: 1px solid var(--lg-border);
+    box-shadow: var(--lg-shadow), var(--lg-inset);
+  }
+
+  .step-visual-card::before {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%);
+    border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  .step-visual-card:hover {
+    border-color: var(--lg-border-strong);
+  }
+}
+
+/* ── Mobile step layout — merge text + visual into one card ─ */
+@media (max-width: 1023px) {
+  /* Collapse gap between the text card and the visual below it */
+  .step-visual-wrapper {
+    margin-top: -1px;
+    border-radius: 0 0 var(--lg-radius-sm) var(--lg-radius-sm);
+    overflow: hidden;
+  }
+
+  /* The text card's bottom border-radius should not clip the visual */
+  .liquid-card.step-card-hover {
+    border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0;
+  }
 }
 
 /* ── Smooth section transitions ───────────────────────────── */
@@ -1160,6 +1294,21 @@ section + section {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   FOCUS VISIBLE — Apple-style keyboard focus rings
+   ══════════════════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--accent-copper);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent-copper);
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════
    SAFE AREA (notched phones)
    ══════════════════════════════════════════════════════════════ */
 @supports (padding: env(safe-area-inset-bottom)) {
@@ -1169,13 +1318,97 @@ section + section {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   REDUCED MOTION
+   REDUCED MOTION & ACCESSIBILITY
+   Apple: "Reduced motion doesn't mean no feedback — it means
+   a gentler, non-vestibular equivalent."
    ══════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 200ms !important;
+    transition-timing-function: ease-out !important;
+  }
+
+  /* Replace slides/springs with cross-fades */
+  .reveal, .reveal-scale {
+    transform: none !important;
+    transition: opacity 0.3s ease-out !important;
+  }
+
+  .reveal.visible, .reveal-scale.visible {
+    opacity: 1;
+  }
+
+  /* Kill parallax-like floating animations */
+  .mockup-float,
+  .orb-1, .orb-2, .orb-3,
+  .hero-particle,
+  .timeline-pulse,
+  .step-node,
+  .glow-breathe,
+  .cta-glow {
+    animation: none !important;
+  }
+
+  /* Kill word-by-word hero stagger — show all at once */
+  .hero-word-animate {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+
+  .accent-line-animate {
+    width: 60px !important;
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
+
+/* Apple: prefers-reduced-transparency — make glass surfaces frostier */
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass, .liquid-glass-strong, .liquid-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .liquid-glass {
+    background: rgba(20, 20, 28, 0.95);
+  }
+
+  .liquid-glass-strong {
+    background: rgba(20, 20, 28, 0.98);
+  }
+
+  .liquid-card {
+    background: rgba(20, 20, 28, 0.92);
+  }
+
+  html.light .liquid-glass {
+    background: rgba(245, 243, 238, 0.98);
+  }
+
+  html.light .liquid-glass-strong {
+    background: rgba(245, 243, 238, 1);
+  }
+
+  html.light .liquid-card {
+    background: rgba(245, 243, 238, 0.95);
+  }
+
+  .nav-scroll-edge::after {
+    backdrop-filter: none;
+  }
+}
+
+/* Apple: prefers-contrast — near-solid backgrounds with defined borders */
+@media (prefers-contrast: more) {
+  .liquid-glass, .liquid-glass-strong, .liquid-card {
+    border-width: 2px;
+    border-color: var(--lg-border-strong);
+  }
+
+  .liquid-btn, .liquid-btn-primary {
+    border-width: 2px;
   }
 }
 
@@ -1183,68 +1416,20 @@ section + section {
    BACKWARD-COMPATIBLE ALIASES
    Old class names → liquid glass
    ══════════════════════════════════════════════════════════════ */
-.glass { background: var(--lg-bg); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); border: 1px solid var(--lg-border); border-radius: var(--lg-radius); box-shadow: var(--lg-shadow), var(--lg-inset); transition: all 0.4s var(--ease-out-expo); }
+.glass { background: var(--lg-bg); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); border: 1px solid var(--lg-border); border-radius: var(--lg-radius); box-shadow: var(--lg-shadow), var(--lg-inset); transition: background 0.4s var(--ease-out), border-color 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out); }
 .glass:hover { background: var(--lg-bg-strong); border-color: var(--lg-border-strong); }
-.glass-card { background: var(--lg-bg); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-sm); box-shadow: var(--lg-shadow), var(--lg-inset); position: relative; overflow: hidden; transition: all 0.4s var(--ease-out-expo); }
+.glass-card { background: var(--lg-bg); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-sm); box-shadow: var(--lg-shadow), var(--lg-inset); position: relative; overflow: hidden; transition: background 0.4s var(--ease-out), border-color 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out), transform 0.4s var(--ease-spring-critical); }
 .glass-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 40%; background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%); border-radius: var(--lg-radius-sm) var(--lg-radius-sm) 0 0; pointer-events: none; opacity: 0.4; }
 .glass-card:hover { border-color: var(--lg-border-strong); transform: translateY(-1px); box-shadow: var(--lg-shadow-lg), var(--lg-inset); }
-.glass-btn { background: var(--lg-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-xs); padding: 10px 24px; color: var(--foreground); font-weight: 500; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s var(--ease-out-expo); }
+.glass-btn { background: var(--lg-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-xs); padding: 10px 24px; color: var(--foreground); font-weight: 500; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; transition: transform 0.15s var(--ease-spring-critical), background 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out); }
 .glass-btn::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%); border-radius: var(--lg-radius-xs) var(--lg-radius-xs) 0 0; pointer-events: none; opacity: 0.4; }
 .glass-btn:hover { background: var(--lg-bg-strong); border-color: var(--lg-border-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
 .glass-btn:active { transform: scale(0.97); }
-.glass-btn-primary { background: linear-gradient(135deg, rgba(201, 168, 124, 0.9), rgba(184, 147, 95, 0.95)); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(201, 168, 124, 0.3); border-radius: var(--lg-radius-xs); padding: 10px 24px; color: #0a0a0f; font-weight: 600; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(201, 168, 124, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2); transition: all 0.2s var(--ease-out-expo); }
+.glass-btn-primary { background: linear-gradient(135deg, rgba(201, 168, 124, 0.9), rgba(184, 147, 95, 0.95)); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(201, 168, 124, 0.3); border-radius: var(--lg-radius-xs); padding: 10px 24px; color: #0a0a0f; font-weight: 600; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(201, 168, 124, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2); transition: transform 0.15s var(--ease-spring-critical), background 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out); }
 .glass-btn-primary::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%); border-radius: var(--lg-radius-xs) var(--lg-radius-xs) 0 0; pointer-events: none; }
 .glass-btn-primary:hover { background: linear-gradient(135deg, rgba(220, 196, 160, 0.95), rgba(201, 168, 124, 1)); box-shadow: 0 8px 32px rgba(201, 168, 124, 0.35); }
 .glass-btn-primary:active { transform: scale(0.97); }
-.glass-input { background: var(--lg-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-xs); padding: 12px 16px; color: var(--foreground); font-size: 14px; outline: none; width: 100%; transition: all 0.3s var(--ease-out-expo); }
+.glass-input { background: var(--lg-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-xs); padding: 12px 16px; color: var(--foreground); font-size: 14px; outline: none; width: 100%; transition: border-color 0.3s var(--ease-out), background 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out); }
 .glass-input:focus { border-color: rgba(201, 168, 124, 0.5); box-shadow: 0 0 0 3px rgba(201, 168, 124, 0.1), 0 0 24px rgba(201, 168, 124, 0.06); }
 
-/* ══════════════════════════════════════════════════════════════
-   TIMELINE & STEP ANIMATIONS
-   ══════════════════════════════════════════════════════════════ */
 
-@keyframes timeline-pulse-move {
-  0% { top: 0; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
-.timeline-pulse {
-  animation: timeline-pulse-move 4s ease-in-out infinite;
-}
-
-@keyframes step-node-glow {
-  0%, 100% { box-shadow: 0 0 16px rgba(201, 168, 124, 0.08), 0 0 24px rgba(201, 168, 124, 0.04); }
-  50% { box-shadow: 0 0 24px rgba(201, 168, 124, 0.15), 0 0 48px rgba(201, 168, 124, 0.06); }
-}
-
-.step-node {
-  animation: step-node-glow 3s ease-in-out infinite;
-}
-
-@keyframes step-card-glow {
-  0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2); }
-  50% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(201, 168, 124, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.2); }
-}
-
-.step-card-hover:hover {
-  animation: step-card-glow 2s ease-in-out infinite;
-}
-
-.step-visual-wrapper {
-  transition: transform 0.4s var(--ease-out-expo);
-}
-
-.step-visual-wrapper:hover {
-  transform: translateY(-4px) scale(1.01);
-}
-
-.step-visual-card {
-  border-radius: var(--lg-radius-sm);
-  transition: border-color 0.3s var(--ease-out-expo);
-}
-
-.step-visual-card:hover {
-  border-color: var(--lg-border-strong);
-}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -17,13 +17,39 @@ interface ToastProps {
 }
 
 function ToastItem({ toast, onDismiss }: ToastProps) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onDismiss(toast.id);
-    }, toast.duration || (toast.type === "error" ? 8000 : 5000));
+  const [isVisible, setIsVisible] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    return () => clearTimeout(timer);
+  // Emil: enter on mount
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
+
+  // Emil: auto-dismiss with pause-on-hover
+  useEffect(() => {
+    const duration = toast.duration || (toast.type === "error" ? 8000 : 5000);
+    timerRef.current = setTimeout(() => {
+      setIsExiting(true);
+      setTimeout(() => onDismiss(toast.id), 300);
+    }, duration);
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [toast, onDismiss]);
+
+  const handleMouseEnter = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
+
+  const handleMouseLeave = () => {
+    const duration = toast.duration || (toast.type === "error" ? 8000 : 5000);
+    timerRef.current = setTimeout(() => {
+      setIsExiting(true);
+      setTimeout(() => onDismiss(toast.id), 300);
+    }, duration);
+  };
 
   const icons = {
     success: (
@@ -48,24 +74,67 @@ function ToastItem({ toast, onDismiss }: ToastProps) {
     ),
   };
 
-  const colors = {
-    success: "bg-[#7CB87C]/10 border-[#7CB87C]/20 text-[#7CB87C]",
-    error: "bg-[#E06C75]/10 border-[#E06C75]/20 text-[#E06C75]",
-    info: "bg-[#61AFEF]/10 border-[#61AFEF]/20 text-[#61AFEF]",
-    warning: "bg-[#E5C07B]/10 border-[#E5C07B]/20 text-[#E5C07B]",
+  const colorMap = {
+    success: {
+      bg: "rgba(124, 184, 124, 0.1)",
+      border: "rgba(124, 184, 124, 0.2)",
+      text: "var(--success)",
+    },
+    error: {
+      bg: "rgba(201, 124, 124, 0.1)",
+      border: "rgba(201, 124, 124, 0.2)",
+      text: "var(--danger)",
+    },
+    info: {
+      bg: "rgba(124, 158, 201, 0.1)",
+      border: "rgba(124, 158, 201, 0.2)",
+      text: "var(--info)",
+    },
+    warning: {
+      bg: "rgba(229, 192, 123, 0.1)",
+      border: "rgba(229, 192, 123, 0.2)",
+      text: "#e5c07b",
+    },
   };
+
+  const colors = colorMap[toast.type];
 
   return (
     <div
-      className={`flex items-center gap-3 p-4 border rounded-lg shadow-lg animate-slide-in ${colors[toast.type]}`}
+      className="flex items-center gap-3 p-4 rounded-lg"
+      style={{
+        backgroundColor: colors.bg,
+        border: `1px solid ${colors.border}`,
+        color: colors.text,
+        boxShadow: "var(--lg-shadow)",
+        // Emil: enter/exit from same edge (bottom-right), symmetric paths
+        opacity: isExiting ? 0 : isVisible ? 1 : 0,
+        transform: isExiting
+          ? "translateX(100%) scale(0.95)"
+          : isVisible
+          ? "translateX(0) scale(1)"
+          : "translateX(100%) scale(0.95)",
+        // Emil: toast uses ease for elegance, not ease-out — matches Sonner's personality
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+      }}
       role="alert"
       aria-live="polite"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {icons[toast.type]}
       <p className="flex-1 text-[13px]">{toast.message}</p>
       <button
-        onClick={() => onDismiss(toast.id)}
-        className="p-1 hover:opacity-70 transition-opacity"
+        onClick={() => {
+          setIsExiting(true);
+          setTimeout(() => onDismiss(toast.id), 300);
+        }}
+        className="p-1"
+        style={{
+          transition: "opacity 0.15s ease",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
         aria-label="Dismiss"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

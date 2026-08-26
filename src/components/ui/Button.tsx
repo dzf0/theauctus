@@ -1,6 +1,6 @@
 "use client";
 
-import { ButtonHTMLAttributes, forwardRef, useRef, useState } from "react";
+import { ButtonHTMLAttributes, forwardRef } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -21,61 +21,48 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className = "",
       disabled,
       children,
-      onClick,
       ...props
     },
     ref
   ) => {
-    const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
-    const buttonRef = useRef<HTMLButtonElement>(null);
-
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-      const button = buttonRef.current;
-      if (button) {
-        const rect = button.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const id = Date.now();
-        setRipples((prev) => [...prev, { x, y, id }]);
-        setTimeout(() => {
-          setRipples((prev) => prev.filter((r) => r.id !== id));
-        }, 600);
-      }
-      onClick?.(e);
-    };
-
     const baseStyles =
       "relative inline-flex items-center justify-center font-medium overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-copper)] disabled:opacity-40 disabled:cursor-not-allowed select-none";
 
+    // Emil: specific transition properties, never `transition: all`
     const variantStyles: Record<string, React.CSSProperties> = {
       primary: {
         background: "linear-gradient(135deg, var(--accent-copper), var(--primary-dark))",
         color: "#0a0a0f",
         border: "1px solid rgba(201, 168, 124, 0.3)",
         boxShadow: "0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+        transition: "transform 0.15s var(--ease-spring-critical), box-shadow 0.25s var(--ease-out), background 0.25s var(--ease-out)",
       },
       secondary: {
         background: "var(--lg-bg)",
         color: "var(--foreground)",
         border: "1px solid var(--lg-border)",
+        transition: "transform 0.15s var(--ease-spring-critical), background 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out)",
       },
       ghost: {
         background: "transparent",
         color: "var(--muted)",
         border: "1px solid transparent",
+        transition: "transform 0.15s var(--ease-spring-critical), color 0.2s var(--ease-out), background 0.2s var(--ease-out)",
       },
       danger: {
-        background: "rgba(224, 108, 117, 0.1)",
+        background: "rgba(201, 124, 124, 0.1)",
         color: "var(--danger)",
-        border: "1px solid rgba(224, 108, 117, 0.2)",
+        border: "1px solid rgba(201, 124, 124, 0.2)",
+        transition: "transform 0.15s var(--ease-spring-critical), background 0.25s var(--ease-out), border-color 0.25s var(--ease-out)",
       },
     };
 
+    // Emil: subtle hover effects, scale(0.97) on press
     const variantClasses: Record<string, string> = {
-      primary: "hover:shadow-[0_4px_16px_rgba(201,168,124,0.3)] active:scale-[0.98]",
-      secondary: "hover:bg-[var(--lg-bg-strong)] hover:border-[var(--lg-border-strong)] active:scale-[0.98]",
-      ghost: "hover:text-[var(--foreground)] hover:bg-[var(--lg-bg)] active:scale-[0.98]",
-      danger: "hover:bg-[rgba(224,108,117,0.2)] hover:border-[rgba(224,108,117,0.3)] active:scale-[0.98]",
+      primary: "hover:shadow-[0_4px_16px_rgba(201,168,124,0.3)]",
+      secondary: "hover:bg-[var(--lg-bg-strong)] hover:border-[var(--lg-border-strong)]",
+      ghost: "hover:text-[var(--foreground)] hover:bg-[var(--lg-bg)]",
+      danger: "hover:bg-[rgba(201,124,124,0.2)] hover:border-[rgba(201,124,124,0.3)]",
     };
 
     const sizes: Record<string, string> = {
@@ -86,37 +73,22 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <button
-        ref={(node) => {
-          (buttonRef as React.MutableRefObject<HTMLButtonElement | null>).current = node;
-          if (typeof ref === "function") ref(node);
-          else if (ref) ref.current = node;
-        }}
+        ref={ref}
         className={`${baseStyles} ${variantClasses[variant]} ${sizes[size]} ${className}`}
         style={variantStyles[variant]}
         disabled={disabled || loading}
-        onClick={handleClick}
+        // Emil: respond on pointer-down, not release — instant scale feedback
+        onPointerDown={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "scale(0.97)";
+        }}
+        onPointerUp={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "";
+        }}
+        onPointerLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = "";
+        }}
         {...props}
       >
-        {/* Ripple effect */}
-        {ripples.map((ripple) => (
-          <span
-            key={ripple.id}
-            className="absolute rounded-full bg-white/20 pointer-events-none animate-[ripple_0.6s_ease-out_forwards]"
-            style={{
-              left: ripple.x,
-              top: ripple.y,
-              width: 0,
-              height: 0,
-              transform: "translate(-50%, -50%)",
-            }}
-          />
-        ))}
-
-        {/* Shine sweep overlay */}
-        <span className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
-          <span className="absolute inset-0 -translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-        </span>
-
         {loading ? (
           <svg className="animate-spin -ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

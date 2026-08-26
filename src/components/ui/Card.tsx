@@ -9,26 +9,31 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ variant = "default", padding = "md", className = "", children, ...props }, ref) => {
-    const baseStyles = "rounded-lg border relative overflow-hidden transition-all duration-300";
+    const baseStyles = "rounded-lg border relative overflow-hidden";
 
+    // Emil: specific transitions, never `transition: all`
     const variantStyles: Record<string, React.CSSProperties> = {
       default: {
         background: "var(--lg-bg)",
         borderColor: "var(--lg-border)",
+        transition: "border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out)",
       },
       interactive: {
         background: "var(--lg-bg)",
         borderColor: "var(--lg-border)",
         cursor: "pointer",
+        transition: "transform 0.3s var(--ease-spring-critical), border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out)",
       },
       selected: {
         background: "rgba(201, 168, 124, 0.1)",
         borderColor: "rgba(201, 168, 124, 0.3)",
         boxShadow: "0 0 20px rgba(201, 168, 124, 0.08)",
+        transition: "border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out)",
       },
       stat: {
         background: "var(--lg-bg)",
         borderColor: "var(--lg-border)",
+        transition: "border-color 0.3s var(--ease-out)",
       },
     };
 
@@ -39,17 +44,44 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       lg: "p-6",
     };
 
-    const hoverClass = variant === "interactive"
-      ? "hover:border-[var(--lg-border-strong)] hover:-translate-y-0.5 active:translate-y-0"
-      : variant === "stat"
-      ? "hover:border-[var(--lg-border-strong)]"
-      : "";
+    // Emil: interactive cards lift on hover, press snaps back
+    const hoverHandlers =
+      variant === "interactive"
+        ? {
+            onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.borderColor = "var(--lg-border-strong)";
+              e.currentTarget.style.boxShadow = "var(--lg-shadow)";
+            },
+            onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.borderColor = "";
+              e.currentTarget.style.boxShadow = "";
+            },
+            onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
+              e.currentTarget.style.transform = "translateY(0) scale(0.99)";
+            },
+            onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+            },
+          }
+        : variant === "stat"
+        ? {
+            onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+              e.currentTarget.style.borderColor = "var(--lg-border-strong)";
+            },
+            onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
+              e.currentTarget.style.borderColor = "";
+            },
+          }
+        : {};
 
     return (
       <div
         ref={ref}
-        className={`${baseStyles} ${paddings[padding]} ${hoverClass} ${className}`}
+        className={`${baseStyles} ${paddings[padding]} ${className}`}
         style={variantStyles[variant]}
+        {...hoverHandlers}
         {...props}
       >
         {children}
