@@ -147,8 +147,8 @@ export default function QueuePage() {
         )}
       </div>
 
-      {/* ── Posts table ─────────────────────────────────────── */}
-      <div className="liquid-card overflow-hidden">
+      {/* ── Posts: Desktop table ──────────────────────────── */}
+      <div className="hidden sm:block liquid-card overflow-hidden">
         {/* Table header */}
         <div className="grid grid-cols-[40px_1fr_120px_100px_100px_120px] gap-4 px-5 py-3 text-xs font-medium uppercase tracking-wider" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`, color: isDark ? "#7a756f" : "#6b6560" }}>
           <div>
@@ -239,6 +239,64 @@ export default function QueuePage() {
 
         {posts.length === 0 && (
           <div className="text-center py-12" style={{ color: "var(--muted)" }}>
+            <p className="text-sm">No posts match your filters</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Posts: Mobile cards ───────────────────────────── */}
+      <div className="sm:hidden space-y-3">
+        {posts.map((post) => {
+          const config = platformConfig[post.platform];
+          const isSelected = selectedPosts.has(post.id);
+
+          return (
+            <div
+              key={post.id}
+              className="liquid-card p-4 transition-colors duration-300"
+              style={{
+                background: isSelected ? "rgba(124, 158, 201, 0.05)" : undefined,
+              }}
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelect(post.id)}
+                    className="rounded mt-0.5"
+                  />
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium"
+                    style={{ backgroundColor: `${config.color}15`, color: config.color }}
+                  >
+                    {config.icon} {config.label}
+                  </span>
+                </div>
+                <StatusBadge status={post.status} isDark={isDark} />
+              </div>
+              <p className="text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
+                {post.title}
+              </p>
+              <p className="text-xs line-clamp-2 mb-2" style={{ color: "var(--muted)" }}>
+                {post.content.slice(0, 120)}...
+              </p>
+              <div className="flex items-center justify-between text-[11px]" style={{ color: "var(--muted)" }}>
+                <span className="capitalize">{post.contentType}</span>
+                <span>
+                  {post.scheduledAt
+                    ? new Date(post.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                    : post.publishedAt
+                    ? new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                    : "—"}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+
+        {posts.length === 0 && (
+          <div className="liquid-card text-center py-12" style={{ color: "var(--muted)" }}>
             <p className="text-sm">No posts match your filters</p>
           </div>
         )}

@@ -69,8 +69,7 @@ function CreditUsageChart({ history }: { history: CreditHistoryEntry[] }) {
       <div className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${chartW} ${chartH + 20}`}
-          className="w-full"
-          style={{ minWidth: days.length > 10 ? 400 : undefined }}
+          className="w-full max-w-full"
         >
           {/* Baseline */}
           <line x1="20" y1={baseline} x2={chartW - 20} y2={baseline} stroke="var(--lg-border)" strokeWidth="1" />
