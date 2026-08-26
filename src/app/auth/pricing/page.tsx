@@ -82,9 +82,9 @@ export default function PricingPage() {
       }
 
       // Demo mode or success — go to onboarding
-      router.push("/onboarding");
+      router.push("/dashboard");
     } catch {
-      router.push("/onboarding");
+      router.push("/dashboard");
     } finally {
       setPurchasing(null);
     }
@@ -113,9 +113,9 @@ export default function PricingPage() {
         window.location.href = data.url;
         return;
       }
-      router.push("/onboarding");
+      router.push("/dashboard");
     } catch {
-      router.push("/onboarding");
+      router.push("/dashboard");
     } finally {
       setPurchasing(null);
     }
@@ -124,7 +124,7 @@ export default function PricingPage() {
   const customCredits = customAmount ? Math.floor(parseFloat(customAmount || "0") / CUSTOM_CREDIT_RATE) : 0;
 
   const handleSkip = () => {
-    router.push("/onboarding");
+    router.push("/dashboard");
   };
 
   if (loading) {

@@ -86,7 +86,7 @@ function handleCorsPreflight(request: NextRequest): NextResponse | null {
 // MAIN MIDDLEWARE
 // ══════════════════════════════════════════════════════════════
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // ── CORS preflight ──────────────────────────────────────────
   const preflightResponse = handleCorsPreflight(request);
   if (preflightResponse) return preflightResponse;

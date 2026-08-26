@@ -156,6 +156,21 @@ export default function UsernamePage() {
         return;
       }
 
+      // Save onboarding data from localStorage if present
+      const savedOnboarding = localStorage.getItem("theauctus-onboarding");
+      if (savedOnboarding) {
+        try {
+          const onboardingData = JSON.parse(savedOnboarding);
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(onboardingData),
+          });
+          localStorage.removeItem("theauctus-onboarding");
+        } catch {
+          // Continue anyway
+        }
+      }
       router.push("/auth/pricing");
     } catch {
       setError("Something went wrong. Please try again.");
@@ -163,7 +178,22 @@ export default function UsernamePage() {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    // Save onboarding data from localStorage if present
+    const savedOnboarding = localStorage.getItem("theauctus-onboarding");
+    if (savedOnboarding) {
+      try {
+        const onboardingData = JSON.parse(savedOnboarding);
+        await fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(onboardingData),
+        });
+        localStorage.removeItem("theauctus-onboarding");
+      } catch {
+        // Continue anyway
+      }
+    }
     router.push("/auth/pricing");
   };
 

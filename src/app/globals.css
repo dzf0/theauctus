@@ -2,31 +2,32 @@
 
 :root {
   /* ══════════════════════════════════════════════════════════════
-     LIQUID GLASS DESIGN TOKENS — Dark Mode
+     APPLE DESIGN SYSTEM — Dark Mode
+     True black canvas · #F5F5F7 type · #86868B muted · copper accent
      ══════════════════════════════════════════════════════════════ */
-  --background: #0a0a0f;
-  --foreground: #f0ece6;
+  --background: #000000;
+  --foreground: #f5f5f7;
   --primary: #c9a87c;
   --primary-dark: #b8935f;
   --primary-light: #dcc4a0;
   --accent: #c9a87c;
   --accent-copper: #c9a87c;
   --accent-rose: #d4a5a5;
-  --muted: #7a756f;
+  --muted: #86868b;
   --border: rgba(255, 255, 255, 0.08);
   --card: rgba(255, 255, 255, 0.04);
   --glass: rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-hover: rgba(255, 255, 255, 0.08);
-  --sidebar-bg: rgba(12, 12, 18, 0.85);
-  --sidebar-text: #8a8580;
+  --sidebar-bg: rgba(10, 10, 12, 0.85);
+  --sidebar-text: #86868b;
   --sidebar-active: #c9a87c;
-  --headline-color: #9a9590;
+  --headline-color: #a1a1a6;
   --success: #7cb87c;
   --danger: #c97c7c;
   --info: #7c9ec9;
-  --warm-white: #f0ece6;
-  --cool-grey: #9a9590;
+  --warm-white: #f5f5f7;
+  --cool-grey: #86868b;
 
   /* Liquid glass tokens */
   --lg-blur: 40px;
@@ -96,29 +97,29 @@
    LIGHT MODE — Liquid Glass
    ══════════════════════════════════════════════════════════════ */
 html.light {
-  --background: #f5f3ee;
-  --foreground: #1a1816;
+  --background: #ffffff;
+  --foreground: #1d1d1f;
   --primary: #8a6828;
   --primary-dark: #7a5e22;
   --primary-light: #b8935f;
   --accent: #8a6828;
   --accent-copper: #8a6828;
   --accent-rose: #b56b6b;
-  --muted: #6b6560;
+  --muted: #86868b;
   --border: rgba(0, 0, 0, 0.06);
   --card: rgba(0, 0, 0, 0.02);
   --glass: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-hover: rgba(255, 255, 255, 0.7);
-  --sidebar-bg: rgba(245, 243, 238, 0.85);
-  --sidebar-text: #6b6560;
+  --sidebar-bg: rgba(250, 250, 252, 0.85);
+  --sidebar-text: #86868b;
   --sidebar-active: #8a6828;
-  --headline-color: #4a4540;
+  --headline-color: #424245;
   --success: #3d8b37;
   --danger: #b91c1c;
   --info: #2563eb;
-  --warm-white: #1a1816;
-  --cool-grey: #4a4540;
+  --warm-white: #1d1d1f;
+  --cool-grey: #424245;
 
   --lg-bg: rgba(255, 255, 255, 0.45);
   --lg-bg-strong: rgba(255, 255, 255, 0.65);
@@ -131,12 +132,12 @@ html.light {
 }
 
 html.light body {
-  background: #f5f3ee;
-  color: #1a1816;
+  background: #ffffff;
+  color: #1d1d1f;
 }
 
 html.light .editorial-bg {
-  background: #f5f3ee;
+  background: #ffffff;
 }
 
 html.light .editorial-bg::after {
@@ -162,7 +163,7 @@ html.light .liquid-sidebar {
 html.light .liquid-input {
   background: rgba(255, 255, 255, 0.5);
   border-color: rgba(0, 0, 0, 0.08);
-  color: #1a1816;
+  color: #1d1d1f;
 }
 
 html.light .liquid-input:focus {
@@ -173,7 +174,7 @@ html.light .liquid-input:focus {
 html.light .liquid-btn {
   background: rgba(255, 255, 255, 0.5);
   border-color: rgba(0, 0, 0, 0.08);
-  color: #1a1816;
+  color: #1d1d1f;
 }
 
 html.light .liquid-btn:hover {
@@ -212,7 +213,7 @@ html.light .text-\[\#faf8f5\],
 html.light .text-\[\#e8e4de\],
 html.light .text-white,
 html.light [class*="text-[#f"] {
-  color: #1a1816 !important;
+  color: #1d1d1f !important;
   transition: color 0.6s var(--ease-out-expo);
 }
 
@@ -222,7 +223,7 @@ html.light .font-headline-bold,
 html.light h1,
 html.light h2,
 html.light h3 {
-  color: #1a1816 !important;
+  color: #1d1d1f !important;
   transition: color 0.6s var(--ease-out-expo);
 }
 
@@ -241,7 +242,7 @@ html.light .bg-\[\#0c0c12\],
 html.light .bg-\[\#111118\],
 html.light .bg-\[\#1a1a2e\],
 html.light [class*="bg-[#0"] {
-  background-color: #f5f3ee !important;
+  background-color: #ffffff !important;
 }
 
 /* Glass backgrounds → light glass */
@@ -283,7 +284,7 @@ html.light [class*="bg-[rgba(255,255,255,0.05)]"],
 html.light [class*="border-[rgba(255,255,255,0.08)]"] {
   background: rgba(255, 255, 255, 0.7) !important;
   border-color: rgba(0, 0, 0, 0.1) !important;
-  color: #1a1816 !important;
+  color: #1d1d1f !important;
 }
 
 /* Card hover shadows → lighter */
@@ -293,13 +294,13 @@ html.light [class*="shadow-[0_8"] {
 
 /* Spec-list strong → dark */
 html.light .spec-list strong {
-  color: #1a1816 !important;
+  color: #1d1d1f !important;
 }
 
 /* Dashboard sidebar → light */
 html.light .liquid-sidebar,
 html.light .glass-sidebar {
-  background: rgba(245, 243, 238, 0.9) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
   border-right-color: rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -567,7 +568,7 @@ select.liquid-input option {
 
 html.light select.liquid-input option {
   background: #ffffff;
-  color: #1a1816;
+  color: #1d1d1f;
 }
 
 /* ── Liquid Button ─────────────────────────────────────────── */
@@ -1072,8 +1073,8 @@ html.light select.liquid-input option {
 html.light .nav-scroll-edge::after {
   background: linear-gradient(
     180deg,
-    rgba(245, 243, 238, 0.6) 0%,
-    rgba(245, 243, 238, 0.3) 40%,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 40%,
     transparent 100%
   );
 }
@@ -1384,15 +1385,15 @@ a:focus-visible {
   }
 
   html.light .liquid-glass {
-    background: rgba(245, 243, 238, 0.98);
+    background: rgba(255, 255, 255, 0.98);
   }
 
   html.light .liquid-glass-strong {
-    background: rgba(245, 243, 238, 1);
+    background: rgba(255, 255, 255, 1);
   }
 
   html.light .liquid-card {
-    background: rgba(245, 243, 238, 0.95);
+    background: rgba(255, 255, 255, 0.95);
   }
 
   .nav-scroll-edge::after {
@@ -1433,3 +1434,259 @@ a:focus-visible {
 .glass-input:focus { border-color: rgba(201, 168, 124, 0.5); box-shadow: 0 0 0 3px rgba(201, 168, 124, 0.1), 0 0 24px rgba(201, 168, 124, 0.06); }
 
 
+
+/* ══════════════════════════════════════════════════════════════
+   APPLE MOTION SYSTEM v2 — hardcore animation layer
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Scroll progress bar ──────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  z-index: 100;
+  background: linear-gradient(90deg, var(--accent-copper), var(--primary-light));
+  transform-origin: 0 50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* ── 2. Word-by-word blur-to-sharp reveal ────────────────────── */
+@keyframes word-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.word-reveal {
+  display: inline-block;
+  opacity: 0;
+  animation: word-reveal-in 0.9s var(--ease-out-expo) forwards;
+  animation-delay: var(--word-delay, 0s);
+  will-change: transform, filter, opacity;
+}
+
+/* ── 3. Section zoom reveal — scale 0.96→1 + rise + fade ─────── */
+.reveal-zoom {
+  opacity: 0;
+  transform: translateY(48px) scale(0.96);
+  transition:
+    opacity 1s var(--ease-out-expo),
+    transform 1s var(--ease-out-expo);
+  will-change: transform, opacity;
+}
+
+.reveal-zoom.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Slide from side */
+.reveal-left,
+.reveal-right {
+  opacity: 0;
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo);
+}
+.reveal-left { transform: translateX(-56px); }
+.reveal-right { transform: translateX(56px); }
+.reveal-left.visible,
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── 4. 3D tilt card — driven by --tilt-x / --tilt-y vars ────── */
+.tilt-card {
+  transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateZ(0);
+  transition: transform 0.35s var(--ease-spring-critical), box-shadow 0.35s var(--ease-out-expo);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-card:hover {
+  box-shadow: var(--lg-shadow-lg), 0 24px 64px rgba(201, 168, 124, 0.08);
+}
+.tilt-card-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    600px circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, 0.08),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 2;
+}
+.tilt-card:hover .tilt-card-glare { opacity: 1; }
+
+/* ── 5. Magnetic button — JS sets --pull-x/--pull-y ──────────── */
+.magnetic-btn {
+  transform: translate(var(--pull-x, 0px), var(--pull-y, 0px));
+  transition: transform 0.25s var(--ease-spring-critical);
+  will-change: transform;
+}
+
+/* ── 6. Marquee — infinite platform scroll ───────────────────── */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 32s linear infinite;
+  will-change: transform;
+}
+.marquee-mask:hover .marquee-track { animation-play-state: paused; }
+.marquee-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* ── 7. Mouse-follow mesh gradient — hero backdrop ───────────── */
+.mesh-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+  will-change: transform;
+}
+@keyframes mesh-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(60px, -40px, 0) scale(1.12); }
+  66% { transform: translate3d(-40px, 30px, 0) scale(0.92); }
+}
+@keyframes mesh-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-70px, 50px, 0) scale(1.15); }
+}
+.mesh-drift-a { animation: mesh-drift-a 16s ease-in-out infinite; }
+.mesh-drift-b { animation: mesh-drift-b 20s ease-in-out infinite; }
+
+/* ── 8. Stagger children utility ─────────────────────────────── */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s var(--ease-out-expo),
+    transform 0.8s var(--ease-out-expo);
+}
+.stagger.visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stagger.visible > *:nth-child(1) { transition-delay: 0ms; }
+.stagger.visible > *:nth-child(2) { transition-delay: 80ms; }
+.stagger.visible > *:nth-child(3) { transition-delay: 160ms; }
+.stagger.visible > *:nth-child(4) { transition-delay: 240ms; }
+.stagger.visible > *:nth-child(5) { transition-delay: 320ms; }
+.stagger.visible > *:nth-child(6) { transition-delay: 400ms; }
+.stagger.visible > *:nth-child(7) { transition-delay: 480ms; }
+.stagger.visible > *:nth-child(8) { transition-delay: 560ms; }
+
+/* ── 9. Animated gradient text shimmer ───────────────────────── */
+@keyframes text-shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.text-shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--foreground) 30%,
+    var(--accent-copper) 48%,
+    var(--primary-light) 52%,
+    var(--foreground) 70%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shimmer 6s linear infinite;
+}
+
+/* ── 10. Scroll hint bounce ──────────────────────────────────── */
+@keyframes scroll-hint-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+.scroll-hint {
+  animation: scroll-hint-bounce 2s var(--ease-in-out) infinite;
+}
+
+/* ── 11. Card border draw on hover ───────────────────────────── */
+.border-glow-card {
+  position: relative;
+}
+.border-glow-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    300px circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(201, 168, 124, 0.55),
+    transparent 60%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.border-glow-card:hover::after { opacity: 1; }
+
+/* ── 12. Page enter choreography helpers ─────────────────────── */
+.enter-seq {
+  opacity: 0;
+  animation: enter-rise 0.9s var(--ease-out-expo) forwards;
+  animation-delay: var(--seq-delay, 0s);
+}
+@keyframes enter-rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduced motion: everything above collapses to fades */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress,
+  .marquee-track,
+  .text-shimmer,
+  .mesh-drift-a,
+  .mesh-drift-b,
+  .scroll-hint {
+    animation: none !important;
+  }
+  .word-reveal,
+  .enter-seq {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+  .reveal-zoom,
+  .reveal-left,
+  .reveal-right,
+  .stagger > * {
+    transform: none !important;
+    transition-duration: 0.3s !important;
+  }
+  .tilt-card {
+    transform: none !important;
+  }
+  .magnetic-btn {
+    transform: none !important;
+  }
+}

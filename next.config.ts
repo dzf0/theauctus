@@ -57,16 +57,6 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Static assets - cache aggressively
-        source: "/_next/static/(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
         // Images - cache for 1 week
         source: "/(.*)\\.(jpg|jpeg|png|gif|ico|svg|webp|avif)",
         headers: [

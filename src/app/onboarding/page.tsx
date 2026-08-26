@@ -209,27 +209,17 @@ export default function OnboardingPage() {
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
-    try {
-      const response = await fetch("/api/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          niche: formData.niche === "Other" ? formData.customNiche : formData.niche,
-          brandVoice: formData.brandVoice,
-          tonePreferences: formData.tonePreferences,
-          targetAudience: formData.targetAudience,
-          contentGoals: formData.contentGoals,
-          postingFrequency: formData.postingFrequency,
-          onboarded: true,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) { setError(data.error || "Failed to save profile"); setLoading(false); return; }
-      setShowLoader(true);
-    } catch {
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
-    }
+    const onboardingData = {
+      niche: formData.niche === "Other" ? formData.customNiche : formData.niche,
+      brandVoice: formData.brandVoice,
+      tonePreferences: formData.tonePreferences,
+      targetAudience: formData.targetAudience,
+      contentGoals: formData.contentGoals,
+      postingFrequency: formData.postingFrequency,
+      onboarded: true,
+    };
+    localStorage.setItem("theauctus-onboarding", JSON.stringify(onboardingData));
+    setShowLoader(true);
   };
 
   const handleSkip = async () => {
@@ -238,29 +228,21 @@ export default function OnboardingPage() {
       setError("Please fill in your niche and target audience (at least 10 characters) before continuing.");
       return;
     }
-    // Save what they have and mark onboarded
-    try {
-      await fetch("/api/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          niche: formData.niche === "Other" ? formData.customNiche : formData.niche,
-          brandVoice: formData.brandVoice || "professional",
-          tonePreferences: formData.tonePreferences.length > 0 ? formData.tonePreferences : ["Friendly"],
-          targetAudience: formData.targetAudience,
-          contentGoals: formData.contentGoals.length > 0 ? formData.contentGoals : ["engagement"],
-          postingFrequency: formData.postingFrequency || "3-5x-week",
-          onboarded: true,
-        }),
-      });
-    } catch {
-      // Continue anyway
-    }
+    const onboardingData = {
+      niche: formData.niche === "Other" ? formData.customNiche : formData.niche,
+      brandVoice: formData.brandVoice || "professional",
+      tonePreferences: formData.tonePreferences.length > 0 ? formData.tonePreferences : ["Friendly"],
+      targetAudience: formData.targetAudience,
+      contentGoals: formData.contentGoals.length > 0 ? formData.contentGoals : ["engagement"],
+      postingFrequency: formData.postingFrequency || "3-5x-week",
+      onboarded: true,
+    };
+    localStorage.setItem("theauctus-onboarding", JSON.stringify(onboardingData));
     setShowLoader(true);
   };
 
   const handleLoaderComplete = () => {
-    router.push("/auth/pricing");
+    router.push("/auth/signup");
   };
 
   // Show animated loader

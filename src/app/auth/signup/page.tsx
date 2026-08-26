@@ -112,11 +112,44 @@ export default function SignUpPage() {
       if (authError) { setError(authError.message || "Failed to create account"); setLoading(false); return; }
 
       if (data.user && !data.session) {
+      // Save onboarding data from localStorage if present
+      const savedOnboarding = localStorage.getItem("theauctus-onboarding");
+      if (savedOnboarding) {
+        try {
+          const onboardingData = JSON.parse(savedOnboarding);
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(onboardingData),
+          });
+          localStorage.removeItem("theauctus-onboarding");
+        } catch {
+          // Continue anyway — onboarding data is optional
+        }
+      }
         router.push(`/auth/verify-otp?email=${encodeURIComponent(formData.email)}`);
         return;
       }
 
-      if (data.session) { router.push("/auth/pricing"); router.refresh(); }
+      if (data.session) {
+      // Save onboarding data from localStorage if present
+      const savedOnboarding = localStorage.getItem("theauctus-onboarding");
+      if (savedOnboarding) {
+        try {
+          const onboardingData = JSON.parse(savedOnboarding);
+          await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(onboardingData),
+          });
+          localStorage.removeItem("theauctus-onboarding");
+        } catch {
+          // Continue anyway — onboarding data is optional
+        }
+      }
+        router.push("/auth/pricing");
+        router.refresh();
+      }
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
