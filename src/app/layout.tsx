@@ -1,8 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/components/user-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/cookie-consent";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "TheAuctus — Automated Creator Growth Engine",
@@ -26,13 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`h-full antialiased ${playfair.variable} ${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col editorial-bg">
         <ThemeProvider>
           <UserProvider>
