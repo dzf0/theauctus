@@ -1874,12 +1874,6 @@ a:focus-visible {
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
-@media (max-width: 768px) {
-  .bento-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
-  .bento-grid { grid-template-columns: 1fr; }
-}
 .bento-card {
   position: relative;
   overflow: hidden;
@@ -1910,9 +1904,7 @@ a:focus-visible {
 .bento-card-span-2 {
   grid-column: span 2;
 }
-@media (max-width: 768px) {
-  .bento-card-span-2 { grid-column: span 1; }
-}
+/* Bento cards span 2 columns on all screen sizes */
 
 /* ── Glow border on hover ──────────────────────────────── */
 .bento-glow {

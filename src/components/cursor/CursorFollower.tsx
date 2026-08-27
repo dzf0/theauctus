@@ -44,13 +44,30 @@ export default function CursorFollower() {
     };
     rafId = requestAnimationFrame(tick);
 
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+        show();
+        dot.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`;
+      }
+    };
+
+    const onTouchEnd = () => {
+      hide();
+    };
+
     window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
     document.addEventListener("mouseleave", hide);
     document.addEventListener("mouseenter", show);
 
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("mouseleave", hide);
       document.removeEventListener("mouseenter", show);
     };

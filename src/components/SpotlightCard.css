@@ -36,7 +36,8 @@
 }
 
 .card-spotlight:hover::before,
-.card-spotlight:focus-within::before {
+.card-spotlight:focus-within::before,
+.card-spotlight:active::before {
   opacity: 1;
 }
 

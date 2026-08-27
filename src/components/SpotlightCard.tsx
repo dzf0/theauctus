@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
 import "./SpotlightCard.css";
 
 const SpotlightCard = ({
@@ -14,20 +14,32 @@ const SpotlightCard = ({
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = divRef.current!.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  const updateSpotlight = useCallback((clientX: number, clientY: number) => {
+    const el = divRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    el.style.setProperty("--mouse-x", `${x}px`);
+    el.style.setProperty("--mouse-y", `${y}px`);
+    el.style.setProperty("--spotlight-color", spotlightColor);
+  }, [spotlightColor]);
 
-    divRef.current!.style.setProperty("--mouse-x", `${x}px`);
-    divRef.current!.style.setProperty("--mouse-y", `${y}px`);
-    divRef.current!.style.setProperty("--spotlight-color", spotlightColor);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    updateSpotlight(e.clientX, e.clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      updateSpotlight(e.touches[0].clientX, e.touches[0].clientY);
+    }
   };
 
   return (
     <div
       ref={divRef}
       onMouseMove={handleMouseMove}
+      onTouchMove={handleTouchMove}
       className={`card-spotlight ${className}`}
     >
       {children}

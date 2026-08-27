@@ -38,18 +38,4 @@
   will-change: transform;
 }
 
-/* Hide both on touch devices */
-@media (hover: none) and (pointer: coarse) {
-  .cursor-dot,
-  .cursor-ring {
-    display: none !important;
-  }
-}
-
-/* Also hide on small screens */
-@media (max-width: 768px) {
-  .cursor-dot,
-  .cursor-ring {
-    display: none !important;
-  }
-}
+/* Keep cursor visible on all devices */

@@ -190,27 +190,40 @@ export function CountUp({
 export function useMagnetic(strength = 6) {
   const ref = useRef<HTMLElement>(null);
 
+  const updatePull = useCallback((clientX: number, clientY: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
+    el.style.setProperty("--pull-x", `${(dx / rect.width) * strength * 2}px`);
+    el.style.setProperty("--pull-y", `${(dy / rect.height) * strength * 2}px`);
+  }, [strength]);
+
   const onMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      const el = ref.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const dx = e.clientX - (rect.left + rect.width / 2);
-      const dy = e.clientY - (rect.top + rect.height / 2);
-      el.style.setProperty("--pull-x", `${(dx / rect.width) * strength * 2}px`);
-      el.style.setProperty("--pull-y", `${(dy / rect.height) * strength * 2}px`);
+      updatePull(e.clientX, e.clientY);
     },
-    [strength]
+    [updatePull]
   );
 
-  const onMouseLeave = useCallback(() => {
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length > 0) {
+        updatePull(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    },
+    [updatePull]
+  );
+
+  const onLeave = useCallback(() => {
     const el = ref.current;
     if (!el) return;
     el.style.setProperty("--pull-x", "0px");
     el.style.setProperty("--pull-y", "0px");
   }, []);
 
-  return { ref, onMouseMove, onMouseLeave };
+  return { ref, onMouseMove, onTouchMove, onMouseLeave: onLeave, onTouchEnd: onLeave };
 }
 
 export function Magnetic({
@@ -224,9 +237,9 @@ export function Magnetic({
   className?: string;
   as?: ElementType;
 }) {
-  const { ref, onMouseMove, onMouseLeave } = useMagnetic(strength);
+  const { ref, onMouseMove, onMouseLeave, onTouchMove, onTouchEnd } = useMagnetic(strength);
   return (
-    <Tag ref={ref} className={`magnetic-btn ${className}`} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
+    <Tag ref={ref} className={`magnetic-btn ${className}`} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       {children}
     </Tag>
   );
@@ -274,8 +287,32 @@ export function TiltCard({
     el.style.setProperty("--tilt-y", "0deg");
   }, []);
 
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      const el = ref.current;
+      if (!el || e.touches.length === 0) return;
+      const rect = el.getBoundingClientRect();
+      const px = (e.touches[0].clientX - rect.left) / rect.width;
+      const py = (e.touches[0].clientY - rect.top) / rect.height;
+      const ry = (px - 0.5) * 2 * maxTilt;
+      const rx = -(py - 0.5) * 2 * maxTilt;
+      el.style.setProperty("--tilt-x", `${rx.toFixed(2)}deg`);
+      el.style.setProperty("--tilt-y", `${ry.toFixed(2)}deg`);
+      el.style.setProperty("--glare-x", `${(px * 100).toFixed(1)}%`);
+      el.style.setProperty("--glare-y", `${(py * 100).toFixed(1)}%`);
+    },
+    [maxTilt]
+  );
+
+  const onTouchEnd = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.setProperty("--tilt-x", "0deg");
+    el.style.setProperty("--tilt-y", "0deg");
+  }, []);
+
   return (
-    <div ref={ref} className={`tilt-card ${className}`} style={style} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
+    <div ref={ref} className={`tilt-card ${className}`} style={style} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       {children}
       {glare && <div className="tilt-card-glare" />}
     </div>
@@ -289,15 +326,23 @@ export function MeshBackdrop() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
+    const onMove = (clientX: number, clientY: number) => {
       const el = containerRef.current;
       if (!el) return;
-      const x = (e.clientX / window.innerWidth - 0.5) * 40;
-      const y = (e.clientY / window.innerHeight - 0.5) * 30;
+      const x = (clientX / window.innerWidth - 0.5) * 40;
+      const y = (clientY / window.innerHeight - 0.5) * 30;
       el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
+    const onMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) onMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+    };
   }, []);
 
   return (

@@ -68,99 +68,6 @@ const faqs = [
   { q: "How is this different from Buffer/Hootsuite?", a: "Those are scheduling tools. TheAuctus is a growth engine — it plans, writes, and optimizes based on your metrics." },
 ];
 
-// ── Live Product Mockup ──────────────────────────────────────────
-function ProductMockup() {
-  const [activeDay, setActiveDay] = useState(0);
-  const [typed, setTyped] = useState("");
-  const fullText = "Create a 30-day fitness content calendar";
-
-  useEffect(() => {
-    let i = 0;
-    const t = setInterval(() => {
-      i++;
-      setTyped(fullText.slice(0, i));
-      if (i >= fullText.length) clearInterval(t);
-    }, 40);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setActiveDay((d) => (d + 1) % 12);
-    }, 2000);
-    return () => clearInterval(t);
-  }, []);
-
-  const platforms = ["𝕏", "in", "📷", "♪", "▶", "@"];
-  const days = Array.from({ length: 12 }, (_, i) => ({
-    platform: platforms[i % 6],
-    color: ["rgba(255,255,255,0.08)", "rgba(10,102,194,0.12)", "rgba(225,48,108,0.1)", "rgba(255,0,80,0.1)", "rgba(255,0,0,0.1)", "rgba(255,255,255,0.1)"][i % 6],
-  }));
-
-  return (
-    <div className="relative w-full max-w-2xl mx-auto">
-      {/* Floating rings */}
-      <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full border border-[rgba(255,255,255,0.06)] hero-gradient-ring" />
-      <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full border border-[rgba(255,255,255,0.04)] hero-gradient-ring" style={{ animationDelay: '3s' }} />
-
-      {/* Main card */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ background: 'var(--lg-bg-strong)', border: '1px solid var(--lg-border)', boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.03)' }}>
-        {/* Browser chrome */}
-        <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: '1px solid var(--lg-border)', background: 'var(--lg-bg)' }}>
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-          </div>
-          <div className="flex-1 flex justify-center">
-            <div className="px-4 py-1 rounded-md text-[10px] text-[var(--muted)]" style={{ background: 'var(--lg-bg)' }}>theauctus.in/planner</div>
-          </div>
-        </div>
-
-        {/* AI prompt bar */}
-        <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--lg-border)' }}>
-          <div className="flex items-center gap-2 mb-3">              <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <span className="text-white/60 text-[9px]">✦</span>
-            </div>
-            <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]">AI Planner</span>
-          </div>
-          <p className="text-[13px] text-[var(--foreground)] font-headline min-h-[20px]">
-            {typed}
-            <span className="inline-block w-[2px] h-4 bg-white/60 ml-0.5 align-text-bottom" style={{ animation: 'blink-cursor 1s step-end infinite' }} />
-          </p>
-        </div>
-
-        {/* Calendar grid */}
-        <div className="p-5">
-          <div className="grid grid-cols-6 gap-2">
-            {days.map((d, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-lg flex items-center justify-center text-[11px] transition-all duration-500"
-                style={{
-                  background: i === activeDay ? 'rgba(255,255,255,0.15)' : d.color,
-                  border: `1px solid ${i === activeDay ? 'rgba(255,255,255,0.3)' : 'var(--lg-border)'}`,
-                  transform: i === activeDay ? 'scale(1.08)' : 'scale(1)',
-                  boxShadow: i === activeDay ? '0 0 16px rgba(255,255,255,0.1)' : 'none',
-                }}
-              >
-                {d.platform}
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-4">
-            <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">30 posts scheduled</span>
-            <span className="text-[10px] text-white/60 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" style={{ animation: 'blink-cursor 2s ease-in-out infinite' }} />
-              Publishing
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Seeded pseudo-random (deterministic for SSR hydration) ──
 function seededRandom(seed: number) {
   const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
@@ -189,10 +96,54 @@ function ParallaxField() {
     setMouse({ x, y });
   }, []);
 
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length > 0) {
+      const x = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+      const y = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+      setMouse({ x, y });
+    }
+  }, []);
+
+  const handleDeviceOrientation = useCallback((e: DeviceOrientationEvent) => {
+    if (e.gamma !== null && e.beta !== null) {
+      // gamma: -90 to 90 (left/right tilt)
+      // beta: -180 to 180 (front/back tilt)
+      const x = Math.max(-1, Math.min(1, (e.gamma || 0) / 45));
+      const y = Math.max(-1, Math.min(1, ((e.beta || 0) - 45) / 45));
+      setMouse({ x, y });
+    }
+  }, []);
+
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [handleMouseMove]);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    // Try device orientation for mobile gyroscope parallax
+    if (typeof DeviceOrientationEvent !== "undefined") {
+      // iOS 13+ requires permission
+      if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+        // We'll add a one-time touch listener to request permission on first touch
+        const requestPerm = async () => {
+          try {
+            const perm = await (DeviceOrientationEvent as any).requestPermission();
+            if (perm === "granted") {
+              window.addEventListener("deviceorientation", handleDeviceOrientation, { passive: true });
+            }
+          } catch {
+            // permission denied or not available
+          }
+          window.removeEventListener("touchstart", requestPerm);
+        };
+        window.addEventListener("touchstart", requestPerm, { once: true, passive: true });
+      } else {
+        window.addEventListener("deviceorientation", handleDeviceOrientation, { passive: true });
+      }
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("deviceorientation", handleDeviceOrientation);
+    };
+  }, [handleMouseMove, handleTouchMove, handleDeviceOrientation]);
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 ">
@@ -219,12 +170,11 @@ function ParallaxField() {
 
 // ── Floating Orbit Rings ────────────────────────────────────
 function OrbitRings() {
-  return (
-    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 ">
-      {[120, 200, 280].map((size, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full border hidden sm:block"
+  return (        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 ">
+          {[120, 200, 280].map((size, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full border"
           style={{
             width: `${size}px`,
             height: `${size}px`,
@@ -352,60 +302,48 @@ export default function LandingPage() {
       {/* ── Hero — Full immersive section ────────────────────── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
 
-        <div className="max-w-7xl mx-auto w-full relative z-10 px-5 sm:px-6 lg:px-12 pt-28 sm:pt-32 lg:pt-40 pb-16">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left — Text */}
-            <div>
-              <Reveal>
-                <div className="flex items-center gap-3 mb-8">
-                  <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">AI-Powered Content Planning</p>
-                </div>
-              </Reveal>
-              <Reveal delay={0.1}>
-                <h1 className="font-headline text-[2.8rem] sm:text-6xl lg:text-[5rem] xl:text-[5.5rem] leading-[0.92] tracking-tight text-[var(--foreground)] mb-8">
-                  <span className="block">Schedule 30</span>
-                  <span className="block">days of content</span>
-                  <span className="block">across <span className="stat-number">every</span> platform</span>
-                  <span className="block text-[var(--muted)]">— in minutes.</span>
-                </h1>
-              </Reveal>
-              <Reveal delay={0.2}>
-                <p className="text-[15px] text-[var(--muted)] leading-relaxed max-w-lg mb-10">
-                  Plan, write, and schedule a full month of platform-specific content — all with AI. Focus on creating, not managing.
-                </p>
-              </Reveal>
-              <Reveal delay={0.3}>
-                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 mb-6">
-                  {user ? (
-                    <Link href="/dashboard" className="liquid-btn-primary text-[13px] cta-glow w-full sm:w-auto text-center">Go to Dashboard {icons.arrowRight}</Link>
-                  ) : (
-                    <Magnetic strength={6}>
-                      <Link href="/auth/signup" ref={heroCta.ref} onPointerDown={heroCta.onPointerDown} onPointerUp={heroCta.onPointerUp} onPointerLeave={heroCta.onPointerLeave} onMouseMove={heroMagnetic.onMouseMove} onMouseLeave={heroMagnetic.onMouseLeave} className="liquid-btn-primary text-[13px] cta-glow w-full sm:w-auto text-center inline-flex items-center gap-2">
-                        Get Started Free {icons.arrowRight}
-                      </Link>
-                    </Magnetic>
-                  )}
-                </div>
-                <div className="flex items-center gap-6">
-                  <p className="text-[12px] text-[var(--muted)]">10 free credits</p>
-                  <span className="w-1 h-1 rounded-full bg-[var(--muted)]" />
-                  <p className="text-[12px] text-[var(--muted)]">No credit card</p>
-                </div>
-              </Reveal>
+        <div className="max-w-7xl mx-auto w-full relative z-10 px-5 sm:px-6 lg:px-12 pt-28 sm:pt-32 lg:pt-40 pb-16 text-center">
+          <Reveal>
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">AI-Powered Content Planning</p>
             </div>
-
-            {/* Right — Live product mockup */}
-            <div className="hidden lg:block">
-              <Reveal variant="zoom" delay={0.3}>
-                <ProductMockup />
-              </Reveal>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <h1 className="font-headline text-[2.8rem] sm:text-6xl lg:text-[5rem] xl:text-[5.5rem] leading-[0.92] tracking-tight text-[var(--foreground)] mb-8">
+              <span className="block">Schedule 30</span>
+              <span className="block">days of content</span>
+              <span className="block">across <span className="stat-number">every</span> platform</span>
+              <span className="block text-[var(--muted)]">— in minutes.</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="text-[15px] text-[var(--muted)] leading-relaxed max-w-lg mx-auto mb-10">
+              Plan, write, and schedule a full month of platform-specific content — all with AI. Focus on creating, not managing.
+            </p>
+          </Reveal>
+          <Reveal delay={0.3}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
+              {user ? (
+                <Link href="/dashboard" className="liquid-btn-primary text-[13px] cta-glow w-full sm:w-auto text-center">Go to Dashboard {icons.arrowRight}</Link>
+              ) : (
+                <Magnetic strength={6}>
+                  <Link href="/auth/signup" ref={heroCta.ref} onPointerDown={heroCta.onPointerDown} onPointerUp={heroCta.onPointerUp} onPointerLeave={heroCta.onPointerLeave} onMouseMove={heroMagnetic.onMouseMove} onMouseLeave={heroMagnetic.onMouseLeave} className="liquid-btn-primary text-[13px] cta-glow w-full sm:w-auto text-center inline-flex items-center gap-2">
+                    Get Started Free {icons.arrowRight}
+                  </Link>
+                </Magnetic>
+              )}
             </div>
-          </div>
+            <div className="flex items-center justify-center gap-6">
+              <p className="text-[12px] text-[var(--muted)]">10 free credits</p>
+              <span className="w-1 h-1 rounded-full bg-[var(--muted)]" />
+              <p className="text-[12px] text-[var(--muted)]">No credit card</p>
+            </div>
+          </Reveal>
         </div>
 
         {/* Scroll hint */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-1 text-[var(--muted)] scroll-hint">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-[var(--muted)] scroll-hint">
           <span className="text-[9px] uppercase tracking-[0.15em]">Scroll</span>
           {icons.scrollDown}
         </div>
