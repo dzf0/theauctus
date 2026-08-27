@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import LetterGlitch from "@/components/LetterGlitch";
 
 // ── Glitch 404 Text ──────────────────────────────────────────
 function GlitchText() {
@@ -170,114 +171,20 @@ function BlinkLine() {
   );
 }
 
-// ── Seeded pseudo-random (deterministic for SSR hydration) ──
-function seededRandom(seed: number) {
-  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
 
-// ── Floating Parallax Particles (404-specific: copper accent particles) ──
-function ParallaxField() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [particles] = useState(() =>
-    Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      x: seededRandom(i * 7 + 1) * 100,
-      y: seededRandom(i * 13 + 2) * 100,
-      size: 1 + seededRandom(i * 19 + 3) * 3,
-      depth: 0.2 + seededRandom(i * 23 + 4) * 0.8,
-      opacity: 0.1 + seededRandom(i * 29 + 5) * 0.4,
-      duration: 4 + seededRandom(i * 31 + 6) * 8,
-      delay: seededRandom(i * 37 + 7) * 4,
-    }))
-  );
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 2;
-    const y = (e.clientY / window.innerHeight - 0.5) * 2;
-    setMouse({ x, y });
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [handleMouseMove]);
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            opacity: p.opacity,
-            background: p.id % 3 === 0 ? "var(--accent-copper)" : "rgba(255,255,255,0.5)",
-            transform: `translate(${mouse.x * p.depth * 30}px, ${mouse.y * p.depth * 30}px)`,
-            transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
-            animation: `float-particle ${p.duration}s ease-in-out ${p.delay}s infinite`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ── Floating Orbit Rings (404-specific: copper borders, larger sizes) ──
-function OrbitRings() {
-  return (
-    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-      {[200, 320, 440].map((size, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full border"
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            borderColor: `rgba(201,168,124,${0.08 - i * 0.02})`,
-            animation: `orbit-spin ${20 + i * 10}s linear infinite ${i % 2 === 0 ? "" : "reverse"}`,
-          }}
-        >
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: "6px",
-              height: "6px",
-              background: i === 0 ? "var(--accent-copper)" : "rgba(255,255,255,0.3)",
-              top: "-3px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              boxShadow: i === 0 ? "0 0 12px rgba(201,168,124,0.5)" : "none",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 // ── Main 404 Page ───────────────────────────────────────────
 export default function NotFound() {
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6"
-      style={{ background: "var(--background)" }}
-    >
-      {/* 404-specific galaxy overlays (layout provides the base Galaxy) */}
-      <ParallaxField />
-      <OrbitRings />
-
-      {/* 404-specific orange radial gradient */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(255,107,0,0.08) 0%, transparent 60%)",
-            filter: "blur(80px)",
-          }}
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6">
+      {/* LetterGlitch background — fills entire 404 page */}
+      <div className="absolute inset-0 z-0">
+        <LetterGlitch
+          glitchColors={["#C9A87C", "#86868b", "#ffffff"]}
+          glitchSpeed={50}
+          centerVignette={true}
+          outerVignette={true}
+          smooth={true}
         />
       </div>
 
