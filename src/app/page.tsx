@@ -12,6 +12,7 @@ import {
 import { CREDIT_PACKS, CREDIT_COSTS } from "@/lib/constants";
 import SpotlightCard from "@/components/SpotlightCard";
 import GooeyNav from "@/components/GooeyNav";
+import DepthText from "@/components/DepthText";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -145,12 +146,27 @@ export default function LandingPage() {
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-headline text-[2.8rem] sm:text-6xl lg:text-[5rem] xl:text-[5.5rem] leading-[0.92] tracking-tight text-[var(--foreground)] mb-8">
-              <span className="block">Schedule 30</span>
-              <span className="block">days of content</span>
-              <span className="block">across <span className="stat-number">every</span> platform</span>
-              <span className="block text-[var(--muted)]">— in minutes.</span>
-            </h1>
+            <div className="mb-8">
+              <DepthText
+                text="Schedule 30 days of content across every platform"
+                layers={24}
+                depth={1.8}
+                faceColor="#f8fafc"
+                depthColor="#86868b"
+                tilt={6}
+                pointerTracking
+                smoothing={0.14}
+                perspective={1000}
+                autoOrbit
+                orbitSpeed={0.3}
+                fontSize="clamp(2.2rem, 7vw, 5rem)"
+                fontWeight={400}
+                shadow
+              />
+              <p className="font-headline text-[2rem] sm:text-5xl lg:text-[4.5rem] xl:text-[5rem] leading-[0.92] tracking-tight text-[var(--muted)] mt-2">
+                — in minutes.
+              </p>
+            </div>
           </Reveal>
           <Reveal delay={0.2}>
             <p className="text-[15px] text-[var(--muted)] leading-relaxed max-w-lg mx-auto mb-10">
