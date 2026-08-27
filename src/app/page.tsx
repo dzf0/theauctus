@@ -171,7 +171,7 @@ function seededRandom(seed: number) {
 function ParallaxField() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [particles] = useState(() =>
-    Array.from({ length: 50 }, (_, i) => ({
+    Array.from({ length: 30 }, (_, i) => ({
       id: i,
       x: seededRandom(i * 7 + 1) * 100,
       y: seededRandom(i * 13 + 2) * 100,
@@ -195,7 +195,7 @@ function ParallaxField() {
   }, [handleMouseMove]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 mobile-hide-bg">
       {particles.map((p) => (
         <div
           key={p.id}
@@ -220,11 +220,11 @@ function ParallaxField() {
 // ── Floating Orbit Rings ────────────────────────────────────
 function OrbitRings() {
   return (
-    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0">
-      {[200, 320, 440].map((size, i) => (
+    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 mobile-hide-bg">
+      {[120, 200, 280].map((size, i) => (
         <div
           key={i}
-          className="absolute rounded-full border"
+          className="absolute rounded-full border hidden sm:block"
           style={{
             width: `${size}px`,
             height: `${size}px`,
@@ -272,7 +272,7 @@ export default function LandingPage() {
       <ScrollProgress />
 
       {/* ── Fixed full-page background layers (matching 404) ── */}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 mobile-hide-bg">
         <Galaxy
           saturation={0}
           density={0.8}
