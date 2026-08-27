@@ -1659,6 +1659,59 @@ a:focus-visible {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── 13. Demo video showcase ────────────────────────────────── */
+.demo-video-glow {
+  background: conic-gradient(
+    from 0deg,
+    rgba(201,168,124,0) 0deg,
+    rgba(201,168,124,0.4) 60deg,
+    rgba(201,168,124,0) 120deg,
+    rgba(201,168,124,0.3) 200deg,
+    rgba(201,168,124,0) 280deg,
+    rgba(201,168,124,0.4) 340deg,
+    rgba(201,168,124,0) 360deg
+  );
+  animation: demo-glow-spin 8s linear infinite;
+  border-radius: 1rem;
+  filter: blur(6px);
+}
+@keyframes demo-glow-spin {
+  to { transform: rotate(360deg); }
+}
+
+.demo-play-btn {
+  background: rgba(201,168,124,0.15);
+  border: 1px solid rgba(201,168,124,0.3);
+  color: var(--accent-copper);
+  backdrop-filter: blur(12px);
+  animation: demo-play-pulse 3s ease-in-out infinite;
+  transition: transform 0.4s var(--ease-out-expo), background 0.3s ease;
+}
+.demo-play-btn:hover {
+  transform: scale(1.08);
+  background: rgba(201,168,124,0.25);
+}
+@keyframes demo-play-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,124,0.2); }
+  50% { box-shadow: 0 0 0 16px rgba(201,168,124,0); }
+}
+
+/* Hide play overlay when video is playing (via JS class) */
+.demo-play-overlay {
+  opacity: 1;
+}
+video:not([src=""]):not(.paused) ~ .demo-play-overlay {
+  opacity: 0;
+}
+
+.demo-badge-float {
+  animation: demo-badge-bob 4s ease-in-out infinite;
+}
+@keyframes demo-badge-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
 /* Reduced motion: everything above collapses to fades */
 @media (prefers-reduced-motion: reduce) {
   .scroll-progress,
@@ -1666,7 +1719,10 @@ a:focus-visible {
   .text-shimmer,
   .mesh-drift-a,
   .mesh-drift-b,
-  .scroll-hint {
+  .scroll-hint,
+  .demo-video-glow,
+  .demo-badge-float,
+  .demo-play-btn {
     animation: none !important;
   }
   .word-reveal,

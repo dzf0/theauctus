@@ -9,7 +9,6 @@ import {
   ScrollProgress,
   Reveal,
   WordReveal,
-  CountUp,
   useMagnetic,
   Magnetic,
   TiltCard,
@@ -444,27 +443,78 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Stats (animated counters) ──────────────────────── */}
+      {/* ── Demo Video Showcase ────────────────────────────── */}
       <section className="py-16 sm:py-20 lg:py-24 px-5 sm:px-6 lg:px-12 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.05) 0%, transparent 60%)", filter: "blur(50px)" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full" style={{ background: "radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)", filter: "blur(60px)" }} />
         </div>
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4 lg:gap-4">
-            {[
-              { target: 30, suffix: "K+", label: "Posts Generated" },
-              { target: 8, suffix: "", label: "Platforms" },
-              { target: 98, suffix: "%", label: "On-Time Delivery" },
-              { target: 4, suffix: "x", label: "Average Growth" },
-            ].map((stat, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <div className="text-center">
-                  <CountUp target={stat.target} suffix={stat.suffix} className="font-headline text-5xl sm:text-6xl lg:text-7xl text-[var(--foreground)]" />
-                  <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-[var(--muted)] mt-1 sm:mt-3">{stat.label}</p>
+        <div className="max-w-5xl mx-auto relative z-10">
+          <Reveal>
+            <div className="text-center mb-8 sm:mb-12">
+              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3">See it in action</p>
+              <h2 className="font-headline text-3xl sm:text-4xl lg:text-5xl text-[var(--foreground)] leading-[1.05]">
+                Watch your content pipeline<br className="hidden sm:block" />{" "}<span className="text-[var(--muted)]">come alive.</span>
+              </h2>
+            </div>
+          </Reveal>
+          <Reveal variant="zoom" delay={0.15}>
+            <div className="relative group">
+              {/* Animated glow border */}
+              <div className="absolute -inset-[1px] rounded-2xl demo-video-glow opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative rounded-2xl overflow-hidden" style={{ background: "var(--lg-bg-strong)", border: "1px solid var(--lg-border)" }}>
+                {/* Video player */}
+                <div className="relative aspect-video bg-black">
+                  <video
+                    className="w-full h-full object-cover"
+                    poster=""
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
+                  >
+                    <source src="/demo.mp4" type="video/mp4" />
+                  </video>
+                  {/* Play overlay — shown when video has no source yet */}
+                  <div className="demo-play-overlay absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500">
+                    <div className="demo-play-btn w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4">
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] text-white/60">Hover to play</p>
+                  </div>
+                  {/* Bottom gradient fade */}
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
                 </div>
-              </Reveal>
-            ))}
-          </div>
+                {/* Browser-style chrome bar */}
+                <div className="flex items-center gap-2 px-4 py-2.5 border-t" style={{ borderColor: "var(--lg-border)", background: "var(--lg-bg)" }}>
+                  <div className="flex gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-[#ff5f57]" />
+                    <div className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
+                    <div className="w-2 h-2 rounded-full bg-[#28c840]" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="px-4 py-1 rounded-md text-[10px] text-[var(--muted)]" style={{ background: "var(--lg-bg)" }}>
+                      theauctus.in/dashboard
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Floating accent badge */}
+              <div className="absolute -top-3 -right-3 sm:top-4 sm:right-4 demo-badge-float">
+                <div className="px-3 py-1.5 rounded-full text-[10px] uppercase tracking-[0.1em] font-medium" style={{ background: "rgba(201,168,124,0.15)", border: "1px solid rgba(201,168,124,0.25)", color: "var(--accent-copper)" }}>
+                  ✦ AI-Powered
+                </div>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal delay={0.3}>
+            <p className="text-center mt-6 sm:mt-8 text-[12px] sm:text-[13px] text-[var(--muted)]">
+              Plan, write, and schedule 30 days of content — <span className="accent-text">all with AI.</span>
+            </p>
+          </Reveal>
         </div>
       </section>
 
