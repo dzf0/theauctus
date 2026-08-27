@@ -24,6 +24,7 @@ export interface AuthContext {
 
 export interface MiddlewareOptions {
   requireAuth?: boolean;
+  requireAdmin?: boolean;
   requirePlan?: PlanTier;
   rateLimit?: { limit: number; windowMs: number };
   rateLimitKey?: string;
@@ -162,6 +163,19 @@ export function verifyCsrfToken(token: string, userId: string): boolean {
 }
 
 // ══════════════════════════════════════════════════════════════
+// ADMIN CHECK
+// ══════════════════════════════════════════════════════════════
+
+export function isAdminEmail(email: string | undefined | null): boolean {
+  if (!email) return false;
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return adminEmails.includes(email.toLowerCase());
+}
+
+// ══════════════════════════════════════════════════════════════
 // RESPONSE HELPERS
 // ══════════════════════════════════════════════════════════════
 
@@ -201,6 +215,7 @@ export function withAuth(
 ) {
   const {
     requireAuth = true,
+    requireAdmin = false,
     requirePlan = null,
     rateLimit = null,
     rateLimitKey,
@@ -229,6 +244,11 @@ export function withAuth(
 
         if (!user) {
           return jsonError("Authentication required", 401, "AUTHENTICATION_ERROR");
+        }
+
+        // ── Admin check ──────────────────────────────────────
+        if (requireAdmin && !isAdminEmail(user.email)) {
+          return jsonError("Admin access required", 403, "ADMIN_REQUIRED");
         }
 
         // ── Rate limiting ────────────────────────────────────

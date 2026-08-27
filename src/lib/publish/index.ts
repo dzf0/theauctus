@@ -4,13 +4,13 @@
 // Import this file wherever publishPost() is called.
 // ══════════════════════════════════════════════════════════════
 
-import "@/publish/twitter";
-import "@/publish/linkedin";
-import "@/publish/facebook";
-import "@/publish/instagram";
-import "@/publish/threads";
-import "@/publish/youtube";
-import "@/publish/tiktok";
-import "@/publish/blog";
+import "@/lib/publish/twitter";
+import "@/lib/publish/linkedin";
+import "@/lib/publish/facebook";
+import "@/lib/publish/instagram";
+import "@/lib/publish/threads";
+import "@/lib/publish/youtube";
+import "@/lib/publish/tiktok";
+import "@/lib/publish/blog";
 
 export { publishPost, publishScheduledPosts } from "@/lib/publish";

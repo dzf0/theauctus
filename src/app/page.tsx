@@ -82,7 +82,6 @@ function ParticleField() {
     </div>
   );
 }
-
 // ── SVG Icons ──────────────────────────────────────────────────
 const icons = {
   calendar: (
@@ -459,36 +458,28 @@ export default function LandingPage() {
           </Reveal>
           <Reveal variant="zoom" delay={0.15}>
             <div className="relative group">
-              {/* Animated glow border */}
               <div className="absolute -inset-[1px] rounded-2xl demo-video-glow opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative rounded-2xl overflow-hidden" style={{ background: "var(--lg-bg-strong)", border: "1px solid var(--lg-border)" }}>
-                {/* Video player */}
                 <div className="relative aspect-video bg-black">
                   <video
                     className="w-full h-full object-cover"
-                    poster=""
                     muted
                     loop
                     playsInline
                     preload="metadata"
-                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseEnter={(e) => { e.currentTarget.play().catch(() => {}); }}
                     onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
                   >
                     <source src="/demo.mp4" type="video/mp4" />
                   </video>
-                  {/* Play overlay — shown when video has no source yet */}
                   <div className="demo-play-overlay absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500">
-                    <div className="demo-play-btn w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4">
-                      <svg className="w-6 h-6 sm:w-8 sm:h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4 demo-play-btn">
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                     </div>
                     <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] text-white/60">Hover to play</p>
                   </div>
-                  {/* Bottom gradient fade */}
                   <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
                 </div>
-                {/* Browser-style chrome bar */}
                 <div className="flex items-center gap-2 px-4 py-2.5 border-t" style={{ borderColor: "var(--lg-border)", background: "var(--lg-bg)" }}>
                   <div className="flex gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-[#ff5f57]" />
@@ -496,13 +487,10 @@ export default function LandingPage() {
                     <div className="w-2 h-2 rounded-full bg-[#28c840]" />
                   </div>
                   <div className="flex-1 flex justify-center">
-                    <div className="px-4 py-1 rounded-md text-[10px] text-[var(--muted)]" style={{ background: "var(--lg-bg)" }}>
-                      theauctus.in/dashboard
-                    </div>
+                    <div className="px-4 py-1 rounded-md text-[10px] text-[var(--muted)]" style={{ background: "var(--lg-bg)" }}>theauctus.in/dashboard</div>
                   </div>
                 </div>
               </div>
-              {/* Floating accent badge */}
               <div className="absolute -top-3 -right-3 sm:top-4 sm:right-4 demo-badge-float">
                 <div className="px-3 py-1.5 rounded-full text-[10px] uppercase tracking-[0.1em] font-medium" style={{ background: "rgba(201,168,124,0.15)", border: "1px solid rgba(201,168,124,0.25)", color: "var(--accent-copper)" }}>
                   ✦ AI-Powered

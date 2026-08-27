@@ -1679,6 +1679,11 @@ a:focus-visible {
   to { transform: rotate(360deg); }
 }
 
+/* Play overlay */
+.demo-play-overlay {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
 .demo-play-btn {
   background: rgba(201,168,124,0.15);
   border: 1px solid rgba(201,168,124,0.3);
@@ -1694,14 +1699,6 @@ a:focus-visible {
 @keyframes demo-play-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,124,0.2); }
   50% { box-shadow: 0 0 0 16px rgba(201,168,124,0); }
-}
-
-/* Hide play overlay when video is playing (via JS class) */
-.demo-play-overlay {
-  opacity: 1;
-}
-video:not([src=""]):not(.paused) ~ .demo-play-overlay {
-  opacity: 0;
 }
 
 .demo-badge-float {
