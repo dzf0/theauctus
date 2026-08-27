@@ -100,7 +100,7 @@ export default function PrivacyPage() {
             <h2 className="font-headline text-xl mb-3" style={{ color: "var(--foreground)" }}>10. Contact</h2>
             <p>
               For privacy-related questions, contact us at{" "}
-              <a href="mailto:privacy@theauctus.in" className="accent-text hover:opacity-80">privacy@theauctus.in</a>
+              <a href="mailto:privacy@theauctus.in" className="accent-text hover:opacity-80">legal@theauctus.in</a>
             </p>
           </section>
         </div>
