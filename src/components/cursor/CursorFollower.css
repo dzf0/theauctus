@@ -1,0 +1,55 @@
+/* ── Custom cursor follower ─────────────────────────────── */
+
+/* Hide default cursor on desktop for interactive elements */
+@media (hover: hover) and (pointer: fine) {
+  a, button, [role="button"], input, textarea, select, label {
+    cursor: none !important;
+  }
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cursor-visible {
+  opacity: 1;
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-copper);
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid rgba(201, 168, 124, 0.35);
+  border-radius: 50%;
+  will-change: transform;
+}
+
+/* Hide both on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+}
+
+/* Also hide on small screens */
+@media (max-width: 768px) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+}

@@ -278,13 +278,12 @@ export default function NotFound() {
       {/* Galaxy background */}
       <div className="absolute inset-0 z-0">
         <Galaxy
-          hueShift={15}
-          saturation={0.8}
-          density={1.5}
-          glowIntensity={0.6}
+          saturation={0}
+          density={0.8}
+          glowIntensity={0.4}
           starSpeed={0.3}
           mouseRepulsion={true}
-          twinkleIntensity={0.5}
+          twinkleIntensity={0.3}
           rotationSpeed={0.03}
           speed={0.6}
           transparent={true}

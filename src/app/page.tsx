@@ -14,6 +14,7 @@ import {
 } from "@/components/motion";
 import { CREDIT_PACKS, CREDIT_COSTS, CUSTOM_CREDIT_RATE, CUSTOM_CREDIT_MIN_DOLLARS } from "@/lib/constants";
 import Galaxy from "@/components/galaxy/Galaxy";
+import CursorFollower from "@/components/cursor/CursorFollower";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -179,6 +180,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
+      <CursorFollower />
       <ScrollProgress />
 
       {/* ── Navigation ──────────────────────────────────────── */}
@@ -230,15 +232,14 @@ export default function LandingPage() {
         {/* Galaxy background — lava hue shifted */}
         <div className="absolute inset-0 z-0">
           <Galaxy
-            hueShift={15}
-            saturation={0.8}
-            density={1.2}
-            glowIntensity={0.5}
+            saturation={0}
+            density={0.8}
+            glowIntensity={0.4}
             starSpeed={0.4}
             mouseRepulsion={true}
-            twinkleIntensity={0.4}
-            rotationSpeed={0.05}
-            speed={0.8}
+            twinkleIntensity={0.3}
+            rotationSpeed={0.03}
+            speed={0.6}
             transparent={true}
           />
         </div>
