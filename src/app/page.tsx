@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser } from "@/components/user-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ScrollProgress,
   Reveal,
@@ -324,7 +323,6 @@ export default function LandingPage() {
                 timeVariance={200}
                 colors={[1, 2, 3, 1, 2, 3, 1, 4]}
               />
-              <ThemeToggle />
               {user ? (
                 <Link href="/dashboard" className="liquid-btn-primary text-[11px]">Dashboard</Link>
               ) : (
@@ -342,10 +340,6 @@ export default function LandingPage() {
             <a href="#how-it-works" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">How It Works</a>
             <a href="#pricing" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Credits</a>
             <a href="#faq" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
-            <div className="flex items-center gap-2 py-3 px-3">
-              <span className="text-[13px] uppercase tracking-[0.1em] text-[var(--foreground)]">Theme</span>
-              <ThemeToggle />
-            </div>
             {user ? (
               <Link href="/dashboard" className="block liquid-btn-primary text-center text-[13px] py-3">Dashboard</Link>
             ) : (
