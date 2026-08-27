@@ -36,6 +36,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# AI tool configs
+.agents/
+.claude/
+.windsurf/
+.codex/
+.freebuff/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
