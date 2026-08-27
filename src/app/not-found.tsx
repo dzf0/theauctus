@@ -3,62 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import LetterGlitch from "@/components/LetterGlitch";
-
-// ── Glitch 404 Text ──────────────────────────────────────────
-function GlitchText() {
-  return (
-    <div className="relative">
-      <h1
-        className="font-headline text-[8rem] sm:text-[12rem] lg:text-[16rem] leading-none font-bold select-none"
-        style={{ color: "var(--foreground)" }}
-        data-text="404"
-      >
-        404
-      </h1>
-      <style jsx>{`
-        h1 {
-          position: relative;
-        }
-        h1::before,
-        h1::after {
-          content: "404";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-        }
-        h1::before {
-          color: var(--accent-copper);
-          animation: glitch-1 3s infinite linear alternate-reverse;
-          clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-        }
-        h1::after {
-          color: #ef4444;
-          animation: glitch-2 3s infinite linear alternate-reverse;
-          clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-        }
-        @keyframes glitch-1 {
-          0%, 90% { opacity: 0; transform: translate(0); }
-          91% { opacity: 0.8; transform: translate(-4px, -2px); }
-          92% { opacity: 0; transform: translate(0); }
-          93% { opacity: 0.6; transform: translate(4px, 1px); }
-          94% { opacity: 0; transform: translate(0); }
-          100% { opacity: 0; transform: translate(0); }
-        }
-        @keyframes glitch-2 {
-          0%, 88% { opacity: 0; transform: translate(0); }
-          89% { opacity: 0.7; transform: translate(3px, 2px); }
-          90% { opacity: 0; transform: translate(0); }
-          91% { opacity: 0.5; transform: translate(-3px, -1px); }
-          92% { opacity: 0; transform: translate(0); }
-          100% { opacity: 0; transform: translate(0); }
-        }
-      `}</style>
-    </div>
-  );
-}
+import DepthText from "@/components/DepthText";
 
 // ── ASCII Art Astronaut ─────────────────────────────────────
 function LostAstronaut() {
@@ -191,7 +136,22 @@ export default function NotFound() {
       {/* Content */}
       <div className="relative z-10 text-center max-w-2xl mx-auto">
         {/* Glitch 404 */}
-        <GlitchText />
+        <DepthText
+          text="404"
+          layers={34}
+          depth={2.4}
+          faceColor="#f8fafc"
+          depthColor="#C9A87C"
+          tilt={7.5}
+          pointerTracking
+          smoothing={0.14}
+          perspective={900}
+          autoOrbit
+          orbitSpeed={0.35}
+          fontSize="clamp(5rem, 18vw, 12rem)"
+          fontWeight={900}
+          shadow
+        />
 
         {/* Floating astronaut */}
         <div className="flex justify-center my-6">
