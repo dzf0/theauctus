@@ -172,10 +172,19 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/auth/forgot-password") ||
     pathname.startsWith("/auth/update-password");
 
-  // Only enforce onboarding gate on non-dashboard, non-auth, non-onboarding pages
-  // Also skip the root landing page — it's public
+  // Known public + app routes that exist in the codebase
+  const KNOWN_ROUTES = [
+    "/", "/contact", "/privacy", "/terms", "/design-system",
+    "/dashboard", "/planner", "/queue", "/analytics", "/billing", "/settings", "/video",
+    "/onboarding", "/admin",
+    "/auth/signin", "/auth/signup", "/auth/pricing", "/auth/username",
+    "/auth/verify-otp", "/auth/forgot-password", "/auth/update-password",
+  ];
+  const isKnownRoute = KNOWN_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
+
+  // Only enforce onboarding gate on known routes — unknown routes pass through to Next.js 404
   const isLanding = pathname === "/";
-  if (user && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding) {
+  if (user && isKnownRoute && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
