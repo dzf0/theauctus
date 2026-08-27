@@ -94,17 +94,17 @@ function ProductMockup() {
   const platforms = ["𝕏", "in", "📷", "♪", "▶", "@"];
   const days = Array.from({ length: 12 }, (_, i) => ({
     platform: platforms[i % 6],
-    color: ["rgba(255,255,255,0.08)", "rgba(10,102,194,0.12)", "rgba(225,48,108,0.1)", "rgba(255,0,80,0.1)", "rgba(255,0,0,0.1)", "rgba(201,168,124,0.1)"][i % 6],
+    color: ["rgba(255,255,255,0.08)", "rgba(10,102,194,0.12)", "rgba(225,48,108,0.1)", "rgba(255,0,80,0.1)", "rgba(255,0,0,0.1)", "rgba(255,255,255,0.1)"][i % 6],
   }));
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       {/* Floating rings */}
-      <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full border border-[rgba(201,168,124,0.08)] hero-gradient-ring" />
-      <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full border border-[rgba(201,168,124,0.05)] hero-gradient-ring" style={{ animationDelay: '3s' }} />
+      <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full border border-[rgba(255,255,255,0.06)] hero-gradient-ring" />
+      <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full border border-[rgba(255,255,255,0.04)] hero-gradient-ring" style={{ animationDelay: '3s' }} />
 
       {/* Main card */}
-      <div className="relative rounded-2xl overflow-hidden" style={{ background: 'var(--lg-bg-strong)', border: '1px solid var(--lg-border)', boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 60px rgba(201,168,124,0.05)' }}>
+      <div className="relative rounded-2xl overflow-hidden" style={{ background: 'var(--lg-bg-strong)', border: '1px solid var(--lg-border)', boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.03)' }}>
         {/* Browser chrome */}
         <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: '1px solid var(--lg-border)', background: 'var(--lg-bg)' }}>
           <div className="flex gap-1.5">
@@ -119,15 +119,14 @@ function ProductMockup() {
 
         {/* AI prompt bar */}
         <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--lg-border)' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(201,168,124,0.15)' }}>
-              <span className="text-[var(--accent-copper)] text-[9px]">✦</span>
+          <div className="flex items-center gap-2 mb-3">              <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <span className="text-white/60 text-[9px]">✦</span>
             </div>
             <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]">AI Planner</span>
           </div>
           <p className="text-[13px] text-[var(--foreground)] font-headline min-h-[20px]">
             {typed}
-            <span className="inline-block w-[2px] h-4 bg-[var(--accent-copper)] ml-0.5 align-text-bottom" style={{ animation: 'blink-cursor 1s step-end infinite' }} />
+            <span className="inline-block w-[2px] h-4 bg-white/60 ml-0.5 align-text-bottom" style={{ animation: 'blink-cursor 1s step-end infinite' }} />
           </p>
         </div>
 
@@ -139,10 +138,10 @@ function ProductMockup() {
                 key={i}
                 className="aspect-square rounded-lg flex items-center justify-center text-[11px] transition-all duration-500"
                 style={{
-                  background: i === activeDay ? 'rgba(201,168,124,0.2)' : d.color,
-                  border: `1px solid ${i === activeDay ? 'rgba(201,168,124,0.4)' : 'var(--lg-border)'}`,
+                  background: i === activeDay ? 'rgba(255,255,255,0.15)' : d.color,
+                  border: `1px solid ${i === activeDay ? 'rgba(255,255,255,0.3)' : 'var(--lg-border)'}`,
                   transform: i === activeDay ? 'scale(1.08)' : 'scale(1)',
-                  boxShadow: i === activeDay ? '0 0 16px rgba(201,168,124,0.15)' : 'none',
+                  boxShadow: i === activeDay ? '0 0 16px rgba(255,255,255,0.1)' : 'none',
                 }}
               >
                 {d.platform}
@@ -151,13 +150,102 @@ function ProductMockup() {
           </div>
           <div className="flex items-center justify-between mt-4">
             <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">30 posts scheduled</span>
-            <span className="text-[10px] accent-text flex items-center gap-1">
+            <span className="text-[10px] text-white/60 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" style={{ animation: 'blink-cursor 2s ease-in-out infinite' }} />
               Publishing
             </span>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Seeded pseudo-random (deterministic for SSR hydration) ──
+function seededRandom(seed: number) {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// ── Floating Parallax Particles ──────────────────────────────
+function ParallaxField() {
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [particles] = useState(() =>
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: seededRandom(i * 7 + 1) * 100,
+      y: seededRandom(i * 13 + 2) * 100,
+      size: 1 + seededRandom(i * 19 + 3) * 3,
+      depth: 0.2 + seededRandom(i * 23 + 4) * 0.8,
+      opacity: 0.1 + seededRandom(i * 29 + 5) * 0.4,
+      duration: 4 + seededRandom(i * 31 + 6) * 8,
+      delay: seededRandom(i * 37 + 7) * 4,
+    }))
+  );
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 2;
+    const y = (e.clientY / window.innerHeight - 0.5) * 2;
+    setMouse({ x, y });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [handleMouseMove]);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            opacity: p.opacity,
+            background: "rgba(255,255,255,0.5)",
+            transform: `translate(${mouse.x * p.depth * 30}px, ${mouse.y * p.depth * 30}px)`,
+            transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
+            animation: `float-particle ${p.duration}s ease-in-out ${p.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Floating Orbit Rings ────────────────────────────────────
+function OrbitRings() {
+  return (
+    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0">
+      {[200, 320, 440].map((size, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full border"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            borderColor: `rgba(255,255,255,${0.08 - i * 0.02})`,
+            animation: `orbit-spin ${20 + i * 10}s linear infinite ${i % 2 === 0 ? "" : "reverse"}`,
+          }}
+        >
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: "6px",
+              height: "6px",
+              background: "rgba(255,255,255,0.4)",
+              top: "-3px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              boxShadow: "0 0 8px rgba(255,255,255,0.3)",
+            }}
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -179,9 +267,38 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
       <CursorFollower />
       <ScrollProgress />
+
+      {/* ── Fixed full-page background layers (matching 404) ── */}
+      <div className="fixed inset-0 z-0">
+        <Galaxy
+          saturation={0}
+          density={0.8}
+          glowIntensity={0.4}
+          starSpeed={0.4}
+          mouseRepulsion={true}
+          repulsionStrength={2}
+          twinkleIntensity={0.3}
+          rotationSpeed={0.03}
+          speed={0.6}
+          transparent={true}
+        />
+      </div>
+      <ParallaxField />
+      <OrbitRings />
+      <div className="noise-overlay" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
+      {/* Radial gradient backdrop */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%)",
+            filter: "blur(80px)",
+          }}
+        />
+      </div>
 
       {/* ── Navigation ──────────────────────────────────────── */}
       <nav className={`fixed top-0 w-full z-50 liquid-glass-strong nav-scroll-edge ${navScrolled ? "nav-scrolled" : ""}`} style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
@@ -189,7 +306,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="TheAuctus" className="w-8 h-8" />
-              <span className="font-headline text-xl tracking-tight text-foreground">The<span className="accent-text">Auctus</span></span>
+              <span className="font-headline text-xl tracking-tight text-foreground">The<span className="text-white/70">Auctus</span></span>
             </div>
             <div className="hidden md:flex items-center gap-10">
               <a href="#features" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">Features</a>
@@ -229,27 +346,6 @@ export default function LandingPage() {
 
       {/* ── Hero — Full immersive section ────────────────────── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Galaxy background — lava hue shifted */}
-        <div className="absolute inset-0 z-0">
-          <Galaxy
-            saturation={0}
-            density={0.8}
-            glowIntensity={0.4}
-            starSpeed={0.4}
-            mouseRepulsion={true}
-            twinkleIntensity={0.3}
-            rotationSpeed={0.03}
-            speed={0.6}
-            transparent={true}
-          />
-        </div>
-        {/* Lava gradient overlay */}
-        <div className="shader-bg" style={{ opacity: 0.6 }}>
-          <div className="shader-orb shader-orb-1" />
-          <div className="shader-orb shader-orb-2" />
-          <div className="shader-orb shader-orb-3" />
-        </div>
-        <div className="noise-overlay" />
 
         <div className="max-w-7xl mx-auto w-full relative z-10 px-5 sm:px-6 lg:px-12 pt-28 sm:pt-32 lg:pt-40 pb-16">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -258,7 +354,7 @@ export default function LandingPage() {
               <Reveal>
                 <div className="flex items-center gap-3 mb-8">
                   <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
-                  <p className="text-[10px] uppercase tracking-[0.2em] accent-text">AI-Powered Content Planning</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">AI-Powered Content Planning</p>
                 </div>
               </Reveal>
               <Reveal delay={0.1}>
@@ -312,11 +408,10 @@ export default function LandingPage() {
 
       {/* ── Features — Bento Grid ────────────────────────────── */}
       <section id="features" className="py-24 sm:py-32 lg:py-40 px-5 sm:px-6 lg:px-12 relative">
-        <div className="noise-overlay" />
         <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
             <div className="mb-16 lg:mb-24">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">The Engine</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">The Engine</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] max-w-3xl leading-[1.0]">
                 Your content pipeline,<br />
                 <span className="text-[var(--muted)]">fully automated.</span>
@@ -328,7 +423,7 @@ export default function LandingPage() {
               {features.map((f, i) => (
                 <div key={i} className={`bento-card ${f.span === 2 ? 'bento-card-span-2' : ''}`}>
                   <div className="bento-glow" />
-                  <div className="text-[var(--accent-copper)] mb-5 icon-pulse">{f.icon}</div>
+                  <div className="text-white/60 mb-5 icon-pulse">{f.icon}</div>
                   <h3 className="font-headline text-xl sm:text-2xl text-[var(--foreground)] mb-3">{f.title}</h3>
                   <p className="text-[13px] text-[var(--muted)] leading-relaxed">{f.description}</p>
                 </div>
@@ -343,7 +438,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <Reveal>
             <div className="mb-16 lg:mb-24">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">Process</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">Process</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] leading-[1.0]">
                 From zero to 30 days of content.<br />
                 <span className="text-[var(--muted)]">Three steps.</span>
@@ -358,8 +453,8 @@ export default function LandingPage() {
                   <div className="space-y-3">
                     {[1, 0.7, 0.5].map((w, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ background: i === 0 ? 'var(--accent-copper)' : 'var(--lg-border)' }} />
-                        <div className="h-2 rounded-full" style={{ width: `${w * 100}%`, background: i === 0 ? 'linear-gradient(90deg, rgba(201,168,124,0.4), transparent)' : 'var(--lg-bg)' }} />
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ background: i === 0 ? 'rgba(255,255,255,0.6)' : 'var(--lg-border)' }} />
+                        <div className="h-2 rounded-full" style={{ width: `${w * 100}%`, background: i === 0 ? 'linear-gradient(90deg, rgba(255,255,255,0.3), transparent)' : 'var(--lg-bg)' }} />
                       </div>
                     ))}
                     <p className="text-[9px] text-[var(--muted)] uppercase tracking-wider pt-2">Brand voice loaded</p>
@@ -370,12 +465,12 @@ export default function LandingPage() {
                 <div className="liquid-card p-6 rounded-xl">
                   <div className="grid grid-cols-7 gap-1.5">
                     {Array.from({ length: 21 }, (_, i) => (
-                      <div key={i} className="aspect-square rounded-sm" style={{ background: i < 5 ? 'rgba(201,168,124,0.2)' : 'var(--lg-bg)', border: i === 10 ? '1px solid var(--accent-copper)' : '1px solid var(--lg-border)' }} />
+                      <div key={i} className="aspect-square rounded-sm" style={{ background: i < 5 ? 'rgba(255,255,255,0.1)' : 'var(--lg-bg)', border: i === 10 ? '1px solid rgba(255,255,255,0.4)' : '1px solid var(--lg-border)' }} />
                     ))}
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">30 posts ready</span>
-                    <span className="text-[9px] accent-text">✓</span>
+                    <span className="text-[9px] text-white/60">✓</span>
                   </div>
                 </div>
               )},
@@ -383,7 +478,7 @@ export default function LandingPage() {
                 <div className="liquid-card p-6 rounded-xl">
                   <div className="flex items-end gap-1 h-20">
                     {[25, 30, 28, 40, 45, 38, 55, 50, 65, 70, 68, 85, 80, 95].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 10 ? 'linear-gradient(180deg, rgba(201,168,124,0.6), rgba(201,168,124,0.2))' : 'var(--lg-bg)' }} />
+                      <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 10 ? 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))' : 'var(--lg-bg)' }} />
                     ))}
                   </div>
                   <div className="flex items-center justify-between mt-4">
@@ -397,8 +492,8 @@ export default function LandingPage() {
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                   <div className={i % 2 === 1 ? 'lg:order-2' : ''}>
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(201,168,124,0.1)', border: '1px solid rgba(201,168,124,0.15)' }}>
-                        <span className="font-headline text-sm text-[var(--accent-copper)]">{s.step}</span>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <span className="font-headline text-sm text-white/70">{s.step}</span>
                       </div>
                       <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">Step {s.step}</span>
                     </div>
@@ -418,12 +513,12 @@ export default function LandingPage() {
       {/* ── Pricing ──────────────────────────────────────────── */}
       <section id="pricing" className="py-24 sm:py-32 lg:py-40 px-5 sm:px-6 lg:px-12 shimmer-divider relative">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(201,168,124,0.04) 0%, transparent 60%)', filter: 'blur(60px)' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%)', filter: 'blur(60px)' }} />
         </div>
         <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
             <div className="mb-12">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">Credits</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">Credits</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] leading-[1.0]">
                 Pay for what you use.<br />
                 <span className="text-[var(--muted)]">No subscriptions.</span>
@@ -435,7 +530,7 @@ export default function LandingPage() {
             <div className="liquid-card p-4 mb-10 max-w-full sm:max-w-md rounded-xl">
               <div className="flex flex-wrap gap-x-4 gap-y-1 sm:gap-x-6 text-[12px]" style={{ color: 'var(--muted)' }}>
                 {CREDIT_COSTS.map((item, i) => (
-                  <span key={i}>{item.action}: <span className="accent-text font-medium">{item.credits} cr</span></span>
+                  <span key={i}>{item.action}: <span className="text-white/70 font-medium">{item.credits} cr</span></span>
                 ))}
               </div>
             </div>
@@ -446,7 +541,7 @@ export default function LandingPage() {
               {CREDIT_PACKS.map((pack) => (
                 <TiltCard key={pack.id} maxTilt={3} className={`liquid-card p-6 sm:p-8 relative hover-lift ${pack.popular ? 'glow-breathe' : ''}`} style={{ borderRadius: 'var(--lg-radius-sm)' }}>
                   {pack.popular && <span className="liquid-badge absolute top-5 right-5 z-10">Best Value</span>}
-                  <div className="text-[var(--accent-copper)] mb-4">{pack.id === 'starter' ? icons.sparkles : pack.id === 'growth' ? icons.calendar : icons.currency}</div>
+                  <div className="text-white/60 mb-4">{pack.id === 'starter' ? icons.sparkles : pack.id === 'growth' ? icons.calendar : icons.currency}</div>
                   <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-4 relative z-10">{pack.name}</p>
                   <div className="flex items-baseline gap-1 mb-1 relative z-10">
                     <span className="font-headline text-4xl sm:text-5xl text-[var(--foreground)]">${pack.price}</span>
@@ -456,7 +551,7 @@ export default function LandingPage() {
                   <ul className="space-y-3 mb-8 relative z-10">
                     {pack.features.map((f, j) => (
                       <li key={j} className="flex items-start gap-2 text-[12px] text-[var(--cool-grey)]">
-                        <span className="text-[var(--accent-copper)]">{icons.check}</span>{f}
+                        <span className="text-white/60">{icons.check}</span>{f}
                       </li>
                     ))}
                   </ul>
@@ -470,7 +565,7 @@ export default function LandingPage() {
 
           <Reveal delay={0.2}>
             <p className="text-center mt-10 text-[12px] text-[var(--muted)]">
-              All accounts start with <span className="accent-text font-medium">10 free credits</span> · No credit card required
+              All accounts start with <span className="text-white/70 font-medium">10 free credits</span> · No credit card required
             </p>
           </Reveal>
         </div>
@@ -481,7 +576,7 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <div className="mb-12 lg:mb-16">
-              <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-4">FAQ</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">FAQ</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)]">Questions? Answered.</h2>
             </div>
           </Reveal>
@@ -490,7 +585,7 @@ export default function LandingPage() {
               <Reveal key={i} delay={i * 0.05}>
                 <div className="border-t border-[var(--lg-border)]">
                   <button className="w-full py-5 text-left flex items-center justify-between group min-h-[44px]" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                    <span className="text-[14px] text-[var(--foreground)] group-hover:text-accent-text transition-colors pr-4">{faq.q}</span>
+                    <span className="text-[14px] text-[var(--foreground)] group-hover:text-white/70 transition-colors pr-4">{faq.q}</span>
                     <span className="transition-transform duration-300 shrink-0" style={{ transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)', transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)' }}>{icons.chevronDown}</span>
                   </button>
                   <div className={`overflow-hidden transition-all duration-400 ${openFaq === i ? 'max-h-40 pb-5 opacity-100' : 'max-h-0 opacity-0'}`} style={{ transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)' }}>
@@ -505,10 +600,6 @@ export default function LandingPage() {
 
       {/* ── Final CTA ───────────────────────────────────────── */}
       <section className="py-24 sm:py-32 lg:py-40 px-5 sm:px-6 lg:px-12 shimmer-divider relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="shader-orb shader-orb-1" style={{ opacity: 0.2 }} />
-          <div className="shader-orb shader-orb-2" style={{ opacity: 0.15 }} />
-        </div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <Reveal>
             <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] mb-6 leading-[1.0]">
@@ -536,7 +627,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <img src="/logo.svg" alt="TheAuctus" className="w-6 h-6" />
-            <span className="font-headline text-lg text-[var(--foreground)]">The<span className="accent-text">Auctus</span></span>
+            <span className="font-headline text-lg text-[var(--foreground)]">The<span className="text-white/70">Auctus</span></span>
           </div>
           <p className="text-[11px] text-[var(--muted)]">&copy; 2026 TheAuctus. Built by creators, for creators.</p>
           <div className="flex items-center gap-8 text-[11px] text-[var(--muted)]">

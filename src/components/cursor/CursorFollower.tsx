@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "./CursorFollower.css";
 
 export default function CursorFollower() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const dot = dotRef.current;
@@ -19,16 +18,22 @@ export default function CursorFollower() {
     let ringY = 0;
     let rafId: number;
 
+    const show = () => {
+      dot.classList.add("cursor-visible");
+      ring.classList.add("cursor-visible");
+    };
+    const hide = () => {
+      dot.classList.remove("cursor-visible");
+      ring.classList.remove("cursor-visible");
+    };
+
     const onMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-      if (!visible) setVisible(true);
+      show();
       // Dot follows instantly
       dot.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`;
     };
-
-    const onLeave = () => setVisible(false);
-    const onEnter = () => setVisible(true);
 
     const tick = () => {
       // Ring follows with delay (lerp)
@@ -40,27 +45,21 @@ export default function CursorFollower() {
     rafId = requestAnimationFrame(tick);
 
     window.addEventListener("mousemove", onMove, { passive: true });
-    document.addEventListener("mouseleave", onLeave);
-    document.addEventListener("mouseenter", onEnter);
+    document.addEventListener("mouseleave", hide);
+    document.addEventListener("mouseenter", show);
 
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseleave", onLeave);
-      document.removeEventListener("mouseenter", onEnter);
+      document.removeEventListener("mouseleave", hide);
+      document.removeEventListener("mouseenter", show);
     };
-  }, [visible]);
+  }, []);
 
   return (
     <>
-      <div
-        ref={dotRef}
-        className={`cursor-dot ${visible ? "cursor-visible" : ""}`}
-      />
-      <div
-        ref={ringRef}
-        className={`cursor-ring ${visible ? "cursor-visible" : ""}`}
-      />
+      <div ref={dotRef} className="cursor-dot" />
+      <div ref={ringRef} className="cursor-ring" />
     </>
   );
 }

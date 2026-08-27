@@ -60,19 +60,25 @@ function GlitchText() {
   );
 }
 
+// ── Seeded pseudo-random (deterministic for SSR hydration) ──
+function seededRandom(seed: number) {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 // ── Floating Parallax Particles (GitHub-style) ──────────────
 function ParallaxField() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [particles] = useState(() =>
     Array.from({ length: 50 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 1 + Math.random() * 3,
-      depth: 0.2 + Math.random() * 0.8,
-      opacity: 0.1 + Math.random() * 0.4,
-      duration: 4 + Math.random() * 8,
-      delay: Math.random() * 4,
+      x: seededRandom(i * 7 + 1) * 100,
+      y: seededRandom(i * 13 + 2) * 100,
+      size: 1 + seededRandom(i * 19 + 3) * 3,
+      depth: 0.2 + seededRandom(i * 23 + 4) * 0.8,
+      opacity: 0.1 + seededRandom(i * 29 + 5) * 0.4,
+      duration: 4 + seededRandom(i * 31 + 6) * 8,
+      delay: seededRandom(i * 37 + 7) * 4,
     }))
   );
 
