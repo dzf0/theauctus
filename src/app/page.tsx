@@ -263,32 +263,38 @@ export default function LandingPage() {
       </nav>
 
       {/* ── Hero ────────────────────────────────────────────── */}
-      <section className="relative pt-20 sm:pt-24 lg:pt-32 pb-10 sm:pb-16 lg:pb-20 px-5 sm:px-6 lg:px-12 min-h-[auto] sm:min-h-[90vh] flex items-center overflow-hidden">
-        {/* Mouse-follow mesh gradient */}
-        <MeshBackdrop />
+      <section className="relative pt-24 sm:pt-32 lg:pt-40 pb-16 sm:pb-24 lg:pb-32 px-5 sm:px-6 lg:px-12 min-h-[auto] sm:min-h-screen flex items-center overflow-hidden">
+        {/* Shader background */}
+        <div className="shader-bg">
+          <div className="shader-orb shader-orb-1" />
+          <div className="shader-orb shader-orb-2" />
+          <div className="shader-orb shader-orb-3" />
+        </div>
+        <div className="noise-overlay" />
 
-        {/* Particle field — desktop only */}
-        <div className="hidden sm:block"><ParticleField /></div>
+        {/* Gradient ring behind hero */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hero-gradient-ring" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hero-gradient-ring" style={{ width: 800, height: 800, animationDelay: '2s', opacity: 0.15 }} />
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
               <Reveal>
-                <div className="flex items-center gap-3 mb-6 lg:mb-8">
+                <div className="flex items-center gap-3 mb-8">
                   <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
                   <p className="text-[10px] uppercase tracking-[0.2em] accent-text">AI-Powered Content Planning</p>
                 </div>
               </Reveal>
               <Reveal delay={0.1}>
-                <WordReveal
-                  text="Schedule 30 days of content across every platform — in minutes."
-                  className="font-headline text-4xl sm:text-5xl lg:text-[4.5rem] leading-[1.0] text-[var(--foreground)] mb-8"
-                  baseDelay={0.2}
-                  stagger={0.06}
-                />
+                <h1 className="font-headline text-5xl sm:text-6xl lg:text-[5.5rem] leading-[0.95] text-[var(--foreground)] mb-8">
+                  <span className="block">Schedule</span>
+                  <span className="block">30 days of</span>
+                  <span className="block">content for <span className="accent-text">every</span></span>
+                  <span className="block">platform — <span className="stat-number">in minutes.</span></span>
+                </h1>
               </Reveal>
               <Reveal delay={0.2}>
-                <p className="text-[14px] text-[var(--muted)] leading-relaxed max-w-md mb-6 sm:mb-10">
+                <p className="text-[15px] text-[var(--muted)] leading-relaxed max-w-lg mb-10">
                   TheAuctus plans your content, writes platform-specific posts, and schedules optimal timing — so you can focus on creating, not managing.
                 </p>
               </Reveal>
@@ -316,14 +322,18 @@ export default function LandingPage() {
                   )}
                 </div>
                 {!user && (
-                  <p className="text-[12px] text-[var(--muted)]">
+                  <p className="text-[13px] text-[var(--muted)]">
                     Already have an account?{" "}
                     <Link href="/auth/signin" className="accent-text hover:text-[var(--primary-light)] transition-colors">Sign in</Link>
                   </p>
                 )}
               </Reveal>
               <Reveal delay={0.4}>
-                <p className="text-[11px] text-[var(--muted)] mt-3 sm:mt-4">10 free credits included · No credit card required</p>
+                <div className="flex items-center gap-6 mt-8">
+                  <p className="text-[12px] text-[var(--muted)]">10 free credits included</p>
+                  <span className="w-1 h-1 rounded-full bg-[var(--muted)]" />
+                  <p className="text-[12px] text-[var(--muted)]">No credit card required</p>
+                </div>
               </Reveal>
             </div>
 
@@ -506,9 +516,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Features ────────────────────────────────────────── */}
-      <section id="features" className="py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12">
-        <div className="max-w-7xl mx-auto">
+      {/* ── Features — Bento Grid ────────────────────────────── */}
+      <section id="features" className="py-20 sm:py-24 lg:py-32 px-5 sm:px-6 lg:px-12 relative">
+        <div className="noise-overlay" />
+        <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
             <div className="mb-10 sm:mb-14 lg:mb-20">
               <p className="text-[10px] uppercase tracking-[0.2em] accent-text mb-3 lg:mb-4">The Engine</p>
@@ -518,14 +529,57 @@ export default function LandingPage() {
               </h2>
             </div>
           </Reveal>
-          <Reveal variant="stagger" className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-            {features.map((feature, i) => (
-              <TiltCard key={i} maxTilt={3} className="liquid-card p-5 sm:p-6 lg:p-8 h-full hover-lift border-glow-card" style={{ borderRadius: "var(--lg-radius-sm)" }}>
-                <div className="text-[var(--accent-copper)] mb-4 sm:mb-5 lg:mb-6">{feature.icon}</div>
-                <h3 className="font-headline text-lg sm:text-xl text-[var(--foreground)] mb-2 sm:mb-3">{feature.title}</h3>
-                <p className="text-[12px] sm:text-[13px] text-[var(--muted)] leading-relaxed">{feature.description}</p>
-              </TiltCard>
-            ))}
+          <Reveal delay={0.1}>
+            <div className="bento-grid">
+              {/* Card 1 — span 2 */}
+              <div className="bento-card bento-card-span-2">
+                <div className="bento-glow" />
+                <div className="text-[var(--accent-copper)] mb-4 icon-pulse">{features[0].icon}</div>
+                <h3 className="font-headline text-xl sm:text-2xl text-[var(--foreground)] mb-3">{features[0].title}</h3>
+                <p className="text-[13px] text-[var(--muted)] leading-relaxed max-w-lg">{features[0].description}</p>
+                {/* Mini calendar visual */}
+                <div className="mt-6 grid grid-cols-7 gap-1.5">
+                  {Array.from({ length: 14 }, (_, i) => (
+                    <div key={i} className="aspect-square rounded-md" style={{ background: i % 3 === 0 ? 'rgba(201,168,124,0.15)' : 'var(--lg-bg)', border: '1px solid var(--lg-border)' }} />
+                  ))}
+                </div>
+              </div>
+              {/* Card 2 */}
+              <div className="bento-card">
+                <div className="bento-glow" />
+                <div className="text-[var(--accent-copper)] mb-4 icon-pulse">{features[1].icon}</div>
+                <h3 className="font-headline text-lg text-[var(--foreground)] mb-2">{features[1].title}</h3>
+                <p className="text-[12px] text-[var(--muted)] leading-relaxed">{features[1].description}</p>
+              </div>
+              {/* Card 3 */}
+              <div className="bento-card">
+                <div className="bento-glow" />
+                <div className="text-[var(--accent-copper)] mb-4 icon-pulse">{features[2].icon}</div>
+                <h3 className="font-headline text-lg text-[var(--foreground)] mb-2">{features[2].title}</h3>
+                <p className="text-[12px] text-[var(--muted)] leading-relaxed">{features[2].description}</p>
+              </div>
+              {/* Card 4 */}
+              <div className="bento-card">
+                <div className="bento-glow" />
+                <div className="text-[var(--accent-copper)] mb-4 icon-pulse">{features[3].icon}</div>
+                <h3 className="font-headline text-lg text-[var(--foreground)] mb-2">{features[3].title}</h3>
+                <p className="text-[12px] text-[var(--muted)] leading-relaxed">{features[3].description}</p>
+              </div>
+              {/* Card 5 — span 2 */}
+              <div className="bento-card bento-card-span-2">
+                <div className="bento-glow" />
+                <div className="text-[var(--accent-copper)] mb-4 icon-pulse">{features[4].icon}</div>
+                <h3 className="font-headline text-xl sm:text-2xl text-[var(--foreground)] mb-3">{features[4].title}</h3>
+                <p className="text-[13px] text-[var(--muted)] leading-relaxed max-w-lg">{features[4].description}</p>
+              </div>
+              {/* Card 6 */}
+              <div className="bento-card">
+                <div className="bento-glow" />
+                <div className="text-[var(--accent-copper)] mb-4 icon-pulse">{features[5].icon}</div>
+                <h3 className="font-headline text-lg text-[var(--foreground)] mb-2">{features[5].title}</h3>
+                <p className="text-[12px] text-[var(--muted)] leading-relaxed">{features[5].description}</p>
+              </div>
+            </div>
           </Reveal>
         </div>
       </section>

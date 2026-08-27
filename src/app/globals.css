@@ -1740,4 +1740,213 @@ a:focus-visible {
   .magnetic-btn {
     transform: none !important;
   }
+  .shader-orb,
+  .bento-card,
+  .kinetic-word,
+  .hero-gradient-ring {
+    animation: none !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. 2026 REDESIGN — Shader backgrounds, bento grid, kinetic type
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Animated mesh gradient (shader-like) ─────────────────── */
+.shader-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+.shader-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+.shader-orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(201,168,124,0.3), transparent 70%);
+  top: -10%; left: -5%;
+  animation: shader-drift-1 12s ease-in-out infinite;
+}
+.shader-orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(201,168,124,0.15), transparent 70%);
+  bottom: -10%; right: -5%;
+  animation: shader-drift-2 15s ease-in-out infinite;
+}
+.shader-orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(180,130,80,0.12), transparent 70%);
+  top: 40%; left: 50%;
+  animation: shader-drift-3 18s ease-in-out infinite;
+}
+@keyframes shader-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, 40px) scale(1.1); }
+  66% { transform: translate(-30px, 80px) scale(0.95); }
+}
+@keyframes shader-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-50px, -30px) scale(1.05); }
+  66% { transform: translate(40px, -60px) scale(0.9); }
+}
+@keyframes shader-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(70px, -20px) scale(1.15); }
+  66% { transform: translate(-40px, 50px) scale(0.85); }
+}
+
+/* ── Noise texture overlay ──────────────────────────────── */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* ── Bento grid ────────────────────────────────────────── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .bento-grid { grid-template-columns: 1fr; }
+}
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--lg-radius);
+  background: var(--lg-bg);
+  border: 1px solid var(--lg-border);
+  padding: 28px 24px;
+  transition: all 0.5s var(--ease-spring-critical);
+  cursor: default;}
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, var(--lg-highlight) 0%, transparent 100%);
+  border-radius: var(--lg-radius) var(--lg-radius) 0 0;
+  pointer-events: none;
+  opacity: 0.3;
+  transition: opacity 0.5s ease;}
+.bento-card:hover {
+  border-color: var(--lg-border-strong);
+  transform: translateY(-4px);
+  box-shadow: var(--lg-shadow-lg), 0 0 40px rgba(201,168,124,0.06);
+}
+.bento-card:hover::before {
+  opacity: 0.5;
+}
+.bento-card-span-2 {
+  grid-column: span 2;
+}
+@media (max-width: 768px) {
+  .bento-card-span-2 { grid-column: span 1; }
+}
+
+/* ── Glow border on hover ──────────────────────────────── */
+.bento-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: conic-gradient(from 0deg, rgba(201,168,124,0.4), transparent 40%, rgba(201,168,124,0.2), transparent 80%);
+  filter: blur(4px);
+  z-index: -1;
+}
+.bento-card:hover .bento-glow {
+  opacity: 1;
+}
+
+/* ── Kinetic word swap ─────────────────────────────────── */
+.kinetic-word {
+  display: inline-block;
+  animation: kinetic-fade 8s ease-in-out infinite;
+}
+@keyframes kinetic-fade {
+  0%, 30% { opacity: 1; transform: translateY(0); }
+  35%, 45% { opacity: 0; transform: translateY(-20px); }
+  50%, 80% { opacity: 1; transform: translateY(0); }
+  85%, 95% { opacity: 0; transform: translateY(-20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Gradient ring behind hero ─────────────────────────── */
+.hero-gradient-ring {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,168,124,0.1);
+  animation: ring-pulse 6s ease-in-out infinite;
+}
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.05); opacity: 0.6; }
+}
+
+/* ── Section divider line ──────────────────────────────── */
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lg-border) 20%, var(--lg-border) 80%, transparent);
+}
+
+/* ── Staggered fade-in for children ────────────────────── */
+.stagger-fade > * {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: stagger-child-in 0.6s var(--ease-out-expo) forwards;
+}
+.stagger-fade > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-fade > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-fade > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-fade > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-fade > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-fade > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-fade > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-fade > *:nth-child(8) { animation-delay: 0.4s; }
+@keyframes stagger-child-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Feature icon pulse ────────────────────────────────── */
+.icon-pulse {
+  animation: icon-glow-pulse 3s ease-in-out infinite;
+}
+@keyframes icon-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 0px rgba(201,168,124,0)); }
+  50% { filter: drop-shadow(0 0 8px rgba(201,168,124,0.4)); }
+}
+
+/* ── Stat counter animation ────────────────────────────── */
+.stat-number {
+  background: linear-gradient(135deg, var(--foreground), var(--accent-copper));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;}
+
+/* ── Scroll progress bar (redesigned) ──────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-copper), var(--primary-light));
+  transform-origin: left;
+  z-index: 100;
+  animation: scroll-progress-fill linear;
+  animation-timeline: scroll(root);
 }
