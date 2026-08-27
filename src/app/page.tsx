@@ -622,7 +622,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ──────────────────────────────────────────── */}
-      <footer className="py-12 px-6 lg:px-12 border-t border-[var(--lg-border)]">
+      <footer className="relative z-10 py-12 px-6 lg:px-12 border-t border-[var(--lg-border)]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <img src="/logo.svg" alt="TheAuctus" className="w-6 h-6" />
