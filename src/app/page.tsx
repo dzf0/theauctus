@@ -12,7 +12,6 @@ import {
 } from "@/components/motion";
 import { CREDIT_PACKS, CREDIT_COSTS, CUSTOM_CREDIT_RATE, CUSTOM_CREDIT_MIN_DOLLARS } from "@/lib/constants";
 import Galaxy from "@/components/galaxy/Galaxy";
-import CursorFollower from "@/components/cursor/CursorFollower";
 import SpotlightCard from "@/components/SpotlightCard";
 import GooeyNav from "@/components/GooeyNav";
 
@@ -218,7 +217,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen relative">
-      <CursorFollower />
       <ScrollProgress />
 
       {/* ── Fixed full-page background layers (matching 404) ── */}
