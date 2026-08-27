@@ -24,8 +24,6 @@ const GooeyNav = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
-  const filterRef = useRef<HTMLSpanElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
   const [activeIndex, setActiveIndex] = useState(initialActiveIndex);
 
   const noise = (n = 1) => n / 2 - Math.random() * n;
@@ -47,21 +45,19 @@ const GooeyNav = ({
     };
   };
 
-  const makeParticles = (element: HTMLSpanElement) => {
+  const makeParticles = (element: HTMLLIElement) => {
     const d = particleDistances;
     const r = particleR;
-    const bubbleTime = animationTime * 2 + timeVariance;
-    element.style.setProperty("--time", `${bubbleTime}ms`);
 
     for (let i = 0; i < particleCount; i++) {
       const t = animationTime * 2 + noise(timeVariance * 2);
       const p = createParticle(i, t, d, r);
-      element.classList.remove("active");
 
       setTimeout(() => {
         const particle = document.createElement("span");
         const point = document.createElement("span");
-        particle.classList.add("particle");
+        particle.classList.add("gooey-particle");
+        point.classList.add("gooey-point");
         particle.style.setProperty("--start-x", `${p.start[0]}px`);
         particle.style.setProperty("--start-y", `${p.start[1]}px`);
         particle.style.setProperty("--end-x", `${p.end[0]}px`);
@@ -70,38 +66,17 @@ const GooeyNav = ({
         particle.style.setProperty("--scale", `${p.scale}`);
         particle.style.setProperty("--color", `var(--color-${p.color}, white)`);
         particle.style.setProperty("--rotate", `${p.rotate}deg`);
-
-        point.classList.add("point");
         particle.appendChild(point);
         element.appendChild(particle);
-        requestAnimationFrame(() => {
-          element.classList.add("active");
-        });
         setTimeout(() => {
           try {
             element.removeChild(particle);
           } catch {
-            // Do nothing
+            // already removed
           }
         }, t);
       }, 30);
     }
-  };
-
-  const updateEffectPosition = (element: HTMLLIElement) => {
-    if (!containerRef.current || !filterRef.current || !textRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const pos = element.getBoundingClientRect();
-
-    const styles = {
-      left: `${pos.x - containerRect.x}px`,
-      top: `${pos.y - containerRect.y}px`,
-      width: `${pos.width}px`,
-      height: `${pos.height}px`,
-    };
-    Object.assign(filterRef.current.style, styles);
-    Object.assign(textRef.current.style, styles);
-    textRef.current.innerText = element.innerText;
   };
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, index: number) => {
@@ -109,22 +84,7 @@ const GooeyNav = ({
     if (activeIndex === index) return;
 
     setActiveIndex(index);
-    updateEffectPosition(liEl);
-
-    if (filterRef.current) {
-      const particles = filterRef.current.querySelectorAll(".particle");
-      particles.forEach((p) => filterRef.current!.removeChild(p));
-    }
-
-    if (textRef.current) {
-      textRef.current.classList.remove("active");
-      void textRef.current.offsetWidth;
-      textRef.current.classList.add("active");
-    }
-
-    if (filterRef.current) {
-      makeParticles(filterRef.current);
-    }
+    makeParticles(liEl);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>, index: number) => {
@@ -138,22 +98,7 @@ const GooeyNav = ({
   };
 
   useEffect(() => {
-    if (!navRef.current || !containerRef.current) return;
-    const activeLi = navRef.current.querySelectorAll("li")[activeIndex];
-    if (activeLi) {
-      updateEffectPosition(activeLi);
-      textRef.current?.classList.add("active");
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      const currentActiveLi = navRef.current?.querySelectorAll("li")[activeIndex];
-      if (currentActiveLi) {
-        updateEffectPosition(currentActiveLi as HTMLLIElement);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+    // Scroll to active item if needed
   }, [activeIndex]);
 
   return (
@@ -173,8 +118,6 @@ const GooeyNav = ({
           ))}
         </ul>
       </nav>
-      <span className="effect filter" ref={filterRef} />
-      <span className="effect text" ref={textRef} />
     </div>
   );
 };
