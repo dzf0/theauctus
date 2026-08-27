@@ -13,6 +13,7 @@ import {
   TiltCard,
 } from "@/components/motion";
 import { CREDIT_PACKS, CREDIT_COSTS, CUSTOM_CREDIT_RATE, CUSTOM_CREDIT_MIN_DOLLARS } from "@/lib/constants";
+import Galaxy from "@/components/galaxy/Galaxy";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -226,15 +227,28 @@ export default function LandingPage() {
 
       {/* ── Hero — Full immersive section ────────────────────── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Shader bg */}
-        <div className="shader-bg">
+        {/* Galaxy background — lava hue shifted */}
+        <div className="absolute inset-0 z-0">
+          <Galaxy
+            hueShift={15}
+            saturation={0.8}
+            density={1.2}
+            glowIntensity={0.5}
+            starSpeed={0.4}
+            mouseRepulsion={true}
+            twinkleIntensity={0.4}
+            rotationSpeed={0.05}
+            speed={0.8}
+            transparent={true}
+          />
+        </div>
+        {/* Lava gradient overlay */}
+        <div className="shader-bg" style={{ opacity: 0.6 }}>
           <div className="shader-orb shader-orb-1" />
           <div className="shader-orb shader-orb-2" />
           <div className="shader-orb shader-orb-3" />
         </div>
         <div className="noise-overlay" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hero-gradient-ring" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hero-gradient-ring" style={{ width: 800, height: 800, animationDelay: '3s', opacity: 0.1 }} />
 
         <div className="max-w-7xl mx-auto w-full relative z-10 px-5 sm:px-6 lg:px-12 pt-28 sm:pt-32 lg:pt-40 pb-16">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

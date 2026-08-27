@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
+import Galaxy from "@/components/galaxy/Galaxy";
 
 // ── Glitch 404 Text ──────────────────────────────────────────
 function GlitchText() {
@@ -274,7 +275,21 @@ export default function NotFound() {
       className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6"
       style={{ background: "var(--background)" }}
     >
-      {/* Background effects */}
+      {/* Galaxy background */}
+      <div className="absolute inset-0 z-0">
+        <Galaxy
+          hueShift={15}
+          saturation={0.8}
+          density={1.5}
+          glowIntensity={0.6}
+          starSpeed={0.3}
+          mouseRepulsion={true}
+          twinkleIntensity={0.5}
+          rotationSpeed={0.03}
+          speed={0.6}
+          transparent={true}
+        />
+      </div>
       <ParallaxField />
       <OrbitRings />
 
@@ -283,7 +298,7 @@ export default function NotFound() {
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(201,168,124,0.06) 0%, transparent 60%)",
+            background: "radial-gradient(circle, rgba(255,107,0,0.08) 0%, transparent 60%)",
             filter: "blur(80px)",
           }}
         />

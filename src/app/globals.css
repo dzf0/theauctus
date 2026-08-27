@@ -2,17 +2,17 @@
 
 :root {
   /* ══════════════════════════════════════════════════════════════
-     APPLE DESIGN SYSTEM — Dark Mode
-     True black canvas · #F5F5F7 type · #86868B muted · copper accent
+     LAVA DESIGN SYSTEM — Dark Mode
+     True black · white type · orange/red lava accent
      ══════════════════════════════════════════════════════════════ */
   --background: #000000;
   --foreground: #f5f5f7;
-  --primary: #c9a87c;
-  --primary-dark: #b8935f;
-  --primary-light: #dcc4a0;
-  --accent: #c9a87c;
-  --accent-copper: #c9a87c;
-  --accent-rose: #d4a5a5;
+  --primary: #FF6B00;
+  --primary-dark: #E05500;
+  --primary-light: #FF8C33;
+  --accent: #FF4500;
+  --accent-copper: #FF6B00;
+  --accent-rose: #FF2D2D;
   --muted: #86868b;
   --border: rgba(255, 255, 255, 0.08);
   --card: rgba(255, 255, 255, 0.04);
@@ -21,11 +21,11 @@
   --glass-hover: rgba(255, 255, 255, 0.08);
   --sidebar-bg: rgba(10, 10, 12, 0.85);
   --sidebar-text: #86868b;
-  --sidebar-active: #c9a87c;
+  --sidebar-active: #FF6B00;
   --headline-color: #a1a1a6;
-  --success: #7cb87c;
-  --danger: #c97c7c;
-  --info: #7c9ec9;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --info: #FF6B00;
   --warm-white: #f5f5f7;
   --cool-grey: #86868b;
 
@@ -97,12 +97,12 @@
 html.light {
   --background: #ffffff;
   --foreground: #1d1d1f;
-  --primary: #8a6828;
-  --primary-dark: #7a5e22;
-  --primary-light: #b8935f;
-  --accent: #8a6828;
-  --accent-copper: #8a6828;
-  --accent-rose: #b56b6b;
+  --primary: #E05500;
+  --primary-dark: #CC4A00;
+  --primary-light: #FF6B00;
+  --accent: #E05500;
+  --accent-copper: #E05500;
+  --accent-rose: #DC2626;
   --muted: #86868b;
   --border: rgba(0, 0, 0, 0.06);
   --card: rgba(0, 0, 0, 0.02);
@@ -111,11 +111,11 @@ html.light {
   --glass-hover: rgba(255, 255, 255, 0.7);
   --sidebar-bg: rgba(250, 250, 252, 0.85);
   --sidebar-text: #86868b;
-  --sidebar-active: #8a6828;
+  --sidebar-active: #E05500;
   --headline-color: #424245;
-  --success: #3d8b37;
-  --danger: #b91c1c;
-  --info: #2563eb;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --info: #FF6B00;
   --warm-white: #1d1d1f;
   --cool-grey: #424245;
 
@@ -165,8 +165,8 @@ html.light .liquid-input {
 }
 
 html.light .liquid-input:focus {
-  border-color: rgba(138, 104, 40, 0.4);
-  box-shadow: 0 0 0 3px rgba(138, 104, 40, 0.08), 0 0 24px rgba(138, 104, 40, 0.06);
+  border-color: rgba(224, 85, 0, 0.4);
+  box-shadow: 0 0 0 3px rgba(224, 85, 0, 0.08), 0 0 24px rgba(224, 85, 0, 0.06);
 }
 
 html.light .liquid-btn {
@@ -181,19 +181,19 @@ html.light .liquid-btn:hover {
 }
 
 html.light .liquid-btn-primary {
-  background: linear-gradient(135deg, rgba(138, 104, 40, 0.9), rgba(122, 94, 34, 0.95));
-  color: #faf8f5;
-  border-color: rgba(138, 104, 40, 0.3);
+  background: linear-gradient(135deg, #E05500, #CC4A00);
+  color: #ffffff;
+  border-color: rgba(224, 85, 0, 0.3);
 }
 
 html.light .liquid-badge {
-  background: rgba(138, 104, 40, 0.1);
-  border-color: rgba(138, 104, 40, 0.2);
-  color: #8a6828;
+  background: rgba(224, 85, 0, 0.1);
+  border-color: rgba(224, 85, 0, 0.2);
+  color: #E05500;
 }
 
 html.light ::selection {
-  background: rgba(138, 104, 40, 0.2);
+  background: rgba(224, 85, 0, 0.2);
 }
 
 html.light ::-webkit-scrollbar-thumb {
@@ -263,7 +263,7 @@ html.light [class*="border-[rgba(255,255,255,0."] {
 }
 
 /* Copper accent → keep */
-html.light .text-\[\#c9a87c\],
+html.light .text-\[\#FF6B00\],
 html.light .text-\[\#b8935f\],
 html.light .accent-text,
 html.light [class*="text-[#c9"] {
@@ -1663,13 +1663,13 @@ a:focus-visible {
 .demo-video-glow {
   background: conic-gradient(
     from 0deg,
-    rgba(201,168,124,0) 0deg,
-    rgba(201,168,124,0.4) 60deg,
-    rgba(201,168,124,0) 120deg,
-    rgba(201,168,124,0.3) 200deg,
-    rgba(201,168,124,0) 280deg,
-    rgba(201,168,124,0.4) 340deg,
-    rgba(201,168,124,0) 360deg
+    rgba(255,107,0,0) 0deg,
+    rgba(255,107,0,0.4) 60deg,
+    rgba(255,107,0,0) 120deg,
+    rgba(255,107,0,0.3) 200deg,
+    rgba(255,107,0,0) 280deg,
+    rgba(255,107,0,0.4) 340deg,
+    rgba(255,107,0,0) 360deg
   );
   animation: demo-glow-spin 8s linear infinite;
   border-radius: 1rem;
@@ -1685,8 +1685,8 @@ a:focus-visible {
   transition: opacity 0.5s ease;
 }
 .demo-play-btn {
-  background: rgba(201,168,124,0.15);
-  border: 1px solid rgba(201,168,124,0.3);
+  background: rgba(255,107,0,0.15);
+  border: 1px solid rgba(255,107,0,0.3);
   color: var(--accent-copper);
   backdrop-filter: blur(12px);
   animation: demo-play-pulse 3s ease-in-out infinite;
@@ -1694,11 +1694,11 @@ a:focus-visible {
 }
 .demo-play-btn:hover {
   transform: scale(1.08);
-  background: rgba(201,168,124,0.25);
+  background: rgba(255,107,0,0.25);
 }
 @keyframes demo-play-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,124,0.2); }
-  50% { box-shadow: 0 0 0 16px rgba(201,168,124,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,0,0.2); }
+  50% { box-shadow: 0 0 0 16px rgba(255,107,0,0); }
 }
 
 .demo-badge-float {
@@ -1754,29 +1754,29 @@ a:focus-visible {
    14. 2026 REDESIGN — Shader backgrounds, bento grid, kinetic type
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Flowing gradient river background ───────────────────── */
+/* ── Lava liquid flowing gradient ────────────────────────── */
 .shader-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
   z-index: 0;
-  background: var(--background);
+  background: #000000;
 }
-/* Base flowing gradient — the river */
+/* Base lava flow — molten rivers of red/orange */
 .shader-bg::before {
   content: '';
   position: absolute;
   inset: -50%;
   width: 200%;
   height: 200%;
-  background: 
-    radial-gradient(ellipse 600px 600px at 20% 30%, rgba(201,168,124,0.18), transparent),
-    radial-gradient(ellipse 500px 500px at 70% 60%, rgba(138,104,40,0.12), transparent),
-    radial-gradient(ellipse 400px 400px at 50% 80%, rgba(220,196,160,0.08), transparent),
-    radial-gradient(ellipse 700px 300px at 80% 20%, rgba(201,168,124,0.06), transparent);
-  animation: river-flow 20s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse 700px 500px at 15% 25%, rgba(255,69,0,0.25), transparent 60%),
+    radial-gradient(ellipse 600px 400px at 75% 65%, rgba(255,107,0,0.2), transparent 60%),
+    radial-gradient(ellipse 500px 500px at 50% 85%, rgba(220,38,38,0.15), transparent 55%),
+    radial-gradient(ellipse 800px 350px at 85% 15%, rgba(255,140,51,0.12), transparent 50%);
+  animation: lava-flow 18s ease-in-out infinite;
 }
-/* Secondary flow layer — adds depth */
+/* Secondary lava layer — deeper molten core */
 .shader-bg::after {
   content: '';
   position: absolute;
@@ -1784,67 +1784,68 @@ a:focus-visible {
   width: 160%;
   height: 160%;
   background:
-    radial-gradient(ellipse 350px 350px at 30% 70%, rgba(201,168,124,0.1), transparent),
-    radial-gradient(ellipse 450px 250px at 60% 30%, rgba(180,130,80,0.08), transparent),
-    radial-gradient(ellipse 300px 400px at 80% 70%, rgba(201,168,124,0.06), transparent);
-  animation: river-flow-2 25s ease-in-out infinite reverse;
+    radial-gradient(ellipse 400px 350px at 25% 75%, rgba(255,69,0,0.18), transparent 55%),
+    radial-gradient(ellipse 500px 300px at 65% 25%, rgba(255,107,0,0.12), transparent 50%),
+    radial-gradient(ellipse 350px 450px at 85% 65%, rgba(255,140,51,0.1), transparent 55%);
+  animation: lava-flow-2 24s ease-in-out infinite reverse;
 }
-@keyframes river-flow {
+@keyframes lava-flow {
   0% { transform: translate(0%, 0%) rotate(0deg); }
-  25% { transform: translate(5%, -3%) rotate(1deg); }
-  50% { transform: translate(-3%, 5%) rotate(-0.5deg); }
-  75% { transform: translate(-5%, -2%) rotate(0.5deg); }
+  20% { transform: translate(6%, -4%) rotate(1.5deg); }
+  40% { transform: translate(-4%, 6%) rotate(-1deg); }
+  60% { transform: translate(5%, -2%) rotate(0.8deg); }
+  80% { transform: translate(-6%, 3%) rotate(-0.5deg); }
   100% { transform: translate(0%, 0%) rotate(0deg); }
 }
-@keyframes river-flow-2 {
+@keyframes lava-flow-2 {
   0% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
-  33% { transform: translate(-4%, 3%) rotate(-1deg) scale(1.02); }
-  66% { transform: translate(3%, -4%) rotate(0.8deg) scale(0.98); }
+  30% { transform: translate(-5%, 4%) rotate(-1.2deg) scale(1.03); }
+  60% { transform: translate(4%, -5%) rotate(1deg) scale(0.97); }
   100% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
 }
-/* Individual floating orbs — lava lamp style */
+/* Floating lava blobs — molten orbs */
 .shader-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
+  filter: blur(80px);
   mix-blend-mode: screen;
   will-change: transform;
 }
 .shader-orb-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(201,168,124,0.25) 0%, rgba(201,168,124,0.05) 50%, transparent 70%);
-  top: -15%; left: -10%;
-  animation: orb-float-1 18s ease-in-out infinite;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(255,69,0,0.3) 0%, rgba(255,69,0,0.08) 40%, transparent 70%);
+  top: -20%; left: -10%;
+  animation: orb-lava-1 16s ease-in-out infinite;
 }
 .shader-orb-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(138,104,40,0.2) 0%, rgba(138,104,40,0.04) 50%, transparent 70%);
-  bottom: -15%; right: -10%;
-  animation: orb-float-2 22s ease-in-out infinite;
+  width: 550px; height: 550px;
+  background: radial-gradient(circle, rgba(255,107,0,0.25) 0%, rgba(255,107,0,0.06) 40%, transparent 70%);
+  bottom: -20%; right: -10%;
+  animation: orb-lava-2 20s ease-in-out infinite;
 }
 .shader-orb-3 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(220,196,160,0.15) 0%, rgba(220,196,160,0.03) 50%, transparent 70%);
-  top: 40%; left: 40%;
-  animation: orb-float-3 26s ease-in-out infinite;
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, rgba(220,38,38,0.2) 0%, rgba(220,38,38,0.04) 40%, transparent 70%);
+  top: 35%; left: 35%;
+  animation: orb-lava-3 24s ease-in-out infinite;
 }
-@keyframes orb-float-1 {
+@keyframes orb-lava-1 {
   0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  20% { transform: translate(80px, 60px) scale(1.15) rotate(5deg); }
-  40% { transform: translate(-40px, 120px) scale(0.9) rotate(-3deg); }
-  60% { transform: translate(60px, -40px) scale(1.1) rotate(2deg); }
-  80% { transform: translate(-80px, 20px) scale(0.95) rotate(-4deg); }
+  20% { transform: translate(100px, 80px) scale(1.2) rotate(6deg); }
+  40% { transform: translate(-60px, 140px) scale(0.85) rotate(-4deg); }
+  60% { transform: translate(80px, -50px) scale(1.15) rotate(3deg); }
+  80% { transform: translate(-100px, 30px) scale(0.9) rotate(-5deg); }
 }
-@keyframes orb-float-2 {
+@keyframes orb-lava-2 {
   0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  25% { transform: translate(-70px, -50px) scale(1.1) rotate(-4deg); }
-  50% { transform: translate(50px, -100px) scale(0.85) rotate(3deg); }
-  75% { transform: translate(-30px, 60px) scale(1.05) rotate(-2deg); }
+  25% { transform: translate(-90px, -60px) scale(1.15) rotate(-5deg); }
+  50% { transform: translate(70px, -120px) scale(0.8) rotate(4deg); }
+  75% { transform: translate(-40px, 80px) scale(1.1) rotate(-3deg); }
 }
-@keyframes orb-float-3 {
+@keyframes orb-lava-3 {
   0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  30% { transform: translate(100px, -60px) scale(1.2) rotate(6deg); }
-  60% { transform: translate(-60px, 80px) scale(0.8) rotate(-5deg); }
+  30% { transform: translate(120px, -80px) scale(1.3) rotate(7deg); }
+  60% { transform: translate(-80px, 100px) scale(0.75) rotate(-6deg); }
 }
 
 /* ── Noise texture overlay ──────────────────────────────── */
@@ -1892,7 +1893,7 @@ a:focus-visible {
 .bento-card:hover {
   border-color: var(--lg-border-strong);
   transform: translateY(-4px);
-  box-shadow: var(--lg-shadow-lg), 0 0 40px rgba(201,168,124,0.06);
+  box-shadow: var(--lg-shadow-lg), 0 0 40px rgba(255,107,0,0.06);
 }
 .bento-card:hover::before {
   opacity: 0.5;
@@ -1911,7 +1912,7 @@ a:focus-visible {
   border-radius: inherit;
   opacity: 0;
   transition: opacity 0.5s ease;
-  background: conic-gradient(from 0deg, rgba(201,168,124,0.4), transparent 40%, rgba(201,168,124,0.2), transparent 80%);
+  background: conic-gradient(from 0deg, rgba(255,107,0,0.4), transparent 40%, rgba(255,107,0,0.2), transparent 80%);
   filter: blur(4px);
   z-index: -1;
 }
@@ -1937,7 +1938,7 @@ a:focus-visible {
   position: absolute;
   width: 600px; height: 600px;
   border-radius: 50%;
-  border: 1px solid rgba(201,168,124,0.1);
+  border: 1px solid rgba(255,107,0,0.1);
   animation: ring-pulse 6s ease-in-out infinite;
 }
 @keyframes ring-pulse {
@@ -1975,8 +1976,8 @@ a:focus-visible {
   animation: icon-glow-pulse 3s ease-in-out infinite;
 }
 @keyframes icon-glow-pulse {
-  0%, 100% { filter: drop-shadow(0 0 0px rgba(201,168,124,0)); }
-  50% { filter: drop-shadow(0 0 8px rgba(201,168,124,0.4)); }
+  0%, 100% { filter: drop-shadow(0 0 0px rgba(255,107,0,0)); }
+  50% { filter: drop-shadow(0 0 8px rgba(255,107,0,0.4)); }
 }
 
 /* ── Stat counter animation ────────────────────────────── */
