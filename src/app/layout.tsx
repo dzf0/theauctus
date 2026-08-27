@@ -4,6 +4,7 @@ import "./globals.css";
 import { UserProvider } from "@/components/user-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/cookie-consent";
+import GalaxyBackground from "@/components/GalaxyBackground";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col editorial-bg">
         <ThemeProvider>
           <UserProvider>
+            <GalaxyBackground />
             <div className="relative z-10 flex-1 flex flex-col">
               {children}
             </div>

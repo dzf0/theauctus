@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback } from "react";
-import Galaxy from "@/components/galaxy/Galaxy";
+import { useState } from "react";
 
 // ── Glitch 404 Text ──────────────────────────────────────────
 function GlitchText() {
@@ -54,109 +53,6 @@ function GlitchText() {
           91% { opacity: 0.5; transform: translate(-3px, -1px); }
           92% { opacity: 0; transform: translate(0); }
           100% { opacity: 0; transform: translate(0); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-// ── Seeded pseudo-random (deterministic for SSR hydration) ──
-function seededRandom(seed: number) {
-  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
-}
-
-// ── Floating Parallax Particles (GitHub-style) ──────────────
-function ParallaxField() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [particles] = useState(() =>
-    Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      x: seededRandom(i * 7 + 1) * 100,
-      y: seededRandom(i * 13 + 2) * 100,
-      size: 1 + seededRandom(i * 19 + 3) * 3,
-      depth: 0.2 + seededRandom(i * 23 + 4) * 0.8,
-      opacity: 0.1 + seededRandom(i * 29 + 5) * 0.4,
-      duration: 4 + seededRandom(i * 31 + 6) * 8,
-      delay: seededRandom(i * 37 + 7) * 4,
-    }))
-  );
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    const x = (e.clientX / window.innerWidth - 0.5) * 2;
-    const y = (e.clientY / window.innerHeight - 0.5) * 2;
-    setMouse({ x, y });
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [handleMouseMove]);
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: `${p.size}px`,
-            height: `${p.size}px`,
-            opacity: p.opacity,
-            background: p.id % 3 === 0 ? "var(--accent-copper)" : "rgba(255,255,255,0.5)",
-            transform: `translate(${mouse.x * p.depth * 30}px, ${mouse.y * p.depth * 30}px)`,
-            transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
-            animation: `float-particle ${p.duration}s ease-in-out ${p.delay}s infinite`,
-          }}
-        />
-      ))}
-      <style jsx>{`
-        @keyframes float-particle {
-          0%, 100% { transform: translateY(0) translateX(0); }
-          25% { transform: translateY(-12px) translateX(6px); }
-          50% { transform: translateY(-6px) translateX(-4px); }
-          75% { transform: translateY(-16px) translateX(2px); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-// ── Floating Orbit Rings ────────────────────────────────────
-function OrbitRings() {
-  return (
-    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-      {[200, 320, 440].map((size, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full border"
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            borderColor: `rgba(201,168,124,${0.08 - i * 0.02})`,
-            animation: `orbit-spin ${20 + i * 10}s linear infinite ${i % 2 === 0 ? "" : "reverse"}`,
-          }}
-        >
-          {/* Orbit dot */}
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: "6px",
-              height: "6px",
-              background: i === 0 ? "var(--accent-copper)" : "rgba(255,255,255,0.3)",
-              top: "-3px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              boxShadow: i === 0 ? "0 0 12px rgba(201,168,124,0.5)" : "none",
-            }}
-          />
-        </div>
-      ))}
-      <style jsx>{`
-        @keyframes orbit-spin {
-          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
@@ -281,34 +177,6 @@ export default function NotFound() {
       className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6"
       style={{ background: "var(--background)" }}
     >
-      {/* Galaxy background */}
-      <div className="absolute inset-0 z-0">
-        <Galaxy
-          saturation={0}
-          density={0.8}
-          glowIntensity={0.4}
-          starSpeed={0.3}
-          mouseRepulsion={true}
-          twinkleIntensity={0.3}
-          rotationSpeed={0.03}
-          speed={0.6}
-          transparent={true}
-        />
-      </div>
-      <ParallaxField />
-      <OrbitRings />
-
-      {/* Radial gradient backdrop */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(255,107,0,0.08) 0%, transparent 60%)",
-            filter: "blur(80px)",
-          }}
-        />
-      </div>
-
       {/* Content */}
       <div className="relative z-10 text-center max-w-2xl mx-auto">
         {/* Glitch 404 */}
