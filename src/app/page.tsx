@@ -146,9 +146,41 @@ export default function LandingPage() {
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <div className="mb-8">
+            <div className="mb-8 flex flex-col items-center">
               <DepthText
-                text="Schedule 30 days of content across every platform"
+                text="Schedule 30"
+                layers={24}
+                depth={1.8}
+                faceColor="#f8fafc"
+                depthColor="#86868b"
+                tilt={6}
+                pointerTracking
+                smoothing={0.14}
+                perspective={1000}
+                autoOrbit
+                orbitSpeed={0.3}
+                fontSize="clamp(2.2rem, 7vw, 5rem)"
+                fontWeight={400}
+                shadow
+              />
+              <DepthText
+                text="days of content"
+                layers={24}
+                depth={1.8}
+                faceColor="#f8fafc"
+                depthColor="#86868b"
+                tilt={6}
+                pointerTracking
+                smoothing={0.14}
+                perspective={1000}
+                autoOrbit
+                orbitSpeed={0.3}
+                fontSize="clamp(2.2rem, 7vw, 5rem)"
+                fontWeight={400}
+                shadow
+              />
+              <DepthText
+                text="across every platform"
                 layers={24}
                 depth={1.8}
                 faceColor="#f8fafc"
