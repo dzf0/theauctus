@@ -196,7 +196,7 @@ function ParallaxField() {
   }, [handleMouseMove]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 mobile-hide-bg">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 ">
       {particles.map((p) => (
         <div
           key={p.id}
@@ -221,7 +221,7 @@ function ParallaxField() {
 // ── Floating Orbit Rings ────────────────────────────────────
 function OrbitRings() {
   return (
-    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 mobile-hide-bg">
+    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 ">
       {[120, 200, 280].map((size, i) => (
         <div
           key={i}
@@ -273,7 +273,7 @@ export default function LandingPage() {
       <ScrollProgress />
 
       {/* ── Fixed full-page background layers (matching 404) ── */}
-      <div className="fixed inset-0 z-0 mobile-hide-bg">
+      <div className="fixed inset-0 z-0 ">
         <Galaxy
           saturation={0}
           density={0.8}

@@ -2009,9 +2009,3 @@ a:focus-visible {
   animation-timeline: scroll(root);
 }
 
-/* ══════════════════════════════════════════════════════════════
-   MOBILE — Hide heavy background effects for performance
-   ══════════════════════════════════════════════════════════════ */
-@media (max-width: 639px) {
-  .mobile-hide-bg { display: none !important; }
-}
