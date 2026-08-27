@@ -10,11 +10,11 @@ import {
   WordReveal,
   useMagnetic,
   Magnetic,
-  TiltCard,
 } from "@/components/motion";
 import { CREDIT_PACKS, CREDIT_COSTS, CUSTOM_CREDIT_RATE, CUSTOM_CREDIT_MIN_DOLLARS } from "@/lib/constants";
 import Galaxy from "@/components/galaxy/Galaxy";
 import CursorFollower from "@/components/cursor/CursorFollower";
+import SpotlightCard from "@/components/SpotlightCard";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -421,12 +421,11 @@ export default function LandingPage() {
           <Reveal delay={0.1}>
             <div className="bento-grid">
               {features.map((f, i) => (
-                <div key={i} className={`bento-card ${f.span === 2 ? 'bento-card-span-2' : ''}`}>
-                  <div className="bento-glow" />
+                <SpotlightCard key={i} className={`${f.span === 2 ? 'col-span-2' : ''}`} spotlightColor="rgba(255,255,255,0.06)">
                   <div className="text-white/60 mb-5 icon-pulse">{f.icon}</div>
                   <h3 className="font-headline text-xl sm:text-2xl text-[var(--foreground)] mb-3">{f.title}</h3>
                   <p className="text-[13px] text-[var(--muted)] leading-relaxed">{f.description}</p>
-                </div>
+                </SpotlightCard>
               ))}
             </div>
           </Reveal>
@@ -449,7 +448,7 @@ export default function LandingPage() {
           <div className="space-y-12 lg:space-y-20">
             {[
               { step: "01", title: "Tell AI about your brand", desc: "Enter your niche, keywords, and brand voice. Connect your platforms. Takes 2 minutes.", visual: (
-                <div className="liquid-card p-6 rounded-xl">
+                <SpotlightCard className="p-6" spotlightColor="rgba(255,255,255,0.05)">
                   <div className="space-y-3">
                     {[1, 0.7, 0.5].map((w, i) => (
                       <div key={i} className="flex items-center gap-3">
@@ -459,10 +458,10 @@ export default function LandingPage() {
                     ))}
                     <p className="text-[9px] text-[var(--muted)] uppercase tracking-wider pt-2">Brand voice loaded</p>
                   </div>
-                </div>
+                </SpotlightCard>
               )},
               { step: "02", title: "Review your calendar", desc: "AI generates 30+ platform-specific posts with optimal timing and hashtags.", visual: (
-                <div className="liquid-card p-6 rounded-xl">
+                <SpotlightCard className="p-6" spotlightColor="rgba(255,255,255,0.05)">
                   <div className="grid grid-cols-7 gap-1.5">
                     {Array.from({ length: 21 }, (_, i) => (
                       <div key={i} className="aspect-square rounded-sm" style={{ background: i < 5 ? 'rgba(255,255,255,0.1)' : 'var(--lg-bg)', border: i === 10 ? '1px solid rgba(255,255,255,0.4)' : '1px solid var(--lg-border)' }} />
@@ -472,10 +471,10 @@ export default function LandingPage() {
                     <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">30 posts ready</span>
                     <span className="text-[9px] text-white/60">✓</span>
                   </div>
-                </div>
+                </SpotlightCard>
               )},
               { step: "03", title: "Watch it grow", desc: "Content auto-publishes. Analytics track everything. AI suggests new tactics weekly.", visual: (
-                <div className="liquid-card p-6 rounded-xl">
+                <SpotlightCard className="p-6" spotlightColor="rgba(255,255,255,0.05)">
                   <div className="flex items-end gap-1 h-20">
                     {[25, 30, 28, 40, 45, 38, 55, 50, 65, 70, 68, 85, 80, 95].map((h, i) => (
                       <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 10 ? 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))' : 'var(--lg-bg)' }} />
@@ -485,7 +484,7 @@ export default function LandingPage() {
                     <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">Growth +4.2x</span>
                     <span className="text-[9px]" style={{ color: 'var(--success)' }}>↑ Trending</span>
                   </div>
-                </div>
+                </SpotlightCard>
               )},
             ].map((s, i) => (
               <Reveal key={i} delay={i * 0.1}>
@@ -527,19 +526,19 @@ export default function LandingPage() {
           </Reveal>
 
           <Reveal delay={0.05}>
-            <div className="liquid-card p-4 mb-10 max-w-full sm:max-w-md rounded-xl">
+            <SpotlightCard className="p-4 mb-10 max-w-full sm:max-w-md" spotlightColor="rgba(255,255,255,0.04)">
               <div className="flex flex-wrap gap-x-4 gap-y-1 sm:gap-x-6 text-[12px]" style={{ color: 'var(--muted)' }}>
                 {CREDIT_COSTS.map((item, i) => (
                   <span key={i}>{item.action}: <span className="text-white/70 font-medium">{item.credits} cr</span></span>
                 ))}
               </div>
-            </div>
+            </SpotlightCard>
           </Reveal>
 
           <Reveal delay={0.1}>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {CREDIT_PACKS.map((pack) => (
-                <TiltCard key={pack.id} maxTilt={3} className={`liquid-card p-6 sm:p-8 relative hover-lift ${pack.popular ? 'glow-breathe' : ''}`} style={{ borderRadius: 'var(--lg-radius-sm)' }}>
+                <SpotlightCard key={pack.id} className={`p-6 sm:p-8 relative ${pack.popular ? 'glow-breathe' : ''}`} spotlightColor="rgba(255,255,255,0.06)">
                   {pack.popular && <span className="liquid-badge absolute top-5 right-5 z-10">Best Value</span>}
                   <div className="text-white/60 mb-4">{pack.id === 'starter' ? icons.sparkles : pack.id === 'growth' ? icons.calendar : icons.currency}</div>
                   <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-4 relative z-10">{pack.name}</p>
@@ -558,7 +557,7 @@ export default function LandingPage() {
                   <Link href={user ? '/billing' : '/auth/signup'} className={`block w-full text-center py-3 relative z-10 ${pack.popular ? 'liquid-btn-primary' : 'liquid-btn'}`}>
                     {user ? 'Buy Credits' : 'Start Free'}
                   </Link>
-                </TiltCard>
+                </SpotlightCard>
               ))}
             </div>
           </Reveal>
