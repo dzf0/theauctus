@@ -33,16 +33,20 @@
 
 .gooey-nav-container {
   position: relative;
+  flex-shrink: 0;
+  isolation: isolate;
 }
 
 .gooey-nav-container nav {
   display: flex;
   position: relative;
   transform: translate3d(0, 0, 0.01px);
+  flex-wrap: nowrap;
 }
 
 .gooey-nav-container nav ul {
   display: flex;
+  flex-wrap: nowrap;
   gap: 0.25em;
   list-style: none;
   padding: 0;
@@ -66,6 +70,7 @@
 
 .gooey-nav-container nav ul li {
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .gooey-nav-container nav ul li a {
@@ -136,7 +141,7 @@
   position: absolute;
   inset: -75px;
   z-index: -2;
-  background: var(--background, #000000);
+  background: #000000;
 }
 
 .gooey-nav-container .effect.filter::after {
