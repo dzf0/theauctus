@@ -15,6 +15,7 @@ import { CREDIT_PACKS, CREDIT_COSTS, CUSTOM_CREDIT_RATE, CUSTOM_CREDIT_MIN_DOLLA
 import Galaxy from "@/components/galaxy/Galaxy";
 import CursorFollower from "@/components/cursor/CursorFollower";
 import SpotlightCard from "@/components/SpotlightCard";
+import GooeyNav from "@/components/GooeyNav";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -309,10 +310,20 @@ export default function LandingPage() {
               <span className="font-headline text-xl tracking-tight text-foreground">The<span className="text-white/70">Auctus</span></span>
             </div>
             <div className="hidden md:flex items-center gap-10">
-              <a href="#features" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">Features</a>
-              <a href="#how-it-works" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">How It Works</a>
-              <a href="#pricing" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">Credits</a>
-              <a href="#faq" className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] hover:text-foreground transition-colors link-underline">FAQ</a>
+              <GooeyNav
+                items={[
+                  { label: "Features", href: "#features" },
+                  { label: "How It Works", href: "#how-it-works" },
+                  { label: "Credits", href: "#pricing" },
+                  { label: "FAQ", href: "#faq" },
+                ]}
+                particleCount={12}
+                particleDistances={[70, 8]}
+                particleR={80}
+                animationTime={500}
+                timeVariance={200}
+                colors={[1, 2, 3, 1, 2, 3, 1, 4]}
+              />
               <ThemeToggle />
               {user ? (
                 <Link href="/dashboard" className="liquid-btn-primary text-[11px]">Dashboard</Link>
