@@ -146,7 +146,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <div className="mb-8 flex flex-col items-center">
+            <div className="mb-8 flex flex-col items-center w-full">
               <DepthText
                 text="Schedule 30"
                 layers={24}

@@ -3,6 +3,7 @@
   perspective: var(--depth-text-perspective);
   perspective-origin: 50% 48%;
   isolation: isolate;
+  text-align: center;
 }
 
 .depth-text__stage {
