@@ -1740,6 +1740,8 @@ a:focus-visible {
   .magnetic-btn {
     transform: none !important;
   }
+  .shader-bg::before,
+  .shader-bg::after,
   .shader-orb,
   .bento-card,
   .kinetic-word,
@@ -1752,51 +1754,97 @@ a:focus-visible {
    14. 2026 REDESIGN — Shader backgrounds, bento grid, kinetic type
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Animated mesh gradient (shader-like) ─────────────────── */
+/* ── Flowing gradient river background ───────────────────── */
 .shader-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
   z-index: 0;
+  background: var(--background);
 }
+/* Base flowing gradient — the river */
+.shader-bg::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(ellipse 600px 600px at 20% 30%, rgba(201,168,124,0.18), transparent),
+    radial-gradient(ellipse 500px 500px at 70% 60%, rgba(138,104,40,0.12), transparent),
+    radial-gradient(ellipse 400px 400px at 50% 80%, rgba(220,196,160,0.08), transparent),
+    radial-gradient(ellipse 700px 300px at 80% 20%, rgba(201,168,124,0.06), transparent);
+  animation: river-flow 20s ease-in-out infinite;
+}
+/* Secondary flow layer — adds depth */
+.shader-bg::after {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  width: 160%;
+  height: 160%;
+  background:
+    radial-gradient(ellipse 350px 350px at 30% 70%, rgba(201,168,124,0.1), transparent),
+    radial-gradient(ellipse 450px 250px at 60% 30%, rgba(180,130,80,0.08), transparent),
+    radial-gradient(ellipse 300px 400px at 80% 70%, rgba(201,168,124,0.06), transparent);
+  animation: river-flow-2 25s ease-in-out infinite reverse;
+}
+@keyframes river-flow {
+  0% { transform: translate(0%, 0%) rotate(0deg); }
+  25% { transform: translate(5%, -3%) rotate(1deg); }
+  50% { transform: translate(-3%, 5%) rotate(-0.5deg); }
+  75% { transform: translate(-5%, -2%) rotate(0.5deg); }
+  100% { transform: translate(0%, 0%) rotate(0deg); }
+}
+@keyframes river-flow-2 {
+  0% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+  33% { transform: translate(-4%, 3%) rotate(-1deg) scale(1.02); }
+  66% { transform: translate(3%, -4%) rotate(0.8deg) scale(0.98); }
+  100% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+}
+/* Individual floating orbs — lava lamp style */
 .shader-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
+  filter: blur(60px);
+  mix-blend-mode: screen;
+  will-change: transform;
 }
 .shader-orb-1 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(201,168,124,0.3), transparent 70%);
-  top: -10%; left: -5%;
-  animation: shader-drift-1 12s ease-in-out infinite;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(201,168,124,0.25) 0%, rgba(201,168,124,0.05) 50%, transparent 70%);
+  top: -15%; left: -10%;
+  animation: orb-float-1 18s ease-in-out infinite;
 }
 .shader-orb-2 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(201,168,124,0.15), transparent 70%);
-  bottom: -10%; right: -5%;
-  animation: shader-drift-2 15s ease-in-out infinite;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(138,104,40,0.2) 0%, rgba(138,104,40,0.04) 50%, transparent 70%);
+  bottom: -15%; right: -10%;
+  animation: orb-float-2 22s ease-in-out infinite;
 }
 .shader-orb-3 {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(180,130,80,0.12), transparent 70%);
-  top: 40%; left: 50%;
-  animation: shader-drift-3 18s ease-in-out infinite;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(220,196,160,0.15) 0%, rgba(220,196,160,0.03) 50%, transparent 70%);
+  top: 40%; left: 40%;
+  animation: orb-float-3 26s ease-in-out infinite;
 }
-@keyframes shader-drift-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(60px, 40px) scale(1.1); }
-  66% { transform: translate(-30px, 80px) scale(0.95); }
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  20% { transform: translate(80px, 60px) scale(1.15) rotate(5deg); }
+  40% { transform: translate(-40px, 120px) scale(0.9) rotate(-3deg); }
+  60% { transform: translate(60px, -40px) scale(1.1) rotate(2deg); }
+  80% { transform: translate(-80px, 20px) scale(0.95) rotate(-4deg); }
 }
-@keyframes shader-drift-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-50px, -30px) scale(1.05); }
-  66% { transform: translate(40px, -60px) scale(0.9); }
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25% { transform: translate(-70px, -50px) scale(1.1) rotate(-4deg); }
+  50% { transform: translate(50px, -100px) scale(0.85) rotate(3deg); }
+  75% { transform: translate(-30px, 60px) scale(1.05) rotate(-2deg); }
 }
-@keyframes shader-drift-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(70px, -20px) scale(1.15); }
-  66% { transform: translate(-40px, 50px) scale(0.85); }
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  30% { transform: translate(100px, -60px) scale(1.2) rotate(6deg); }
+  60% { transform: translate(-60px, 80px) scale(0.8) rotate(-5deg); }
 }
 
 /* ── Noise texture overlay ──────────────────────────────── */
