@@ -6,22 +6,27 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
+    if (!user) {
+      redirect("/auth/signin");
+    }
+
+    const adminEmails = (process.env.ADMIN_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!adminEmails.includes((user.email || "").toLowerCase())) {
+      redirect("/dashboard");
+    }
+  } catch {
+    // If session check fails (e.g. cookies not available), redirect to signin
     redirect("/auth/signin");
-  }
-
-  const adminEmails = (process.env.ADMIN_EMAILS || "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (!adminEmails.includes((user.email || "").toLowerCase())) {
-    redirect("/dashboard");
   }
 
   return <>{children}</>;
