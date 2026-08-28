@@ -57,8 +57,8 @@ vec3 hsv2rgb(vec3 c) {
 
 float Star(vec2 uv, float flare) {
   float d = length(uv);
-  float m = (0.02 * uGlowIntensity) / (d * d + 0.004);
-  m *= smoothstep(0.5, 0.05, d);
+  float m = (0.015 * uGlowIntensity) / (d * d + 0.006);
+  m *= smoothstep(0.35, 0.02, d);
   return m;
 }
 
@@ -176,7 +176,7 @@ export default function Galaxy({
     const renderer = new Renderer({
       alpha: transparent,
       premultipliedAlpha: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: Math.min(window.devicePixelRatio || 1, 3),
     });
     const gl = renderer.gl;
 
