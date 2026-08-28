@@ -146,7 +146,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Protect app routes ──────────────────────────────────────
-  const PROTECTED_ROUTES = ["/dashboard", "/planner", "/queue", "/analytics", "/billing", "/settings"];
+  const PROTECTED_ROUTES = ["/dashboard", "/planner", "/queue", "/analytics", "/billing", "/settings", "/video"];
   const isProtected = PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
 
   if (isProtected && !user) {
@@ -185,7 +185,8 @@ export async function middleware(request: NextRequest) {
 
   // Only enforce onboarding gate on known routes — unknown routes pass through to Next.js 404
   const isLanding = pathname === "/";
-  if (user && isKnownRoute && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding && !isAdminRoute) {
+  const isPublicPage = ["/terms", "/privacy", "/contact"].some((p) => pathname === p);
+  if (user && isKnownRoute && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding && !isPublicPage && !isAdminRoute) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
