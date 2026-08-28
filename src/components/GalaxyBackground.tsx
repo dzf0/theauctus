@@ -88,7 +88,7 @@ function ParallaxField() {
             height: `${p.size}px`,
             opacity: p.opacity,
             background: "rgba(255,255,255,0.5)",
-            transform: `translate(${mouse.x * p.depth * 30}px, ${mouse.y * p.depth * 30}px)`,
+            transform: `translate(${mouse.x * p.depth * 18}px, ${mouse.y * p.depth * 18}px)`,
             transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
             animation: `float-particle ${p.duration}s ease-in-out ${p.delay}s infinite`,
           }}
@@ -102,7 +102,7 @@ function ParallaxField() {
 function OrbitRings() {
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 hidden sm:flex">
-      {[120, 200, 280].map((size, i) => (
+      {[80, 140, 200].map((size, i) => (
         <div
           key={i}
           className="absolute rounded-full"
