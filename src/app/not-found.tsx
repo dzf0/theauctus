@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import LetterGlitch from "@/components/LetterGlitch";
+import FaultyTerminal from "@/components/FaultyTerminal";
 import DepthText from "@/components/DepthText";
 
 // ── ASCII Art Astronaut ─────────────────────────────────────
@@ -13,7 +13,7 @@ function LostAstronaut() {
         className="text-[6px] sm:text-[8px] leading-[1.1] font-mono"
         style={{ color: "rgba(201,168,124,0.4)" }}
       >
-{`    .-""""-.
+{`    .-"""""-.
    /        \\
   |  O    O  |
   |    __    |
@@ -73,17 +73,17 @@ function SearchBar() {
           placeholder="Search for something..."
           className="w-full pl-11 pr-4 py-3 rounded-xl text-[13px] transition-all"
           style={{
-            background: "var(--lg-bg)",
-            border: "1px solid var(--lg-border)",
+            background: "rgba(10,10,15,0.7)",
+            border: "1px solid rgba(255,255,255,0.08)",
             color: "var(--foreground)",
             outline: "none",
           }}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = "var(--accent-copper)";
+            e.currentTarget.style.borderColor = "#C9A87C";
             e.currentTarget.style.boxShadow = "0 0 0 3px rgba(201,168,124,0.1)";
           }}
           onBlur={(e) => {
-            e.currentTarget.style.borderColor = "var(--lg-border)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
             e.currentTarget.style.boxShadow = "none";
           }}
         />
@@ -96,13 +96,13 @@ function SearchBar() {
 function BlinkLine() {
   return (
     <div className="flex items-center gap-2 justify-center mt-2">
-      <span className="text-[11px] font-mono" style={{ color: "var(--accent-copper)" }}>
+      <span className="text-[11px] font-mono" style={{ color: "#C9A87C" }}>
         $
       </span>
       <span
         className="inline-block w-[2px] h-4"
         style={{
-          background: "var(--accent-copper)",
+          background: "#C9A87C",
           animation: "blink-cursor 1s step-end infinite",
         }}
       />
@@ -117,25 +117,43 @@ function BlinkLine() {
 }
 
 
-
 // ── Main 404 Page ───────────────────────────────────────────
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6">
-      {/* LetterGlitch background — fills entire 404 page */}
+      {/* FaultyTerminal background — copper-tinted, full-bleed */}
       <div className="absolute inset-0 z-0">
-        <LetterGlitch
-          glitchColors={["#C9A87C", "#86868b", "#ffffff"]}
-          glitchSpeed={50}
-          centerVignette={true}
-          outerVignette={true}
-          smooth={true}
+        <FaultyTerminal
+          scale={1.2}
+          gridMul={[2, 1]}
+          digitSize={1.2}
+          timeScale={0.25}
+          scanlineIntensity={0.15}
+          glitchAmount={0.6}
+          flickerAmount={0.4}
+          noiseAmp={0.3}
+          chromaticAberration={0}
+          dither={0.5}
+          curvature={0.15}
+          tint="#C9A87C"
+          mouseReact={true}
+          mouseStrength={0.3}
+          pageLoadAnimation={true}
+          brightness={0.7}
         />
       </div>
 
+      {/* Dark overlay to push terminal behind content */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: "radial-gradient(ellipse at center, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.85) 100%)",
+        }}
+      />
+
       {/* Content */}
       <div className="relative z-10 text-center max-w-2xl mx-auto">
-        {/* Glitch 404 */}
+        {/* DepthText 404 */}
         <DepthText
           text="404"
           layers={34}
@@ -187,7 +205,7 @@ export default function NotFound() {
             href="/"
             className="px-6 py-2.5 rounded-xl text-[12px] font-medium transition-all"
             style={{
-              background: "var(--accent-copper)",
+              background: "#C9A87C",
               color: "#0a0a0f",
             }}
             onMouseEnter={(e) => {
@@ -205,16 +223,16 @@ export default function NotFound() {
             href="/dashboard"
             className="px-6 py-2.5 rounded-xl text-[12px] font-medium transition-all"
             style={{
-              background: "var(--lg-bg)",
-              border: "1px solid var(--lg-border)",
+              background: "rgba(10,10,15,0.7)",
+              border: "1px solid rgba(255,255,255,0.08)",
               color: "var(--foreground)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--accent-copper)";
+              e.currentTarget.style.borderColor = "#C9A87C";
               e.currentTarget.style.transform = "scale(1.03)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--lg-border)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
               e.currentTarget.style.transform = "scale(1)";
             }}
           >
@@ -224,16 +242,16 @@ export default function NotFound() {
             href="/auth/signup"
             className="px-6 py-2.5 rounded-xl text-[12px] font-medium transition-all"
             style={{
-              background: "var(--lg-bg)",
-              border: "1px solid var(--lg-border)",
+              background: "rgba(10,10,15,0.7)",
+              border: "1px solid rgba(255,255,255,0.08)",
               color: "var(--foreground)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--accent-copper)";
+              e.currentTarget.style.borderColor = "#C9A87C";
               e.currentTarget.style.transform = "scale(1.03)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--lg-border)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
               e.currentTarget.style.transform = "scale(1)";
             }}
           >
