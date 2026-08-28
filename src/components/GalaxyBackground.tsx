@@ -105,24 +105,25 @@ function OrbitRings() {
       {[120, 200, 280].map((size, i) => (
         <div
           key={i}
-          className="absolute rounded-full border"
+          className="absolute rounded-full"
           style={{
             width: `${size}px`,
             height: `${size}px`,
-            borderColor: `rgba(255,255,255,${0.08 - i * 0.02})`,
+            border: `1px solid rgba(255,255,255,${0.04 - i * 0.01})`,
+            boxShadow: `0 0 ${6 + i * 2}px rgba(255,255,255,${0.03 - i * 0.005}), inset 0 0 ${4 + i * 2}px rgba(255,255,255,${0.02 - i * 0.005})`,
             animation: `orbit-spin ${20 + i * 10}s linear infinite ${i % 2 === 0 ? "" : "reverse"}`,
           }}
         >
           <div
             className="absolute rounded-full"
             style={{
-              width: "6px",
-              height: "6px",
-              background: "rgba(255,255,255,0.4)",
-              top: "-3px",
+              width: "4px",
+              height: "4px",
+              background: "rgba(255,255,255,0.25)",
+              top: "-2px",
               left: "50%",
               transform: "translateX(-50%)",
-              boxShadow: "0 0 8px rgba(255,255,255,0.3)",
+              boxShadow: "0 0 6px rgba(255,255,255,0.2)",
             }}
           />
         </div>
