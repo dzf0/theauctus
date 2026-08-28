@@ -43,7 +43,7 @@ function SearchBar() {
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = "#C9A87C";
-            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(201,168,124,0.1)";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(255,255,255,0.08)";
           }}
           onBlur={(e) => {
             e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
@@ -73,7 +73,7 @@ export default function NotFound() {
           chromaticAberration={0.5}
           dither={0.3}
           curvature={0.2}
-          tint="#C9A87C"
+          tint="#e2e8f0"
           mouseReact={true}
           mouseStrength={0.5}
           pageLoadAnimation={true}
@@ -97,7 +97,7 @@ export default function NotFound() {
           layers={34}
           depth={2.4}
           faceColor="#f8fafc"
-          depthColor="#C9A87C"
+          depthColor="#94a3b8"
           tilt={7.5}
           pointerTracking
           smoothing={0.14}
@@ -119,10 +119,10 @@ export default function NotFound() {
 
         {/* Blinking terminal cursor */}
         <div className="flex items-center gap-2 justify-center mb-8">
-          <span className="text-[11px] font-mono" style={{ color: "#C9A87C" }}>$</span>
+          <span className="text-[11px] font-mono" style={{ color: "#e2e8f0" }}>$</span>
           <span
             className="inline-block w-[2px] h-4"
-            style={{ background: "#C9A87C", animation: "blink-cursor 1s step-end infinite" }}
+            style={{ background: "#e2e8f0", animation: "blink-cursor 1s step-end infinite" }}
           />
         </div>
 
@@ -134,8 +134,8 @@ export default function NotFound() {
           <Link
             href="/"
             className="px-6 py-2.5 rounded-xl text-[12px] font-medium transition-all"
-            style={{ background: "#C9A87C", color: "#0a0a0f" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.03)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(201,168,124,0.3)"; }}
+            style={{ background: "#f8fafc", color: "#0a0a0f" }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.03)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(255,255,255,0.15)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "none"; }}
           >
             Go Home
@@ -144,7 +144,7 @@ export default function NotFound() {
             href="/dashboard"
             className="px-6 py-2.5 rounded-xl text-[12px] font-medium transition-all"
             style={{ background: "rgba(10,10,15,0.6)", border: "1px solid rgba(255,255,255,0.06)", color: "#f8fafc" }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C9A87C"; e.currentTarget.style.transform = "scale(1.03)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.transform = "scale(1.03)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "scale(1)"; }}
           >
             Dashboard
@@ -153,7 +153,7 @@ export default function NotFound() {
             href="/auth/signup"
             className="px-6 py-2.5 rounded-xl text-[12px] font-medium transition-all"
             style={{ background: "rgba(10,10,15,0.6)", border: "1px solid rgba(255,255,255,0.06)", color: "#f8fafc" }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C9A87C"; e.currentTarget.style.transform = "scale(1.03)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.transform = "scale(1.03)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "scale(1)"; }}
           >
             Sign Up Free
