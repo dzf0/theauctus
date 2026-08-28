@@ -163,8 +163,8 @@ export async function middleware(request: NextRequest) {
   const isOnboardingFlow =
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/auth/pricing") ||
-    pathname.startsWith("/auth/username") ||
-    pathname.startsWith("/admin");
+    pathname.startsWith("/auth/username");
+  const isAdminRoute = pathname.startsWith("/admin");
 
   // Auth pages that don't need onboarding checks
   const isAuthPage = pathname.startsWith("/auth/signin") ||
@@ -185,7 +185,7 @@ export async function middleware(request: NextRequest) {
 
   // Only enforce onboarding gate on known routes — unknown routes pass through to Next.js 404
   const isLanding = pathname === "/";
-  if (user && isKnownRoute && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding) {
+  if (user && isKnownRoute && !isProtectedRoute && !isOnboardingFlow && !isAuthPage && !isLanding && !isAdminRoute) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -214,7 +214,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Redirect completed users away from onboarding flow ──────
-  if (user && isOnboardingFlow) {
+  if (user && isOnboardingFlow && !isAdminRoute) {
     try {
       const { data: profile, error } = await supabase
         .from("profiles")
