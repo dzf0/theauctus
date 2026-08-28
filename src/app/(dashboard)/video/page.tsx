@@ -22,9 +22,11 @@ export default function VideoGen() {
   const [url,setUrl] = useState("");
   const [err,setErr] = useState("");
 
-  const genScript = async()=>{setBusy(true);setErr("");try{const r=await fetch("/api/video/story",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:topic||"interesting facts",style,duration:dur})});const d=await r.json();if(!r.ok){setErr(d.error);return}setScript(d.script)}catch{setErr("Failed")}setBusy(false)};
+  const extractErr = (d: {error?: string | {message?: string}}) => typeof d.error === "string" ? d.error : d.error?.message || "Request failed";
 
-  const genVideo = async()=>{if(!script.trim()){setErr("Generate script first");return}setBusy(true);setErr("");setUrl("");try{const r=await fetch("/api/video/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({templateId:tpl,script,title:topic||"AI Video"})});const d=await r.json();if(!r.ok){setErr(d.error);return}setUrl(d.videoUrl)}catch{setErr("Video failed")}setBusy(false)};
+  const genScript = async()=>{setBusy(true);setErr("");try{const c=new AbortController();const t=setTimeout(()=>c.abort(),35000);const r=await fetch("/api/video/story",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic:topic||"interesting facts",style,duration:dur}),signal:c.signal});clearTimeout(t);const d=await r.json();if(!r.ok){setErr(extractErr(d));return}setScript(d.script)}catch(e:unknown){setErr(e instanceof DOMException&&e.name==="AbortError"?"Request timed out — try again":"Failed to generate script")}setBusy(false)};
+
+  const genVideo = async()=>{if(!script.trim()){setErr("Generate script first");return}setBusy(true);setErr("");setUrl("");try{const c=new AbortController();const t=setTimeout(()=>c.abort(),120000);const r=await fetch("/api/video/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({templateId:tpl,script,title:topic||"AI Video"}),signal:c.signal});clearTimeout(t);const d=await r.json();if(!r.ok){setErr(extractErr(d));return}setUrl(d.videoUrl)}catch(e:unknown){setErr(e instanceof DOMException&&e.name==="AbortError"?"Video generation timed out":"Video generation failed")}setBusy(false)};
 
   const wc=script.split(/\s+/).filter(Boolean).length;
 

@@ -108,6 +108,8 @@ Return a JSON array. Each element:
 Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30_000);
     const response = await fetch(`${GEMINI_API}?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -120,7 +122,9 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
           maxOutputTokens: 16384,
         },
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -218,6 +222,8 @@ CRITICAL RULES:
 Return ONLY the script text. No title, no explanation, no quotes, no word count.`;
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30_000);
     const response = await fetch(`${GEMINI_API}?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -230,7 +236,9 @@ Return ONLY the script text. No title, no explanation, no quotes, no word count.
           maxOutputTokens: 2048,
         },
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
