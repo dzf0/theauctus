@@ -325,6 +325,151 @@ html.light .auth-container * {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   LIGHT MODE — Comprehensive Inversion
+   Every white thing → black, every black thing → white
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── All white text → dark ─────────────────────────────────── */
+html.light [style*="color: #f8fafc"],
+html.light [style*="color:#f8fafc"],
+html.light [style*="color: #f5f5f7"],
+html.light [style*="color:#f5f5f7"],
+html.light [style*="color: white"],
+html.light [style*="color:#fff"],
+html.light [style*="color: #fff"],
+html.light [style*="color: #ffffff"],
+html.light [style*="color:#ffffff"],
+html.light [style*="color: rgb(255"] {
+  color: #1d1d1f !important;
+}
+
+/* ── All dark backgrounds → white ──────────────────────────── */
+html.light [style*="background: #0a0a0f"],
+html.light [style*="background:#0a0a0f"],
+html.light [style*="background: #08080c"],
+html.light [style*="background: #0c0c12"],
+html.light [style*="background: #111118"],
+html.light [style*="background: #1a1a2e"],
+html.light [style*="background: #000"] {
+  background-color: #ffffff !important;
+}
+
+/* ── Dark rgba backgrounds → light ─────────────────────────── */
+html.light [style*="rgba(10,10,15"] {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ── White rgba borders → dark ─────────────────────────────── */
+html.light [style*="border: 1px solid rgba(255,255,255"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light [style*="border: 1px solid rgba(255, 255, 255"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── All SVG icons → dark ──────────────────────────────────── */
+html.light svg {
+  color: #1d1d1f;
+}
+
+html.light svg[style*="color"] {
+  color: inherit !important;
+}
+
+/* ── SpotlightCard / glass cards ────────────────────────────── */
+html.light [style*="rgba(255,255,255,0.06)"],
+html.light [style*="rgba(255, 255, 255, 0.06)"] {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── All box-shadows with dark → light ─────────────────────── */
+html.light [style*="box-shadow: 0 8px 32px rgba(0,0,0"] {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── All inline color: #e2e8f0 → dark ──────────────────────── */
+html.light [style*="color: #e2e8f0"],
+html.light [style*="color:#e2e8f0"],
+html.light [style*="color: #94a3b8"],
+html.light [style*="color:#94a3b8"],
+html.light [style*="color: #a1a1a6"],
+html.light [style*="color: #86868b"] {
+  color: #424245 !important;
+}
+
+/* ── DepthText face color → dark in light mode ─────────────── */
+html.light [style*="--depth-text-face-color"] {
+  --depth-text-face-color: #1d1d1f !important;
+}
+
+/* ── Copper accent text → darker copper ────────────────────── */
+html.light [style*="color: #C9A87C"],
+html.light [style*="color:#C9A87C"] {
+  color: #8a6828 !important;
+}
+
+/* ── Nav background ────────────────────────────────────────── */
+html.light nav {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Section shimmer dividers ──────────────────────────────── */
+html.light .shimmer-divider::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.06) 30%,
+    rgba(201, 168, 124, 0.15) 50%,
+    rgba(0, 0, 0, 0.06) 70%,
+    transparent 100%
+  );
+}
+
+/* ── Orbit rings → dark in light mode ──────────────────────── */
+html.light [style*="rgba(255,255,255,0."][style*="border"] {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── Parallax particles → dark dots ────────────────────────── */
+html.light [style*="rgba(255,255,255,0.5)"][class*="rounded-full"][class*="absolute"] {
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ── Cookie consent ────────────────────────────────────────── */
+html.light [class*="cookie"],
+html.light [class*="Cookie"] {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1d1d1f !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Dashboard topbar ──────────────────────────────────────── */
+html.light header {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── All remaining dark inline backgrounds → white ─────────── */
+html.light [style*="background-color: #"] {
+  background-color: #ffffff !important;
+}
+
+/* ── DepthText depth color → lighter in light mode ─────────── */
+html.light [style*="--depth-text-depth-color"] {
+  --depth-text-depth-color: #94a3b8 !important;
+}
+
+
+
+/* ══════════════════════════════════════════════════════════════
    GLOBAL THEME TRANSITION
    ══════════════════════════════════════════════════════════════ */
 html {

@@ -14,6 +14,7 @@ import SpotlightCard from "@/components/SpotlightCard";
 import GooeyNav from "@/components/GooeyNav";
 import DepthText from "@/components/DepthText";
 import AnimatedThemeToggler from "@/components/AnimatedThemeToggler";
+import { useTheme } from "@/components/theme-provider";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -73,6 +74,8 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [navScrolled, setNavScrolled] = useState(false);
   const user = useUser();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const heroCta = usePressScale(0.96);
   const finalCta = usePressScale(0.96);
   const heroMagnetic = useMagnetic(8);
@@ -156,8 +159,8 @@ export default function LandingPage() {
                 text="Schedule 30"
                 layers={24}
                 depth={1.8}
-                faceColor="#f8fafc"
-                depthColor="#86868b"
+                faceColor={isDark ? "#f8fafc" : "#1d1d1f"}
+                depthColor={isDark ? "#86868b" : "#b0b0b5"}
                 tilt={6}
                 pointerTracking
                 smoothing={0.14}
@@ -172,8 +175,8 @@ export default function LandingPage() {
                 text="days of content"
                 layers={24}
                 depth={1.8}
-                faceColor="#f8fafc"
-                depthColor="#86868b"
+                faceColor={isDark ? "#f8fafc" : "#1d1d1f"}
+                depthColor={isDark ? "#86868b" : "#b0b0b5"}
                 tilt={6}
                 pointerTracking
                 smoothing={0.14}
@@ -188,8 +191,8 @@ export default function LandingPage() {
                 text="across every platform"
                 layers={24}
                 depth={1.8}
-                faceColor="#f8fafc"
-                depthColor="#86868b"
+                faceColor={isDark ? "#f8fafc" : "#1d1d1f"}
+                depthColor={isDark ? "#86868b" : "#b0b0b5"}
                 tilt={6}
                 pointerTracking
                 smoothing={0.14}
