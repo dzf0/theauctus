@@ -48,7 +48,7 @@ export const POST = withAuth(
 
     // ── Batch AI generation mode ──────────────────────────────
     if (body.topic && body.platforms && body.count) {
-      const { topic, platforms, count } = body;
+      const { topic, platforms, count, startDate, frequency } = body;
 
       if (!Array.isArray(platforms) || platforms.length === 0) {
         return apiValidationError("At least one platform required", "platforms");
@@ -67,6 +67,8 @@ export const POST = withAuth(
         topic,
         platforms,
         count,
+        startDate: startDate || undefined,
+        frequency: frequency || "auto",
         niche: (profile?.niche as string) || undefined,
         brandVoice: (profile?.brand_voice as string) || undefined,
         targetAudience: (profile?.target_audience as string) || undefined,
@@ -82,7 +84,7 @@ export const POST = withAuth(
         content: p.content,
         platform: p.platform,
         content_type: p.contentType || "text",
-        status: "draft",
+        status: p.scheduledAt ? "scheduled" : "draft",
         scheduled_at: p.scheduledAt || null,
         hashtags: p.hashtags || [],
         ai_generated: true,

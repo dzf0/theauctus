@@ -19,6 +19,8 @@ export interface GeneratePostsOptions {
   topic: string;
   platforms: string[];
   count: number;
+  startDate?: string;       // YYYY-MM-DD
+  frequency?: string;       // daily | 3x-week | 5x-week | weekly | auto
   niche?: string;
   brandVoice?: string;
   targetAudience?: string;
@@ -123,11 +125,13 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
       throw new Error("Invalid response format from Gemini");
     }
 
-    return posts;
+    // Apply scheduling dates
+    return applySchedule(posts, opts.startDate, opts.frequency);
   } catch (error) {
     console.error("Gemini generation failed:", error);
     // Fall back to template-based generation
-    return generateFallbackPosts(opts);
+    const fallback = generateFallbackPosts(opts);
+    return applySchedule(fallback, opts.startDate, opts.frequency);
   }
 }
 
@@ -209,6 +213,95 @@ Return ONLY the script text. No title, no explanation, no quotes, no word count.
     console.error("Gemini script generation failed:", error);
     return getFallbackScript(niche, targetWords);
   }
+}
+
+// ── Scheduling ───────────────────────────────────────────────
+
+/**
+ * Compute scheduled_at dates based on start date and frequency,
+ * then distribute posts across days at optimal times per platform.
+ */
+function applySchedule(
+  posts: GeneratedPost[],
+  startDateStr?: string,
+  frequency?: string
+): GeneratedPost[] {
+  if (!startDateStr && !frequency) return posts;
+
+  const freq = frequency || "auto";
+  const start = startDateStr ? new Date(startDateStr + "T12:00:00Z") : new Date();
+
+  // Compute which days get posts
+  const scheduleDays = computeScheduleDays(start, posts.length, freq);
+
+  // Optimal posting hours per platform (UTC)
+  const optimalHours: Record<string, number[]> = {
+    twitter: [13, 17, 22],      // 8am, 12pm, 5pm ET
+    instagram: [16, 24],         // 11am, 7pm ET
+    linkedin: [12, 13],          // 7:30-8:30am ET
+    tiktok: [15, 22],           // 10am, 5pm ET
+    facebook: [13, 20],         // 8am, 3pm ET
+    youtube: [18],              // 2pm ET
+    threads: [14],              // 9am ET
+    blog: [14],                 // 9am ET
+  };
+
+  return posts.map((post, i) => {
+    const day = scheduleDays[i % scheduleDays.length];
+    const hours = optimalHours[post.platform] || [14];
+    const hour = hours[i % hours.length];
+
+    const scheduled = new Date(day);
+    scheduled.setUTCHours(hour, 0, 0, 0);
+
+    return { ...post, scheduledAt: scheduled.toISOString() };
+  });
+}
+
+/**
+ * Generate array of Date objects for each post based on frequency.
+ */
+function computeScheduleDays(start: Date, count: number, freq: string): Date[] {
+  const days: Date[] = [];
+  const d = new Date(start);
+
+  const weekdaysOnly = freq === "5x-week" || freq === "3x-week";
+  const skip = freq === "5x-week"
+    ? [0, 6] // skip Sat/Sun
+    : freq === "3x-week"
+    ? [0, 6] // skip weekends, place on M/W/F
+    : [];
+
+  const preferredDays = freq === "3x-week" ? [1, 3, 5] : []; // Mon, Wed, Fri
+
+  while (days.length < count) {
+    const dow = d.getDay();
+
+    if (freq === "weekly") {
+      // One post per week — always on the start day
+      days.push(new Date(d));
+      d.setDate(d.getDate() + 7);
+    } else if (freq === "daily") {
+      days.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+    } else if (freq === "3x-week") {
+      if (preferredDays.includes(dow)) {
+        days.push(new Date(d));
+      }
+      d.setDate(d.getDate() + 1);
+    } else if (freq === "5x-week") {
+      if (!skip.includes(dow)) {
+        days.push(new Date(d));
+      }
+      d.setDate(d.getDate() + 1);
+    } else {
+      // auto — every other day
+      days.push(new Date(d));
+      d.setDate(d.getDate() + 2);
+    }
+  }
+
+  return days;
 }
 
 // ── Fallback generators (when no API key) ─────────────────────

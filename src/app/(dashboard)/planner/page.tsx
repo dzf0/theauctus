@@ -24,6 +24,14 @@ const PLATFORMS = [
   { value: "facebook", label: "Facebook", icon: "f" },
 ];
 
+const FREQUENCIES = [
+  { value: "daily", label: "Daily", desc: "1 post per day" },
+  { value: "3x-week", label: "3x / week", desc: "Mon, Wed, Fri" },
+  { value: "5x-week", label: "5x / week", desc: "Mon–Fri" },
+  { value: "weekly", label: "Weekly", desc: "1 post per week" },
+  { value: "auto", label: "AI decides", desc: "Best schedule for topic" },
+];
+
 const STATUS_COLORS: Record<string, "default" | "primary" | "success" | "warning" | "error"> = {
   draft: "default",
   ready: "primary",
@@ -35,6 +43,7 @@ export default function PlannerPage() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedDayPosts, setSelectedDayPosts] = useState<Post[] | null>(null);
   const [generateModalOpen, setGenerateModalOpen] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,8 +53,13 @@ export default function PlannerPage() {
   const [postCount, setPostCount] = useState(10);
   const [generating, setGenerating] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1); // tomorrow
+    return d.toISOString().split("T")[0];
+  });
+  const [frequency, setFrequency] = useState("auto");
 
-  // Credit cost per post
   const creditCostPerPost = CREDIT_COSTS.find((c) => c.action === "Single social post")?.credits ?? 5;
   const totalCreditCost = postCount * creditCostPerPost;
 
@@ -72,7 +86,13 @@ export default function PlannerPage() {
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, platforms: selectedPlatforms, count: postCount }),
+        body: JSON.stringify({
+          topic,
+          platforms: selectedPlatforms,
+          count: postCount,
+          startDate,
+          frequency,
+        }),
       });
       const data = await response.json();
       if (!response.ok) { toast.error(data.error || "Failed to generate posts"); return; }
@@ -155,22 +175,27 @@ export default function PlannerPage() {
                   return (
                     <div
                       key={index}
-                      className="min-h-[80px] sm:min-h-[100px] p-1.5 sm:p-2 transition-colors"
+                      className="min-h-[80px] sm:min-h-[100px] p-1.5 sm:p-2 transition-colors relative"
                       style={{
                         background: "var(--background)",
                         cursor: date ? "pointer" : "default",
                         boxShadow: isToday ? "inset 0 0 0 1px var(--accent-copper)" : "none",
                       }}
-                      onClick={() => date && dayPosts.length > 0 && setSelectedPost(dayPosts[0])}
+                      onClick={() => {
+                        if (date && dayPosts.length > 1) {
+                          setSelectedDayPosts(dayPosts);
+                        } else if (date && dayPosts.length === 1) {
+                          setSelectedPost(dayPosts[0]);
+                        }
+                      }}
                     >
                       {date && (
                         <>
                           <span className="text-[11px] sm:text-[12px]" style={{ color: isToday ? "var(--accent-copper)" : "var(--muted)", fontWeight: isToday ? 500 : 400 }}>{date.getDate()}</span>
                           <div className="mt-1 space-y-1">
-                            {dayPosts.slice(0, 2).map((post) => (
+                            {dayPosts.map((post) => (
                               <div key={post.id} className="px-1.5 py-0.5 text-[9px] sm:text-[10px] rounded truncate" style={{ background: "rgba(201, 168, 124, 0.1)", color: "var(--accent-copper)" }}>{post.platform}</div>
                             ))}
-                            {dayPosts.length > 2 && <span className="text-[10px]" style={{ color: "var(--muted)" }}>+{dayPosts.length - 2} more</span>}
                           </div>
                         </>
                       )}
@@ -236,6 +261,14 @@ export default function PlannerPage() {
                     {PLATFORMS.find((p) => p.value === selectedPost.platform)?.icon} {PLATFORMS.find((p) => p.value === selectedPost.platform)?.label}
                   </p>
                 </div>
+                {selectedPost.scheduled_at && (
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wider mb-1" style={{ color: "var(--muted)" }}>Scheduled</p>
+                    <p className="text-[14px]" style={{ color: "var(--foreground)" }}>
+                      {new Date(selectedPost.scheduled_at).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-[11px] uppercase tracking-wider mb-1" style={{ color: "var(--muted)" }}>Content</p>
                   <p className="text-[13px] whitespace-pre-wrap" style={{ color: "var(--foreground)" }}>{selectedPost.content}</p>
@@ -286,12 +319,41 @@ export default function PlannerPage() {
         </div>
       </div>
 
+      {/* Day detail modal — shows all posts for a day */}
+      <Modal isOpen={!!selectedDayPosts} onClose={() => setSelectedDayPosts(null)} title="Posts for this day" size="md">
+        {selectedDayPosts && (
+          <div className="space-y-3">
+            {selectedDayPosts.map((post) => (
+              <div
+                key={post.id}
+                className="p-3 rounded-lg cursor-pointer transition-colors"
+                style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}
+                onClick={() => { setSelectedDayPosts(null); setSelectedPost(post); }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[14px]">{PLATFORMS.find((p) => p.value === post.platform)?.icon}</span>
+                  <span className="text-[12px] font-medium" style={{ color: "var(--foreground)" }}>{post.title}</span>
+                </div>
+                <p className="text-[11px] truncate" style={{ color: "var(--muted)" }}>{post.content}</p>
+                {post.scheduled_at && (
+                  <p className="text-[10px] mt-1" style={{ color: "var(--muted)" }}>
+                    {new Date(post.scheduled_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
+
+      {/* Generate modal */}
       <Modal isOpen={generateModalOpen} onClose={() => setGenerateModalOpen(false)} title="Generate Content" description="AI will create posts based on your brand profile" size="lg">
         {generating ? (
           <AILoader step={0} />
         ) : (
           <div className="space-y-6">
             <Input label="Topic" placeholder="e.g., Sustainable fashion tips for Gen Z" value={topic} onChange={(e) => setTopic(e.target.value)} />
+
             <div>
               <label className="block text-[11px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--muted)" }}>Platforms</label>
               <div className="flex flex-wrap gap-2">
@@ -312,6 +374,7 @@ export default function PlannerPage() {
                 ))}
               </div>
             </div>
+
             <div>
               <label className="block text-[11px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--muted)" }}>Number of Posts</label>
               <div className="flex items-center gap-4">
@@ -320,6 +383,42 @@ export default function PlannerPage() {
               </div>
               <div className="flex justify-between mt-2 text-[11px]" style={{ color: "var(--muted)" }}><span>1 post</span><span>30 posts</span></div>
             </div>
+
+            {/* Scheduling section */}
+            <div className="p-4 rounded-lg" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
+              <p className="text-[11px] uppercase tracking-[0.1em] mb-4" style={{ color: "var(--muted)" }}>Schedule</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] mb-2" style={{ color: "var(--muted)" }}>Start Date</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    min={new Date().toISOString().split("T")[0]}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-[13px]"
+                    style={{ background: "var(--background)", border: "1px solid var(--lg-border)", color: "var(--foreground)" }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] mb-2" style={{ color: "var(--muted)" }}>Frequency</label>
+                  <select
+                    value={frequency}
+                    onChange={(e) => setFrequency(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-[13px]"
+                    style={{ background: "var(--background)", border: "1px solid var(--lg-border)", color: "var(--foreground)" }}
+                  >
+                    {FREQUENCIES.map((f) => (
+                      <option key={f.value} value={f.value}>{f.label} — {f.desc}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <p className="text-[11px] mt-3" style={{ color: "var(--muted)" }}>
+                Posts will be scheduled starting {new Date(startDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                {frequency !== "auto" && ` at optimal times (${FREQUENCIES.find(f => f.value === frequency)?.desc})`}
+              </p>
+            </div>
+
             <div className="p-4 rounded-lg" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
               <div className="flex items-center justify-between text-[13px]">
                 <span style={{ color: "var(--muted)" }}>Credits needed:</span>
@@ -337,6 +436,7 @@ export default function PlannerPage() {
                 </p>
               )}
             </div>
+
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setGenerateModalOpen(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleGenerate} loading={generating} disabled={!topic.trim() || selectedPlatforms.length === 0 || (credits !== null && totalCreditCost > credits)} className="flex-1">
