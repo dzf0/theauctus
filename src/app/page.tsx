@@ -96,7 +96,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="TheAuctus" className="w-8 h-8" />
-              <span className="font-headline text-xl tracking-tight text-foreground">The<span className="text-white/70">Auctus</span></span>
+              <span className="font-headline text-xl tracking-tight text-foreground">The<span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)' }}>Auctus</span></span>
             </div>
             <div className="hidden md:flex items-center gap-10">
               <GooeyNav
@@ -113,7 +113,7 @@ export default function LandingPage() {
                 timeVariance={200}
                 colors={[1, 2, 3, 1, 2, 3, 1, 4]}
               />
-              <AnimatedThemeToggler className="text-white/70 hover:text-white" />
+              <span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }}><AnimatedThemeToggler /></span>
               {user ? (
                 <Link href="/dashboard" className="liquid-btn-primary text-[11px]">Dashboard</Link>
               ) : (
@@ -127,10 +127,10 @@ export default function LandingPage() {
         </div>
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-[var(--lg-border)] px-6 py-4 space-y-1 animate-fade-in-down" style={{ background: "var(--lg-bg-strong)", backdropFilter: "blur(40px)" }}>
-            <a href="#features" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Features</a>
-            <a href="#how-it-works" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">How It Works</a>
-            <a href="#pricing" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Credits</a>
-            <a href="#faq" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
+            <a href="#features" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] rounded-lg transition-colors" style={{ background: 'transparent' }} onMouseEnter={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>Features</a>
+            <a href="#how-it-works" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] rounded-lg transition-colors" style={{ background: 'transparent' }} onMouseEnter={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>How It Works</a>
+            <a href="#pricing" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] rounded-lg transition-colors" style={{ background: 'transparent' }} onMouseEnter={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>Credits</a>
+            <a href="#faq" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] rounded-lg transition-colors" style={{ background: 'transparent' }} onMouseEnter={(e) => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>FAQ</a>
             <div className="px-3 py-2">
               <AnimatedThemeToggler className="text-[var(--foreground)]" />
             </div>
@@ -150,7 +150,7 @@ export default function LandingPage() {
           <Reveal>
             <div className="flex items-center justify-center gap-3 mb-8">
               <span className="accent-line-animate" style={{ "--line-delay": "0.2s" } as React.CSSProperties} />
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">AI-Powered Content Planning</p>
+              <p className="text-[10px] uppercase tracking-[0.2em]" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)' }}>AI-Powered Content Planning</p>
             </div>
           </Reveal>
           <Reveal delay={0.1}>
@@ -239,7 +239,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
             <div className="mb-16 lg:mb-24">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">The Engine</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)' }}>The Engine</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] max-w-3xl leading-[1.0]">
                 Your content pipeline,<br />
                 <span className="text-[var(--muted)]">fully automated.</span>
@@ -250,7 +250,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((f, i) => (
                 <SpotlightCard key={i} className={`${f.span === 2 ? 'sm:col-span-2' : ''}`} spotlightColor="rgba(255,255,255,0.06)">
-                  <div className="text-white/60 mb-5 icon-pulse">{f.icon}</div>
+                  <div className="mb-5 icon-pulse" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.45)' }}>{f.icon}</div>
                   <h3 className="font-headline text-xl sm:text-2xl text-[var(--foreground)] mb-3">{f.title}</h3>
                   <p className="text-[13px] text-[var(--muted)] leading-relaxed">{f.description}</p>
                 </SpotlightCard>
@@ -265,7 +265,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <Reveal>
             <div className="mb-16 lg:mb-24">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">Process</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)' }}>Process</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] leading-[1.0]">
                 From zero to 30 days of content.<br />
                 <span className="text-[var(--muted)]">Three steps.</span>
@@ -280,8 +280,8 @@ export default function LandingPage() {
                   <div className="space-y-3">
                     {[1, 0.7, 0.5].map((w, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ background: i === 0 ? 'rgba(255,255,255,0.6)' : 'var(--lg-border)' }} />
-                        <div className="h-2 rounded-full" style={{ width: `${w * 100}%`, background: i === 0 ? 'linear-gradient(90deg, rgba(255,255,255,0.3), transparent)' : 'var(--lg-bg)' }} />
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ background: i === 0 ? (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)') : 'var(--lg-border)' }} />
+                        <div className="h-2 rounded-full" style={{ width: `${w * 100}%`, background: i === 0 ? (isDark ? 'linear-gradient(90deg, rgba(255,255,255,0.3), transparent)' : 'linear-gradient(90deg, rgba(0,0,0,0.2), transparent)') : 'var(--lg-bg)' }} />
                       </div>
                     ))}
                     <p className="text-[9px] text-[var(--muted)] uppercase tracking-wider pt-2">Brand voice loaded</p>
@@ -292,12 +292,12 @@ export default function LandingPage() {
                 <SpotlightCard className="p-6" spotlightColor="rgba(255,255,255,0.05)">
                   <div className="grid grid-cols-7 gap-1.5">
                     {Array.from({ length: 21 }, (_, i) => (
-                      <div key={i} className="aspect-square rounded-sm" style={{ background: i < 5 ? 'rgba(255,255,255,0.1)' : 'var(--lg-bg)', border: i === 10 ? '1px solid rgba(255,255,255,0.4)' : '1px solid var(--lg-border)' }} />
+                      <div key={i} className="aspect-square rounded-sm" style={{ background: i < 5 ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)') : 'var(--lg-bg)', border: i === 10 ? (isDark ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(0,0,0,0.2)') : '1px solid var(--lg-border)' }} />
                     ))}
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-[9px] text-[var(--muted)] uppercase tracking-wider">30 posts ready</span>
-                    <span className="text-[9px] text-white/60">✓</span>
+                    <span className="text-[9px]" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.4)' }}>✓</span>
                   </div>
                 </SpotlightCard>
               )},
@@ -305,7 +305,7 @@ export default function LandingPage() {
                 <SpotlightCard className="p-6" spotlightColor="rgba(255,255,255,0.05)">
                   <div className="flex items-end gap-1 h-20">
                     {[25, 30, 28, 40, 45, 38, 55, 50, 65, 70, 68, 85, 80, 95].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 10 ? 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))' : 'var(--lg-bg)' }} />
+                      <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 10 ? (isDark ? 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1))' : 'linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.05)') : 'var(--lg-bg)' }} />
                     ))}
                   </div>
                   <div className="flex items-center justify-between mt-4">
@@ -319,8 +319,8 @@ export default function LandingPage() {
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                   <div className={i % 2 === 1 ? 'lg:order-2' : ''}>
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <span className="font-headline text-sm text-white/70">{s.step}</span>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
+                        <span className="font-headline text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }}>{s.step}</span>
                       </div>
                       <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">Step {s.step}</span>
                     </div>
@@ -340,12 +340,12 @@ export default function LandingPage() {
       {/* ── Pricing ──────────────────────────────────────────── */}
       <section id="pricing" className="py-24 sm:py-32 lg:py-40 px-5 sm:px-6 lg:px-12 shimmer-divider relative">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%)', filter: 'blur(60px)' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full" style={{ background: isDark ? 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%)' : 'radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 60%)', filter: 'blur(60px)' }} />
         </div>
         <div className="max-w-6xl mx-auto relative z-10">
           <Reveal>
             <div className="mb-12">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">Credits</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)' }}>Credits</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)] leading-[1.0]">
                 Pay for what you use.<br />
                 <span className="text-[var(--muted)]">No subscriptions.</span>
@@ -357,7 +357,7 @@ export default function LandingPage() {
             <SpotlightCard className="p-4 mb-10 max-w-full sm:max-w-md" spotlightColor="rgba(255,255,255,0.04)">
               <div className="flex flex-wrap gap-x-4 gap-y-1 sm:gap-x-6 text-[12px]" style={{ color: 'var(--muted)' }}>
                 {CREDIT_COSTS.map((item, i) => (
-                  <span key={i}>{item.action}: <span className="text-white/70 font-medium">{item.credits} cr</span></span>
+                  <span key={i}>{item.action}:            <span className="font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' }}>{item.credits} cr</span></span>
                 ))}
               </div>
             </SpotlightCard>
@@ -368,7 +368,7 @@ export default function LandingPage() {
               {CREDIT_PACKS.map((pack) => (
                 <SpotlightCard key={pack.id} className={`p-6 sm:p-8 relative ${pack.popular ? 'glow-breathe' : ''}`} spotlightColor="rgba(255,255,255,0.06)">
                   {pack.popular && <span className="liquid-badge absolute top-5 right-5 z-10">Best Value</span>}
-                  <div className="text-white/60 mb-4">{pack.id === 'starter' ? icons.sparkles : pack.id === 'growth' ? icons.calendar : icons.currency}</div>
+                  <div className="mb-4" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.45)' }}>{pack.id === 'starter' ? icons.sparkles : pack.id === 'growth' ? icons.calendar : icons.currency}</div>
                   <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] mb-4 relative z-10">{pack.name}</p>
                   <div className="flex items-baseline gap-1 mb-1 relative z-10">
                     <span className="font-headline text-4xl sm:text-5xl text-[var(--foreground)]">${pack.price}</span>
@@ -378,7 +378,7 @@ export default function LandingPage() {
                   <ul className="space-y-3 mb-8 relative z-10">
                     {pack.features.map((f, j) => (
                       <li key={j} className="flex items-start gap-2 text-[12px] text-[var(--cool-grey)]">
-                        <span className="text-white/60">{icons.check}</span>{f}
+                        <span style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.4)' }}>{icons.check}</span>{f}
                       </li>
                     ))}
                   </ul>
@@ -392,7 +392,7 @@ export default function LandingPage() {
 
           <Reveal delay={0.2}>
             <p className="text-center mt-10 text-[12px] text-[var(--muted)]">
-              All accounts start with <span className="text-white/70 font-medium">10 free credits</span> · No credit card required
+              All accounts start with <span className="font-medium" style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' }}>10 free credits</span> · No credit card required
             </p>
           </Reveal>
         </div>
@@ -403,7 +403,7 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto">
           <Reveal>
             <div className="mb-12 lg:mb-16">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">FAQ</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] mb-4" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)' }}>FAQ</p>
               <h2 className="font-headline text-4xl sm:text-5xl lg:text-6xl text-[var(--foreground)]">Questions? Answered.</h2>
             </div>
           </Reveal>
@@ -412,7 +412,7 @@ export default function LandingPage() {
               <Reveal key={i} delay={i * 0.05}>
                 <div className="border-t border-[var(--lg-border)]">
                   <button className="w-full py-5 text-left flex items-center justify-between group min-h-[44px]" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                    <span className="text-[14px] text-[var(--foreground)] group-hover:text-white/70 transition-colors pr-4">{faq.q}</span>
+                    <span className="text-[14px] text-[var(--foreground)] transition-colors pr-4" style={{ '--hover-color': isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' } as React.CSSProperties} onMouseEnter={(e) => e.currentTarget.style.color = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} onMouseLeave={(e) => e.currentTarget.style.color = ''}>{faq.q}</span>
                     <span className="transition-transform duration-300 shrink-0" style={{ transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)', transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)' }}>{icons.chevronDown}</span>
                   </button>
                   <div className={`overflow-hidden transition-all duration-400 ${openFaq === i ? 'max-h-40 pb-5 opacity-100' : 'max-h-0 opacity-0'}`} style={{ transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)' }}>
@@ -454,7 +454,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <img src="/logo.svg" alt="TheAuctus" className="w-6 h-6" />
-            <span className="font-headline text-lg text-[var(--foreground)]">The<span className="text-white/70">Auctus</span></span>
+            <span className="font-headline text-lg text-[var(--foreground)]">The<span style={{ color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)' }}>Auctus</span></span>
           </div>
           <p className="text-[11px] text-[var(--muted)]">&copy; 2026 TheAuctus. Built by creators, for creators.</p>
           <div className="flex items-center gap-8 text-[11px] text-[var(--muted)]">

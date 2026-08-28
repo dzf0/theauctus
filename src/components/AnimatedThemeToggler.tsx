@@ -68,7 +68,9 @@ export default function AnimatedThemeToggler({
     <button
       ref={buttonRef}
       onClick={handleToggle}
-      className={`p-2 rounded-lg transition-all duration-200 hover:bg-white/10 ${className}`}
+      onMouseEnter={(e) => e.currentTarget.style.background = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = ''}
+      className={`p-2 rounded-lg transition-all duration-200 ${className}`}
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
     >
       {theme === "dark" ? <SunIcon /> : <MoonIcon />}
