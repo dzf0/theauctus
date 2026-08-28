@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useUser } from "@/components/user-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
+import AnimatedThemeToggler from "@/components/AnimatedThemeToggler";
 
 const navItems = [
   {
@@ -249,7 +249,7 @@ export default function DashboardLayout({
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--success)" }}></div>
               Operational
             </div>
-            <ThemeToggle />
+            <AnimatedThemeToggler />
             <div className="w-7 h-7 rounded-full liquid-card flex items-center justify-center text-[10px] accent-text font-medium">{getInitials()}</div>
             <TopBarSignOut />
           </div>

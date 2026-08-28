@@ -13,6 +13,7 @@ import { CREDIT_PACKS, CREDIT_COSTS } from "@/lib/constants";
 import SpotlightCard from "@/components/SpotlightCard";
 import GooeyNav from "@/components/GooeyNav";
 import DepthText from "@/components/DepthText";
+import AnimatedThemeToggler from "@/components/AnimatedThemeToggler";
 
 // ── Press scale hook ───────────────────────────────────────────
 function usePressScale(scale = 0.97) {
@@ -109,6 +110,7 @@ export default function LandingPage() {
                 timeVariance={200}
                 colors={[1, 2, 3, 1, 2, 3, 1, 4]}
               />
+              <AnimatedThemeToggler className="text-white/70 hover:text-white" />
               {user ? (
                 <Link href="/dashboard" className="liquid-btn-primary text-[11px]">Dashboard</Link>
               ) : (
@@ -126,6 +128,9 @@ export default function LandingPage() {
             <a href="#how-it-works" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">How It Works</a>
             <a href="#pricing" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">Credits</a>
             <a href="#faq" className="block py-3 px-3 text-[13px] font-medium uppercase tracking-[0.1em] text-[var(--foreground)] hover:bg-white/5 rounded-lg transition-colors">FAQ</a>
+            <div className="px-3 py-2">
+              <AnimatedThemeToggler className="text-[var(--foreground)]" />
+            </div>
             {user ? (
               <Link href="/dashboard" className="block liquid-btn-primary text-center text-[13px] py-3">Dashboard</Link>
             ) : (

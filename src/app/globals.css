@@ -368,6 +368,23 @@ html {
   scroll-padding-top: 80px;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   VIEW TRANSITIONS — Animated Theme Toggler
+   ══════════════════════════════════════════════════════════════ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
 ::selection {
   background: rgba(201, 168, 124, 0.3);
   color: var(--foreground);

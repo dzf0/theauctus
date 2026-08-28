@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTheme } from "@/components/theme-provider";
 import PixelSnow from "@/components/PixelSnow";
 
 // ── Seeded pseudo-random (deterministic for SSR hydration) ──
@@ -10,7 +11,7 @@ function seededRandom(seed: number) {
 }
 
 // ── Floating Parallax Particles ──────────────────────────────
-function ParallaxField() {
+function ParallaxField({ isDark }: { isDark: boolean }) {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [particles] = useState(() =>
     Array.from({ length: 30 }, (_, i) => ({
@@ -87,7 +88,7 @@ function ParallaxField() {
             width: `${p.size}px`,
             height: `${p.size}px`,
             opacity: p.opacity,
-            background: "rgba(255,255,255,0.5)",
+            background: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)",
             transform: `translate(${mouse.x * p.depth * 18}px, ${mouse.y * p.depth * 18}px)`,
             transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
             animation: `float-particle ${p.duration}s ease-in-out ${p.delay}s infinite`,
@@ -99,7 +100,7 @@ function ParallaxField() {
 }
 
 // ── Floating Orbit Rings ────────────────────────────────────
-function OrbitRings() {
+function OrbitRings({ isDark }: { isDark: boolean }) {
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 hidden sm:flex">
       {[80, 140, 200].map((size, i) => (
@@ -109,8 +110,10 @@ function OrbitRings() {
           style={{
             width: `${size}px`,
             height: `${size}px`,
-            border: `1px solid rgba(255,255,255,${0.04 - i * 0.01})`,
-            boxShadow: `0 0 ${6 + i * 2}px rgba(255,255,255,${0.03 - i * 0.005}), inset 0 0 ${4 + i * 2}px rgba(255,255,255,${0.02 - i * 0.005})`,
+            border: `1px solid ${isDark ? `rgba(255,255,255,${0.04 - i * 0.01})` : `rgba(0,0,0,${0.06 - i * 0.01})`}`,
+            boxShadow: isDark
+              ? `0 0 ${6 + i * 2}px rgba(255,255,255,${0.03 - i * 0.005}), inset 0 0 ${4 + i * 2}px rgba(255,255,255,${0.02 - i * 0.005})`
+              : `0 0 ${6 + i * 2}px rgba(0,0,0,${0.02 - i * 0.005}), inset 0 0 ${4 + i * 2}px rgba(0,0,0,${0.01 - i * 0.003})`,
             animation: `orbit-spin ${20 + i * 10}s linear infinite ${i % 2 === 0 ? "" : "reverse"}`,
           }}
         >
@@ -119,11 +122,11 @@ function OrbitRings() {
             style={{
               width: "4px",
               height: "4px",
-              background: "rgba(255,255,255,0.25)",
+              background: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)",
               top: "-2px",
               left: "50%",
               transform: "translateX(-50%)",
-              boxShadow: "0 0 6px rgba(255,255,255,0.2)",
+              boxShadow: isDark ? "0 0 6px rgba(255,255,255,0.2)" : "0 0 6px rgba(0,0,0,0.1)",
             }}
           />
         </div>
@@ -134,19 +137,22 @@ function OrbitRings() {
 
 // ── Main Snow Background ────────────────────────────────────
 export default function SnowBackground() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   return (
     <>
       {/* PixelSnow WebGL background */}
       <div className="fixed inset-0 z-0">
         <PixelSnow
-          color="#ffffff"
+          color={isDark ? "#ffffff" : "#1a1a2e"}
           flakeSize={0.008}
           minFlakeSize={1.0}
           pixelResolution={250}
           speed={0.8}
           density={0.2}
           direction={135}
-          brightness={0.9}
+          brightness={isDark ? 0.9 : 0.6}
           gamma={0.5}
           variant="round"
           depthFade={6}
@@ -155,10 +161,10 @@ export default function SnowBackground() {
       </div>
 
       {/* Parallax particles */}
-      <ParallaxField />
+      <ParallaxField isDark={isDark} />
 
       {/* Orbit rings */}
-      <OrbitRings />
+      <OrbitRings isDark={isDark} />
 
       {/* Noise texture overlay */}
       <div className="noise-overlay" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
@@ -168,7 +174,9 @@ export default function SnowBackground() {
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%)",
+            background: isDark
+              ? "radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%)"
+              : "radial-gradient(circle, rgba(0,0,0,0.03) 0%, transparent 60%)",
             filter: "blur(80px)",
           }}
         />
