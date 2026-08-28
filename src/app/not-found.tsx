@@ -120,7 +120,7 @@ function BlinkLine() {
 // ── Main 404 Page ───────────────────────────────────────────
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-6" style={{ background: '#0a0a0f' }}>
       {/* FaultyTerminal background — copper-tinted, full-bleed */}
       <div className="absolute inset-0 z-0">
         <FaultyTerminal
