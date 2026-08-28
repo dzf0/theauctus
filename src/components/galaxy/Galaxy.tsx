@@ -57,13 +57,13 @@ vec3 hsv2rgb(vec3 c) {
 
 float Star(vec2 uv, float flare) {
   float d = length(uv);
-  float m = (0.05 * uGlowIntensity) / d;
-  float rays = smoothstep(0.0, 1.0, 1.0 - abs(uv.x * uv.y * 1000.0));
+  float m = (0.04 * uGlowIntensity) / (d * d + 0.001);
+  float rays = smoothstep(0.0, 0.8, 1.0 - abs(uv.x * uv.y * 1500.0));
   m += rays * flare * uGlowIntensity;
   uv *= MAT45;
-  rays = smoothstep(0.0, 1.0, 1.0 - abs(uv.x * uv.y * 1000.0));
-  m += rays * 0.3 * flare * uGlowIntensity;
-  m *= smoothstep(1.0, 0.2, d);
+  rays = smoothstep(0.0, 0.8, 1.0 - abs(uv.x * uv.y * 1500.0));
+  m += rays * 0.25 * flare * uGlowIntensity;
+  m *= smoothstep(1.0, 0.15, d);
   return m;
 }
 
@@ -181,6 +181,7 @@ export default function Galaxy({
     const renderer = new Renderer({
       alpha: transparent,
       premultipliedAlpha: false,
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
     });
     const gl = renderer.gl;
 
