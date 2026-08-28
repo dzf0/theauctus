@@ -13,11 +13,11 @@ function seededRandom(seed: number) {
 function ParallaxField() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [particles] = useState(() =>
-    Array.from({ length: 50 }, (_, i) => ({
+    Array.from({ length: 30 }, (_, i) => ({
       id: i,
       x: seededRandom(i * 7 + 1) * 100,
       y: seededRandom(i * 13 + 2) * 100,
-      size: 1 + seededRandom(i * 19 + 3) * 4,
+      size: 0.5 + seededRandom(i * 19 + 3) * 2.5,
       depth: 0.2 + seededRandom(i * 23 + 4) * 0.8,
       opacity: 0.1 + seededRandom(i * 29 + 5) * 0.5,
       duration: 4 + seededRandom(i * 31 + 6) * 8,
@@ -140,8 +140,8 @@ export default function GalaxyBackground() {
       <div className="fixed inset-0 z-0">
         <Galaxy
           saturation={15}
-          density={1.2}
-          glowIntensity={0.35}
+          density={0.7}
+          glowIntensity={0.2}
           starSpeed={0.5}
           mouseRepulsion={true}
           repulsionStrength={1.5}
