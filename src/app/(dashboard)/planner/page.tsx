@@ -61,7 +61,7 @@ export default function PlannerPage() {
     try {
       const response = await fetch("/api/posts");
       const data = await response.json();
-      if (response.ok) setPosts(data.posts || []);
+      if (response.ok) setPosts(Array.isArray(data) ? data : data.posts || []);
     } catch { /* ignore */ } finally { setLoading(false); }
   };
 
@@ -76,7 +76,7 @@ export default function PlannerPage() {
       });
       const data = await response.json();
       if (!response.ok) { toast.error(data.error || "Failed to generate posts"); return; }
-      toast.success(`Generated ${postCount} posts!`);
+      toast.success(`Generated ${data.count ?? postCount} posts!`);
       setGenerateModalOpen(false);
       setTopic("");
       fetchPosts();
