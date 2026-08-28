@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════════════════════
-// AI CONTENT GENERATION — Google Gemini
+// AI CONTENT GENERATION — Google Gemini + Search Grounding
 // Used by: /api/posts (batch generation), /api/video/story
+// Gemini searches the web for accurate, up-to-date content
 // ══════════════════════════════════════════════════════════════
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -13,6 +14,7 @@ export interface GeneratedPost {
   contentType: string;
   hashtags: string[];
   scheduledAt: string | null;
+  sources?: string[];  // URLs from web research
 }
 
 export interface GeneratePostsOptions {
@@ -28,17 +30,27 @@ export interface GeneratePostsOptions {
 }
 
 /**
- * Generate social media posts using Gemini.
- * Returns an array of posts tailored to each platform.
+ * Generate social media posts using Gemini with Google Search grounding.
+ * Gemini researches the web first, then creates accurate, data-backed posts.
  */
 export async function generatePosts(opts: GeneratePostsOptions): Promise<GeneratedPost[]> {
   if (!GEMINI_API_KEY) {
+    console.warn("No GEMINI_API_KEY — using fallback templates");
     return generateFallbackPosts(opts);
   }
 
   const postsPerPlatform = Math.ceil(opts.count / opts.platforms.length);
 
-  const prompt = `You are an expert social media content strategist creating high-quality, in-depth posts.
+  const prompt = `You are an expert social media content strategist creating high-quality, in-depth, and FACTUALLY ACCURATE posts.
+
+IMPORTANT: Before writing any content, RESEARCH the topic "${opts.topic}" using Google Search to find:
+- Current trends, statistics, and recent developments
+- Real case studies, examples, and success stories
+- Up-to-date data points, percentages, and numbers
+- Recent news or changes in this space
+- Expert opinions and verified claims
+
+Use the search results to make every claim accurate and every example real. Never fabricate statistics or make up examples — use what you find in the research.
 
 TOPIC: "${opts.topic}"
 NICHE: ${opts.niche || "General"}
@@ -49,8 +61,11 @@ TONE: ${opts.tonePreferences?.join(", ") || "Friendly, informative"}
 Generate exactly ${opts.count} social media posts across these platforms: ${opts.platforms.join(", ")}.
 Each platform should get ~${postsPerPlatform} posts with content tailored to that platform's format and audience.
 
-CRITICAL LENGTH REQUIREMENTS:
-- Every post must be SUBSTANTIAL — at least 150-300 words of content
+CRITICAL REQUIREMENTS:
+- Every post MUST be SUBSTANTIAL — at least 150-300 words of content
+- Every post MUST include at least 2-3 real data points, statistics, or verified facts from your research
+- Reference real companies, tools, or examples found during research
+- If you find a compelling recent study or statistic, build the post around it
 - Twitter/X: Use threads (multiple tweets separated by \\n---\\n). Each thread should be 4-8 tweets with deep value
 - Instagram: Long-form captions with storytelling, at least 200 words
 - LinkedIn: Detailed professional posts, 200-400 words with data and personal stories
@@ -62,7 +77,7 @@ CRITICAL LENGTH REQUIREMENTS:
 
 Each post should include:
 1. A compelling hook (first line that stops scrolling)
-2. A detailed body with actionable advice, examples, or storytelling
+2. A detailed body with REAL data, actionable advice, examples, or storytelling
 3. Key takeaways or bullet points
 4. A strong call-to-action
 5. 3-5 relevant hashtags
@@ -74,11 +89,12 @@ CONTENT MIX (spread across all posts):
 - 20% Promotional (CTAs, product mentions with value propositions)
 
 RULES:
-- Be SPECIFIC — use numbers, percentages, real examples, frameworks
-- Tell stories — personal anecdotes, case studies, before/after
+- Use REAL statistics and data from your web research — never make them up
+- Reference real companies, tools, people, and events
+- Tell stories backed by real examples
 - Provide actionable steps — not vague advice
-- Each post must feel like it alone provides real value
-- No filler, no generic statements
+- Each post must feel like it alone provides real, verified value
+- No filler, no generic statements, no fabricated claims
 
 Return a JSON array. Each element:
 {
@@ -97,6 +113,7 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }],
         generationConfig: {
           temperature: 0.8,
           topP: 0.95,
@@ -117,6 +134,13 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
       throw new Error("Empty response from Gemini");
     }
 
+    // Extract grounding sources from search results
+    const sources: string[] = [];
+    const steps = data?.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    for (const chunk of steps) {
+      if (chunk?.web?.uri) sources.push(chunk.web.uri);
+    }
+
     // Parse JSON — handle markdown code fences if present
     const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
     const posts = JSON.parse(jsonStr) as GeneratedPost[];
@@ -124,6 +148,15 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
     if (!Array.isArray(posts) || posts.length === 0) {
       throw new Error("Invalid response format from Gemini");
     }
+
+    // Attach sources to each post
+    if (sources.length > 0) {
+      for (const post of posts) {
+        post.sources = sources.slice(0, 5);
+      }
+    }
+
+    console.log(`Gemini generated ${posts.length} posts with ${sources.length} web sources`);
 
     // Apply scheduling dates
     return applySchedule(posts, opts.startDate, opts.frequency);
@@ -136,7 +169,7 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
 }
 
 /**
- * Generate a single video script using Gemini.
+ * Generate a single video script using Gemini with Google Search grounding.
  * Minimum 30 seconds (~75 words), target matches duration param.
  */
 export async function generateVideoScript(
@@ -155,24 +188,32 @@ export async function generateVideoScript(
 
   const prompt = `Write a compelling short-form video script about "${topic}" in the ${niche} niche.
 
+IMPORTANT: Before writing, RESEARCH this topic using Google Search to find:
+- Current trends, statistics, and recent developments
+- Real examples, case studies, or success stories
+- Verified data points you can reference
+- What's actually working right now in this space
+
+Use real data from your research to make the script credible and accurate.
+
 DURATION: ${effectiveDuration} seconds (at least ${targetWords} words)
 STYLE: ${style || "educational"}
 
 STRUCTURE:
-1. HOOK (first 3-5 seconds): A bold claim, surprising fact, or provocative question that stops the scroll immediately
+1. HOOK (first 3-5 seconds): A bold claim, surprising fact, or provocative question backed by real data
 2. PROBLEM (5-10 seconds): Identify the pain point or misconception your audience faces
 3. SOLUTION (15-20 seconds): Deliver the core value — step-by-step advice, a framework, or a story with a clear lesson
-4. PROOF (5-10 seconds): Back it up with a specific example, number, or personal anecdote
+4. PROOF (5-10 seconds): Back it up with a specific example, number, or case study from your research
 5. CTA (3-5 seconds): Tell them exactly what to do next (follow, save, share, comment)
 
 CRITICAL RULES:
 - Write for SPOKEN WORD — conversational, natural rhythm, like talking to a friend
 - Every sentence must earn its place — no filler, no generic statements
-- Use specific numbers, examples, and actionable steps
+- Use REAL numbers, verified examples, and actionable steps from your research
 - Keep sentences short and punchy for video pacing
 - No hashtags, no emojis, no stage directions in brackets
 - The script must be at least ${targetWords} words to fill ${effectiveDuration} seconds
-- Think of this as a mini-lecture that delivers real value
+- Think of this as a mini-lecture that delivers real, researched value
 
 Return ONLY the script text. No title, no explanation, no quotes, no word count.`;
 
@@ -182,6 +223,7 @@ Return ONLY the script text. No title, no explanation, no quotes, no word count.
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }],
         generationConfig: {
           temperature: 0.8,
           topP: 0.95,
@@ -201,6 +243,8 @@ Return ONLY the script text. No title, no explanation, no quotes, no word count.
     if (!script) {
       throw new Error("Empty response from Gemini");
     }
+
+    console.log(`Gemini generated video script (${script.split(/\s+/).length} words)`);
 
     // Ensure minimum length — if too short, pad with a stronger ending
     const wordCount = script.split(/\s+/).filter(Boolean).length;
@@ -329,7 +373,7 @@ function generateFallbackPosts(opts: GeneratePostsOptions): GeneratedPost[] {
     },
     {
       hook: `${opts.topic} changed everything for me. Here's how`,
-      body: `6 months ago, I was stuck at 200 followers posting random content about ${opts.topic} with zero strategy.\n\nToday, I've grown to 15,000+ followers, landed 3 brand deals, and built a community that actually engages.\n\nHere's the exact playbook I followed:\n\nWeek 1-2: Foundation\nI defined my niche clearly. Not just "${opts.niche || "content creation"}" — specifically "${opts.topic} for [specific audience].]"\nI created a brand kit: consistent colors, fonts, and tone. Every post looks like it belongs to the same brand.\n\nWeek 3-4: Content System\nI picked 3 content pillars: Educational (40%), Behind-the-scenes (30%), Engagement (30%)\nI batch-create content every Sunday. 3 hours = 2 weeks of posts.\n\nMonth 2: Growth Tactics\nI started commenting on 20 accounts in my niche daily. Not generic comments — thoughtful, value-adding responses.\nI collaborated with 5 creators at my level. Cross-promotion is the fastest growth hack.\n\nMonth 3: Optimization\nI reviewed analytics weekly. Double-down on what works. Kill what doesn't.\nI started repurposing: One blog post = 10 social posts.\n\nMonth 4-6: Scaling\nHired a VA for scheduling and engagement.\nLaunched a free resource as a lead magnet.\nStarted a weekly series that builds anticipation.\n\nThe numbers don't lie. But the real win? I actually enjoy creating now because I have a system instead of a scramble.\n\nWant the detailed template? Comment SYSTEM and I'll DM it to you.`,
+      body: `6 months ago, I was stuck at 200 followers posting random content about ${opts.topic} with zero strategy.\n\nToday, I've grown to 15,000+ followers, landed 3 brand deals, and built a community that actually engages.\n\nHere's the exact playbook I followed:\n\nWeek 1-2: Foundation\nI defined my niche clearly. Not just "${opts.niche || "content creation"}" — specifically "${opts.topic} for [specific audience]."\nI created a brand kit: consistent colors, fonts, and tone. Every post looks like it belongs to the same brand.\n\nWeek 3-4: Content System\nI picked 3 content pillars: Educational (40%), Behind-the-scenes (30%), Engagement (30%)\nI batch-create content every Sunday. 3 hours = 2 weeks of posts.\n\nMonth 2: Growth Tactics\nI started commenting on 20 accounts in my niche daily. Not generic comments — thoughtful, value-adding responses.\nI collaborated with 5 creators at my level. Cross-promotion is the fastest growth hack.\n\nMonth 3: Optimization\nI reviewed analytics weekly. Double-down on what works. Kill what doesn't.\nI started repurposing: One blog post = 10 social posts.\n\nMonth 4-6: Scaling\nHired a VA for scheduling and engagement.\nLaunched a free resource as a lead magnet.\nStarted a weekly series that builds anticipation.\n\nThe numbers don't lie. But the real win? I actually enjoy creating now because I have a system instead of a scramble.\n\nWant the detailed template? Comment SYSTEM and I'll DM it to you.`,
     },
   ];
 
