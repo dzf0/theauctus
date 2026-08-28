@@ -141,7 +141,7 @@ export default function GalaxyBackground() {
         <Galaxy
           saturation={15}
           density={0.7}
-          glowIntensity={0.2}
+          glowIntensity={0.12}
           starSpeed={0.5}
           mouseRepulsion={true}
           repulsionStrength={1.5}

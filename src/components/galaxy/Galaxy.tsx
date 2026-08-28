@@ -57,8 +57,8 @@ vec3 hsv2rgb(vec3 c) {
 
 float Star(vec2 uv, float flare) {
   float d = length(uv);
-  float m = (0.03 * uGlowIntensity) / (d * d + 0.002);
-  m *= smoothstep(0.8, 0.1, d);
+  float m = (0.02 * uGlowIntensity) / (d * d + 0.004);
+  m *= smoothstep(0.5, 0.05, d);
   return m;
 }
 
