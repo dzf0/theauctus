@@ -163,7 +163,8 @@ export async function middleware(request: NextRequest) {
   const isOnboardingFlow =
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/auth/pricing") ||
-    pathname.startsWith("/auth/username");
+    pathname.startsWith("/auth/username") ||
+    pathname.startsWith("/admin");
 
   // Auth pages that don't need onboarding checks
   const isAuthPage = pathname.startsWith("/auth/signin") ||
