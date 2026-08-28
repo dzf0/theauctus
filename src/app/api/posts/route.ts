@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 import { apiValidationError, apiNotFound } from "@/lib/errors";
+import { generatePosts } from "@/lib/ai-generate";
 
 // GET /api/posts — Get all posts for the current user
 export const GET = withAuth(
@@ -36,10 +37,70 @@ export const GET = withAuth(
   }
 );
 
-// POST /api/posts — Create a new post
+// POST /api/posts — Create a new post OR batch-generate with AI
 export const POST = withAuth(
-  async (request, { supabase, user }) => {
+  async (request, { supabase, user, profile }) => {
     const body = await request.json();
+    const validPlatforms = [
+      "twitter", "instagram", "linkedin", "tiktok",
+      "youtube", "threads", "facebook", "blog",
+    ];
+
+    // ── Batch AI generation mode ──────────────────────────────
+    if (body.topic && body.platforms && body.count) {
+      const { topic, platforms, count } = body;
+
+      if (!Array.isArray(platforms) || platforms.length === 0) {
+        return apiValidationError("At least one platform required", "platforms");
+      }
+      if (typeof count !== "number" || count < 1 || count > 30) {
+        return apiValidationError("Count must be 1-30", "count");
+      }
+      for (const p of platforms) {
+        if (!validPlatforms.includes(p)) {
+          return apiValidationError(`Invalid platform: ${p}`, "platforms");
+        }
+      }
+
+      // Generate posts with Gemini
+      const generated = await generatePosts({
+        topic,
+        platforms,
+        count,
+        niche: (profile?.niche as string) || undefined,
+        brandVoice: (profile?.brand_voice as string) || undefined,
+        targetAudience: (profile?.target_audience as string) || undefined,
+        tonePreferences: Array.isArray(profile?.tone_preferences)
+          ? (profile.tone_preferences as string[])
+          : undefined,
+      });
+
+      // Insert all generated posts
+      const postsToInsert = generated.map((p) => ({
+        user_id: user.id,
+        title: p.title,
+        content: p.content,
+        platform: p.platform,
+        content_type: p.contentType || "text",
+        status: "draft",
+        scheduled_at: p.scheduledAt || null,
+        hashtags: p.hashtags || [],
+        ai_generated: true,
+      }));
+
+      const { data: posts, error } = await supabase
+        .from("posts")
+        .insert(postsToInsert)
+        .select();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ posts, count: posts?.length ?? 0 }, { status: 201 });
+    }
+
+    // ── Single post creation mode ─────────────────────────────
     const {
       title,
       content,
@@ -54,17 +115,6 @@ export const POST = withAuth(
       return apiValidationError("Missing required fields");
     }
 
-    // Validate platform
-    const validPlatforms = [
-      "twitter",
-      "instagram",
-      "linkedin",
-      "tiktok",
-      "youtube",
-      "threads",
-      "facebook",
-      "blog",
-    ];
     if (!validPlatforms.includes(platform)) {
       return apiValidationError("Invalid platform", "platform");
     }
