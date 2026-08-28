@@ -428,11 +428,6 @@ html.light .shimmer-divider::before {
   );
 }
 
-/* ── Orbit rings → dark in light mode ──────────────────────── */
-html.light [style*="rgba(255,255,255,0."][style*="border"] {
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-
 /* ── Scrollbar ─────────────────────────────────────────────── */
 html.light ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15) !important;
@@ -969,8 +964,6 @@ html.light select.liquid-input option {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner { animation: spin 1s linear infinite; }
-
-@keyframes orbit-spin { to { transform: rotate(360deg); } }
 
 @keyframes float-particle {
   0%, 100% { transform: translateY(0) translateX(0); }

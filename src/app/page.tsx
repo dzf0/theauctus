@@ -165,8 +165,6 @@ export default function LandingPage() {
                 pointerTracking
                 smoothing={0.14}
                 perspective={1000}
-                autoOrbit
-                orbitSpeed={0.3}
                 fontSize="clamp(2.2rem, 7vw, 5rem)"
                 fontWeight={400}
                 shadow
@@ -181,8 +179,6 @@ export default function LandingPage() {
                 pointerTracking
                 smoothing={0.14}
                 perspective={1000}
-                autoOrbit
-                orbitSpeed={0.3}
                 fontSize="clamp(2.2rem, 7vw, 5rem)"
                 fontWeight={400}
                 shadow
@@ -197,8 +193,6 @@ export default function LandingPage() {
                 pointerTracking
                 smoothing={0.14}
                 perspective={1000}
-                autoOrbit
-                orbitSpeed={0.3}
                 fontSize="clamp(2.2rem, 7vw, 5rem)"
                 fontWeight={400}
                 shadow

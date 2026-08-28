@@ -99,42 +99,6 @@ function ParallaxField({ isDark }: { isDark: boolean }) {
   );
 }
 
-// ── Floating Orbit Rings ────────────────────────────────────
-function OrbitRings({ isDark }: { isDark: boolean }) {
-  return (
-    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 hidden sm:flex">
-      {[80, 140, 200].map((size, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            border: `1px solid ${isDark ? `rgba(255,255,255,${0.04 - i * 0.01})` : `rgba(0,0,0,${0.06 - i * 0.01})`}`,
-            boxShadow: isDark
-              ? `0 0 ${6 + i * 2}px rgba(255,255,255,${0.03 - i * 0.005}), inset 0 0 ${4 + i * 2}px rgba(255,255,255,${0.02 - i * 0.005})`
-              : `0 0 ${6 + i * 2}px rgba(0,0,0,${0.02 - i * 0.005}), inset 0 0 ${4 + i * 2}px rgba(0,0,0,${0.01 - i * 0.003})`,
-            animation: `orbit-spin ${20 + i * 10}s linear infinite ${i % 2 === 0 ? "" : "reverse"}`,
-          }}
-        >
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: "4px",
-              height: "4px",
-              background: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)",
-              top: "-2px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              boxShadow: isDark ? "0 0 6px rgba(255,255,255,0.2)" : "0 0 6px rgba(0,0,0,0.1)",
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ── Main Snow Background ────────────────────────────────────
 export default function SnowBackground() {
   const { theme } = useTheme();
@@ -162,9 +126,6 @@ export default function SnowBackground() {
 
       {/* Parallax particles */}
       <ParallaxField isDark={isDark} />
-
-      {/* Orbit rings */}
-      <OrbitRings isDark={isDark} />
 
       {/* Noise texture overlay */}
       <div className="noise-overlay" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />

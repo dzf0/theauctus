@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { withAuth, isAdminEmail } from "@/lib/api-middleware";
 
 /**
  * GET /api/health/db
  *
  * Verifies all expected tables exist and are queryable.
- * Uses the service-role client (bypasses RLS) so it works without auth.
+ * Admin-only endpoint — requires authenticated admin user.
  */
 export const dynamic = "force-dynamic";
 
@@ -20,43 +21,46 @@ const TABLE_CHECKS = [
   { table: "audit_log", columns: "id, action" },
 ] as const;
 
-export async function GET() {
-  try {
-    const supabase = createSupabaseAdminClient();
-    const results: Record<string, { healthy: boolean; error?: string }> = {};
+export const GET = withAuth(
+  async () => {
+    try {
+      const supabase = createSupabaseAdminClient();
+      const results: Record<string, { healthy: boolean; error?: string }> = {};
 
-    for (const { table, columns } of TABLE_CHECKS) {
-      const { error } = await supabase
-        .from(table)
-        .select(columns)
-        .limit(0);
+      for (const { table, columns } of TABLE_CHECKS) {
+        const { error } = await supabase
+          .from(table)
+          .select(columns)
+          .limit(0);
 
-      results[table] = error
-        ? { healthy: false, error: error.message }
-        : { healthy: true };
+        results[table] = error
+          ? { healthy: false, error: error.message }
+          : { healthy: true };
+      }
+
+      const allHealthy = Object.values(results).every((r) => r.healthy);
+      const failedTables = Object.entries(results)
+        .filter(([, r]) => !r.healthy)
+        .map(([table, r]) => `${table}: ${r.error}`);
+
+      return NextResponse.json({
+        status: allHealthy ? "healthy" : "degraded",
+        healthy: allHealthy,
+        message: allHealthy
+          ? `All ${TABLE_CHECKS.length} tables verified`
+          : `Failed tables: ${failedTables.join("; ")}`,
+        tables: results,
+      });
+    } catch (err) {
+      return NextResponse.json(
+        {
+          status: "error",
+          healthy: false,
+          message: err instanceof Error ? err.message : "Unknown error",
+        },
+        { status: 500 }
+      );
     }
-
-    const allHealthy = Object.values(results).every((r) => r.healthy);
-    const failedTables = Object.entries(results)
-      .filter(([, r]) => !r.healthy)
-      .map(([table, r]) => `${table}: ${r.error}`);
-
-    return NextResponse.json({
-      status: allHealthy ? "healthy" : "degraded",
-      healthy: allHealthy,
-      message: allHealthy
-        ? `All ${TABLE_CHECKS.length} tables verified`
-        : `Failed tables: ${failedTables.join("; ")}`,
-      tables: results,
-    });
-  } catch (err) {
-    return NextResponse.json(
-      {
-        status: "error",
-        healthy: false,
-        message: err instanceof Error ? err.message : "Unknown error",
-      },
-      { status: 500 }
-    );
-  }
-}
+  },
+  { requireAuth: true, requireAdmin: true, auditAction: "health_db_check" }
+);

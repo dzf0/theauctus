@@ -64,16 +64,16 @@ export async function GET(
 ) {
   const { platform } = await params;
 
-  const config = OAUTH_CONFIGS[platform];
-  if (!config || !config.authUrl) {
-    return NextResponse.json({ error: `Platform ${platform} not supported` }, { status: 400 });
-  }
-
-  // Verify user is logged in
+  // Require authentication
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const config = OAUTH_CONFIGS[platform];
+  if (!config || !config.authUrl) {
+    return NextResponse.json({ error: `Platform ${platform} not supported` }, { status: 400 });
   }
 
   // Build the callback URL

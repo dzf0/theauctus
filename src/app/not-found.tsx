@@ -102,8 +102,6 @@ export default function NotFound() {
           pointerTracking
           smoothing={0.14}
           perspective={900}
-          autoOrbit
-          orbitSpeed={0.35}
           fontSize="clamp(5rem, 18vw, 12rem)"
           fontWeight={900}
           shadow

@@ -20,7 +20,7 @@ export const GET = withAuth(async (_request, { supabase, user }) => {
     .eq("user_id", user.id)
     .single();
 
-  const credits = creditData?.balance ?? 0;
+  const credits = creditData?.balance ?? 10;
 
   // Fetch all posts for this user
   const { data: posts } = await supabase
