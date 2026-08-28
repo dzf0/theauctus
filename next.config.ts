@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Treat `three` as external so Turbopack resolves it from node_modules
+  serverExternalPackages: ["three"],
+
   // Reverse proxy configuration
   // This helps distribute load and prevent crashes
   images: {

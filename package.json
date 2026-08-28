@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.120.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
+    "@types/three": "^0.185.4",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.2",
     "animejs": "^3.2.2",
@@ -19,7 +20,8 @@
     "ogl": "^1.0.11",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "stripe": "^22.5.0"
+    "stripe": "^22.5.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
