@@ -321,8 +321,8 @@ export function withAuth(
           }
         }
 
-        // ── Credit balance check ────────────────────────────
-        if (requireCredits && requireCredits > 0) {
+        // ── Credit balance check (admins exempt) ─────────────
+        if (requireCredits && requireCredits > 0 && !isAdminEmail(user.email)) {
           const { data: balance } = await supabase
             .from("credit_balances")
             .select("balance")

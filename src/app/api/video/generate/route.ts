@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 import { generateVoiceover } from "@/lib/voiceover";
 import { generateVideo, VIDEO_TEMPLATES } from "@/lib/video";
+import { deductCredits } from "@/lib/credits";
 
 export const POST = withAuth(async (request, { supabase, user }) => {
   const body = await request.json();
@@ -72,12 +73,25 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     return NextResponse.json({ error: postError.message }, { status: 500 });
   }
 
+  // 6. Deduct credits (admins exempt via deductCredits)
+  const CREDIT_COST = 10;
+  const deductResult = await deductCredits(
+    user,
+    CREDIT_COST,
+    `Generated video: "${title || "AI Generated Video"}"`
+  );
+  if (!deductResult.success) {
+    console.error("[video/generate] Credit deduction failed:", deductResult.error);
+  }
+
   return NextResponse.json({
     success: true,
     post,
     videoUrl: urlData?.publicUrl,
     duration: video.duration,
     voiceoverChars: voiceover.charactersUsed,
+    creditsDeducted: CREDIT_COST,
+    newBalance: deductResult.balance,
   });
 }, {
   rateLimit: { limit: 5, windowMs: 60 * 60 * 1000 },
