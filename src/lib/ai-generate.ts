@@ -31,48 +31,65 @@ export interface GeneratePostsOptions {
 
 async function callGemini(prompt: string, maxTokens: number = 8192): Promise<string> {
   const apiKey = GEMINI_API_KEY();
-  if (!apiKey) throw new Error("No GEMINI_API_KEY set");
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured. Add it to your .env file.");
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60_000);
+  const MAX_RETRIES = 3;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
 
-  try {
-    const response = await fetch(`${GEMINI_API}?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 1.0,
-          topP: 0.95,
-          topK: 40,
-          maxOutputTokens: maxTokens,
-          thinkingConfig: {
-            thinkingLevel: "minimal",
-          } as Record<string, unknown>,
-        },
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
+    try {
+      const response = await fetch(`${GEMINI_API}?key=${apiKey}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 1.0,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: maxTokens,
+            thinkingConfig: {
+              thinkingLevel: "minimal",
+            } as Record<string, unknown>,
+          },
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Gemini API error: ${JSON.stringify(error)}`);
+      if (response.status === 429) {
+        const error = await response.json().catch(() => ({}));
+        const retryDelay = error?.error?.details?.find((d: {retryDelay?: string}) => d.retryDelay);
+        const waitMs = retryDelay ? parseInt(retryDelay.retryDelay) * 1000 : Math.min(30000 * Math.pow(2, attempt - 1), 60000);
+        
+        if (attempt < MAX_RETRIES) {
+          console.log(`[ai-generate] Rate limited (attempt ${attempt}/${MAX_RETRIES}), retrying in ${waitMs}ms...`);
+          await new Promise(r => setTimeout(r, waitMs));
+          continue;
+        }
+        throw new Error(`Gemini API daily quota exhausted (20 requests/day on free tier). Try again tomorrow, or add a paid Gemini API key.`);
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(`Gemini API error ${response.status}: ${JSON.stringify(error)}`);
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+
+      if (!text) {
+        throw new Error("Empty response from Gemini");
+      }
+
+      return text;
+    } catch (error) {
+      clearTimeout(timeout);
+      throw error;
     }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-    if (!text) {
-      throw new Error("Empty response from Gemini");
-    }
-
-    return text;
-  } catch (error) {
-    clearTimeout(timeout);
-    throw error;
   }
+  throw new Error("Gemini API failed after retries");
 }
 
 /**
@@ -140,23 +157,17 @@ Return ONLY a JSON array. Each element:
 
 Return ONLY the JSON array. No markdown fences, no explanation.`;
 
-  try {
-    const text = await callGemini(prompt, 8192);
+  const text = await callGemini(prompt, 8192);
 
-    const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
-    const posts = JSON.parse(jsonStr) as GeneratedPost[];
+  const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
+  const posts = JSON.parse(jsonStr) as GeneratedPost[];
 
-    if (!Array.isArray(posts) || posts.length === 0) {
-      throw new Error("Invalid response format from Gemini");
-    }
-
-    console.log(`Gemini generated ${posts.length} posts`);
-    return applySchedule(posts, opts.startDate, opts.frequency);
-  } catch (error) {
-    console.error("Gemini generation failed:", error);
-    const fallback = generateFallbackPosts(opts);
-    return applySchedule(fallback, opts.startDate, opts.frequency);
+  if (!Array.isArray(posts) || posts.length === 0) {
+    throw new Error("Invalid response format from Gemini");
   }
+
+  console.log(`Gemini generated ${posts.length} posts`);
+  return applySchedule(posts, opts.startDate, opts.frequency);
 }
 
 /**
@@ -198,25 +209,20 @@ RULES:
 
 Return ONLY the script text. No title, no explanation, no quotes around it.`;
 
-  try {
-    let script = await callGemini(prompt, 2048);
+  let script = await callGemini(prompt, 2048);
 
-    if (!script) {
-      throw new Error("Empty response from Gemini");
-    }
-
-    console.log(`Gemini generated video script (${script.split(/\s+/).length} words)`);
-
-    const wordCount = script.split(/\s+/).filter(Boolean).length;
-    if (wordCount < targetWords * 0.7) {
-      script += `\n\nIf you found this valuable, save it for later and follow for more ${niche} tips that actually work. Drop a comment below with your biggest takeaway — I read every single one.`;
-    }
-
-    return script;
-  } catch (error) {
-    console.error("Gemini script generation failed:", error);
-    return getFallbackScript(niche, targetWords);
+  if (!script) {
+    throw new Error("Empty response from Gemini");
   }
+
+  console.log(`Gemini generated video script (${script.split(/\s+/).length} words)`);
+
+  const wordCount = script.split(/\s+/).filter(Boolean).length;
+  if (wordCount < targetWords * 0.7) {
+    script += `\n\nIf you found this valuable, save it for later and follow for more ${niche} tips that actually work. Drop a comment below with your biggest takeaway — I read every single one.`;
+  }
+
+  return script;
 }
 
 // ── Scheduling ───────────────────────────────────────────────
