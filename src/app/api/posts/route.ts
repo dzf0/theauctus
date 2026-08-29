@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 import { apiValidationError, apiNotFound } from "@/lib/errors";
 import { generatePosts } from "@/lib/ai-generate";
+import { deductCredits, checkCredits } from "@/lib/credits";
+import { CREDIT_COSTS } from "@/lib/constants";
 
 // GET /api/posts — Get all posts for the current user
 export const GET = withAuth(
@@ -62,7 +64,18 @@ export const POST = withAuth(
         }
       }
 
-      // Generate posts with Gemini 2.0 Flash
+      // Check credits before generation (admins exempt)
+      const creditCostPerPost = CREDIT_COSTS.find((c) => c.action === "Single social post")?.credits ?? 5;
+      const totalCost = count * creditCostPerPost;
+      const creditCheck = await checkCredits(user, totalCost);
+      if (!creditCheck.hasEnough) {
+        return NextResponse.json(
+          { error: `Insufficient credits. Need ${totalCost}, have ${creditCheck.balance ?? 0}.` },
+          { status: 402 }
+        );
+      }
+
+      // Generate posts with Gemini
       const generated = await generatePosts({
         topic,
         platforms,
@@ -99,7 +112,17 @@ export const POST = withAuth(
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
-      return NextResponse.json({ posts, count: posts?.length ?? 0 }, { status: 201 });
+      // Deduct credits after successful generation
+      const deductResult = await deductCredits(
+        user,
+        totalCost,
+        `Generated ${posts?.length ?? count} posts for "${topic}"`
+      );
+      if (!deductResult.success) {
+        console.error("[posts] Credit deduction failed:", deductResult.error);
+      }
+
+      return NextResponse.json({ posts, count: posts?.length ?? 0, creditsDeducted: totalCost, newBalance: deductResult.balance }, { status: 201 });
     }
 
     // ── Single post creation mode ─────────────────────────────

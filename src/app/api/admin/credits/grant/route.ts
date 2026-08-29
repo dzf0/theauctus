@@ -31,8 +31,8 @@ export const POST = withAuth(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Update credit balance
-    const { data: existing } = await supabase
+    // Update credit balance (use admin client to bypass RLS)
+    const { data: existing } = await admin
       .from("credit_balances")
       .select("balance")
       .eq("user_id", user_id)
@@ -42,18 +42,18 @@ export const POST = withAuth(
     const newBalance = currentBalance + creditAmount;
 
     if (existing) {
-      await supabase
+      await admin
         .from("credit_balances")
         .update({ balance: newBalance, updated_at: new Date().toISOString() })
         .eq("user_id", user_id);
     } else {
-      await supabase
+      await admin
         .from("credit_balances")
         .insert({ user_id, balance: newBalance });
     }
 
-    // Log in credit_history
-    await supabase.from("credit_history").insert({
+    // Log in credit_history (use admin client to bypass RLS)
+    await admin.from("credit_history").insert({
       user_id,
       amount: creditAmount,
       type: "bonus",

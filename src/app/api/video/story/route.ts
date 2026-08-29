@@ -1,23 +1,36 @@
-// POST /api/video/story - AI script generator using Gemini 2.0 Flash
+// POST /api/video/story - AI script generator using Gemini 3.6 Flash
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 import { generateVideoScript } from "@/lib/ai-generate";
+import { deductCredits } from "@/lib/credits";
 
-export const POST = withAuth(async (request, { profile }) => {
+export const POST = withAuth(async (request, { user, profile }) => {
   const body = await request.json();
   const { niche, topic, style, duration } = body;
   const userNiche = niche || (profile?.niche as string) || "general";
   const userTopic = topic || "interesting facts";
   const targetDuration = duration || 30;
 
+  const CREDIT_COST = 2;
+
   try {
     const script = await generateVideoScript(userTopic, userNiche, style || "educational", targetDuration);
-    return NextResponse.json({ script, method: "gemini" });
+
+    // Deduct credits after successful generation (admins exempt)
+    const deductResult = await deductCredits(
+      user,
+      CREDIT_COST,
+      `Generated video script: "${userTopic}"`
+    );
+    if (!deductResult.success) {
+      console.error("[video/story] Credit deduction failed:", deductResult.error);
+    }
+
+    return NextResponse.json({ script, method: "gemini", creditsDeducted: CREDIT_COST, newBalance: deductResult.balance });
   } catch (error) {
     return NextResponse.json({ error: `AI generation failed: ${error instanceof Error ? error.message : "Unknown"}` }, { status: 500 });
   }
 }, {
   rateLimit: { limit: 20, windowMs: 60 * 60 * 1000 },
   rateLimitKey: "video:story",
-  requireCredits: 2,
 });
