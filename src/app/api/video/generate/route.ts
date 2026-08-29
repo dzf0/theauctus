@@ -50,8 +50,14 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     return NextResponse.json({ error: `Upload failed: ${uploadError.message}` }, { status: 500 });
   }
 
-  // 4. Get public URL
-  const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
+  // 4. Get signed URL (expires in 1 hour — keeps bucket private)
+  const { data: urlData, error: urlError } = await supabase.storage
+    .from("media")
+    .createSignedUrl(fileName, 3600);
+
+  if (urlError) {
+    return NextResponse.json({ error: `URL generation failed: ${urlError.message}` }, { status: 500 });
+  }
 
   // 5. Create post record
   const { data: post, error: postError } = await supabase
@@ -87,7 +93,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
   return NextResponse.json({
     success: true,
     post,
-    videoUrl: urlData?.publicUrl,
+    videoUrl: urlData?.signedUrl,
     duration: video.duration,
     voiceoverChars: voiceover.charactersUsed,
     creditsDeducted: CREDIT_COST,
