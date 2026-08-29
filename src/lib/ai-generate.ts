@@ -4,9 +4,12 @@
 // Free tier: https://console.groq.com
 // ══════════════════════════════════════════════════════════════
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+function getGroqKey(): string | undefined {
+  return process.env.GROQ_API_KEY;
+}
 
 export interface GeneratedPost {
   title: string;
@@ -31,6 +34,9 @@ export interface GeneratePostsOptions {
 }
 
 async function callGroq(prompt: string, maxTokens: number = 4096): Promise<string> {
+  const apiKey = getGroqKey();
+  if (!apiKey) throw new Error("No GROQ_API_KEY set");
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60_000);
 
@@ -39,7 +45,7 @@ async function callGroq(prompt: string, maxTokens: number = 4096): Promise<strin
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: GROQ_MODEL,
@@ -74,7 +80,8 @@ async function callGroq(prompt: string, maxTokens: number = 4096): Promise<strin
  * Generate social media posts using Groq (Llama 3.3 70B).
  */
 export async function generatePosts(opts: GeneratePostsOptions): Promise<GeneratedPost[]> {
-  if (!GROQ_API_KEY) {
+  const apiKey = getGroqKey();
+  if (!apiKey) {
     console.warn("No GROQ_API_KEY — using fallback templates");
     return generateFallbackPosts(opts);
   }
@@ -175,7 +182,9 @@ export async function generateVideoScript(
   const effectiveDuration = Math.max(duration, 30);
   const targetWords = Math.round(effectiveDuration * 2.5);
 
-  if (!GROQ_API_KEY) {
+  const apiKey = getGroqKey();
+  if (!apiKey) {
+    console.warn("No GROQ_API_KEY — using fallback script");
     return getFallbackScript(niche, targetWords);
   }
 
