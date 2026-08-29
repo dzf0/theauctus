@@ -103,6 +103,32 @@ export default function PlannerPage() {
     } catch { toast.error("Something went wrong"); } finally { setGenerating(false); }
   };
 
+  const handleCopy = async (post: Post) => {
+    const text = `${post.title}\n\n${post.content}\n\n${post.hashtags.map((t) => `#${t}`).join(" ")}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Post copied to clipboard!");
+    } catch {
+      toast.error("Failed to copy — try selecting manually");
+    }
+  };
+
+  const handleDelete = async (post: Post) => {
+    try {
+      const response = await fetch(`/api/posts?id=${post.id}`, { method: "DELETE" });
+      if (!response.ok) {
+        const data = await response.json();
+        toast.error(data.error || "Failed to delete");
+        return;
+      }
+      setPosts((prev) => prev.filter((p) => p.id !== post.id));
+      setSelectedPost(null);
+      toast.success("Post deleted");
+    } catch {
+      toast.error("Failed to delete post");
+    }
+  };
+
   const togglePlatform = (platform: string) => {
     setSelectedPlatforms((prev) => prev.includes(platform) ? prev.filter((p) => p !== platform) : [...prev, platform]);
   };
@@ -285,8 +311,8 @@ export default function PlannerPage() {
                 )}
                 <div className="flex gap-2 pt-4">
                   <Button variant="secondary" size="sm" className="flex-1">Edit</Button>
-                  <Button variant="secondary" size="sm" className="flex-1">Copy</Button>
-                  <Button variant="danger" size="sm">Delete</Button>
+                  <Button variant="secondary" size="sm" className="flex-1" onClick={() => handleCopy(selectedPost)}>Copy</Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(selectedPost)}>Delete</Button>
                 </div>
               </div>
             </Card>
