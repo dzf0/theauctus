@@ -44,51 +44,70 @@ export async function generateVoiceover(
   // ElevenLabs has a 5000 character limit per request
   const truncatedText = text.slice(0, 5000);
 
-  try {
-    const response = await fetch(
-      `${ELEVENLABS_API}/text-to-speech/${voiceId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          text: truncatedText,
-          model_id: modelId,
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
-            use_speaker_boost: true,
+  // Retry with exponential backoff for 429 rate limits
+  const MAX_RETRIES = 3;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(
+        `${ELEVENLABS_API}/text-to-speech/${voiceId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "xi-api-key": apiKey,
           },
-        }),
-      }
-    );
+          body: JSON.stringify({
+            text: truncatedText,
+            model_id: modelId,
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0.3,
+              use_speaker_boost: true,
+            },
+          }),
+        }
+      );
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
+      if (response.status === 429) {
+        const error = await response.json().catch(() => ({}));
+        if (attempt < MAX_RETRIES) {
+          const waitMs = Math.min(2000 * Math.pow(2, attempt - 1), 10000);
+          console.log(`[voiceover] Rate limited (attempt ${attempt}/${MAX_RETRIES}), retrying in ${waitMs}ms...`);
+          await new Promise(r => setTimeout(r, waitMs));
+          continue;
+        }
+        return {
+          success: false,
+          error: `ElevenLabs is busy (${error.detail?.message || "rate limit"}). Please try again in a few minutes.`,
+        };
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: `ElevenLabs API error ${response.status}: ${JSON.stringify(error)}`,
+        };
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = Buffer.from(arrayBuffer);
+
+      return {
+        success: true,
+        audioBuffer,
+        charactersUsed: truncatedText.length,
+      };
+    } catch (error) {
       return {
         success: false,
-        error: `ElevenLabs API error ${response.status}: ${JSON.stringify(error)}`,
+        error: `Voiceover generation failed: ${error instanceof Error ? error.message : "Unknown"}`,
       };
     }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = Buffer.from(arrayBuffer);
-
-    // Estimate characters used (rough: 1 char = 1 character)
-    return {
-      success: true,
-      audioBuffer,
-      charactersUsed: truncatedText.length,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: `Voiceover generation failed: ${error instanceof Error ? error.message : "Unknown"}`,
-    };
   }
+
+  return { success: false, error: "Voiceover generation failed after retries" };
 }
 
 /**
