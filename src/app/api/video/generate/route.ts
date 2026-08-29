@@ -2,6 +2,7 @@
 // Generates a short-form video with AI voiceover and captions
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { generateVoiceover } from "@/lib/voiceover";
 import { generateVideo, VIDEO_TEMPLATES } from "@/lib/video";
 import { deductCredits } from "@/lib/credits";
@@ -37,9 +38,10 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     return NextResponse.json({ error: video.error || "Video generation failed" }, { status: 500 });
   }
 
-  // 3. Upload to Supabase Storage
+  // 3. Upload to Supabase Storage (admin client bypasses RLS)
+  const adminClient = createSupabaseAdminClient();
   const fileName = `${user.id}/${Date.now()}.mp4`;
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await adminClient.storage
     .from("media")
     .upload(fileName, video.videoBuffer, {
       contentType: "video/mp4",
@@ -47,17 +49,21 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     });
 
   if (uploadError) {
+    console.error("[video/generate] Upload failed:", uploadError);
     return NextResponse.json({ error: `Upload failed: ${uploadError.message}` }, { status: 500 });
   }
 
-  // 4. Get signed URL (expires in 1 hour — keeps bucket private)
-  const { data: urlData, error: urlError } = await supabase.storage
+  // 4. Get signed URL (admin client — expires in 1 hour, bucket stays private)
+  const { data: urlData, error: urlError } = await adminClient.storage
     .from("media")
     .createSignedUrl(fileName, 3600);
 
   if (urlError) {
+    console.error("[video/generate] Signed URL failed:", urlError);
     return NextResponse.json({ error: `URL generation failed: ${urlError.message}` }, { status: 500 });
   }
+
+  console.log(`[video/generate] Video uploaded: ${fileName}, signed URL created`);
 
   // 5. Create post record
   const { data: post, error: postError } = await supabase
