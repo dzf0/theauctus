@@ -341,11 +341,11 @@ export default function PlannerPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-[11px] uppercase tracking-wider" style={{ color: "var(--muted)" }}>Scheduled</p>
-                <p className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>{posts.filter((p) => p.status === "scheduled").length}</p>
+                <p className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>{posts.filter((p) => p.status === "scheduled" && p.scheduled_at && new Date(p.scheduled_at).getMonth() === currentMonth.getMonth() && new Date(p.scheduled_at).getFullYear() === currentMonth.getFullYear()).length}</p>
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-wider" style={{ color: "var(--muted)" }}>Published</p>
-                <p className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>{posts.filter((p) => p.status === "published").length}</p>
+                <p className="font-headline text-2xl" style={{ color: "var(--foreground)" }}>{posts.filter((p) => p.status === "published" && p.scheduled_at && new Date(p.scheduled_at).getMonth() === currentMonth.getMonth() && new Date(p.scheduled_at).getFullYear() === currentMonth.getFullYear()).length}</p>
               </div>
             </div>
           </Card>
