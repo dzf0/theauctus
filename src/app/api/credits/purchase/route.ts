@@ -44,7 +44,7 @@ export const POST = withAuth(async (request, { user }) => {
     const amount = parseFloat(customAmount);
 
     if (isNaN(amount) || amount < CUSTOM_CREDIT_MIN_DOLLARS) {
-      return apiValidationError(`Minimum purchase is $${CUSTOM_CREDIT_MIN_DOLLARS}`);
+      return apiValidationError(`Minimum purchase is ${CUSTOM_CREDIT_MIN_DOLLARS}`);
     }
     if (amount > CUSTOM_CREDIT_MAX_DOLLARS) {
       return apiValidationError(`Maximum purchase is $${CUSTOM_CREDIT_MAX_DOLLARS}`);

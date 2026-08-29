@@ -280,7 +280,8 @@ function UsersTab() {
       .catch(() => setLoading(false));
   }, []);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchUsers(); }, []);
 
   const showToast = (message: string, type: "success" | "error") => {
     setToast({ message, type });
