@@ -1,4 +1,4 @@
-// POST /api/video/story - AI script generator using Groq (Llama 3.3 70B)
+// POST /api/video/story - AI script generator using Gemini 2.0 Flash
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 import { generateVideoScript } from "@/lib/ai-generate";
@@ -12,7 +12,7 @@ export const POST = withAuth(async (request, { profile }) => {
 
   try {
     const script = await generateVideoScript(userTopic, userNiche, style || "educational", targetDuration);
-    return NextResponse.json({ script, method: "groq" });
+    return NextResponse.json({ script, method: "gemini" });
   } catch (error) {
     return NextResponse.json({ error: `AI generation failed: ${error instanceof Error ? error.message : "Unknown"}` }, { status: 500 });
   }

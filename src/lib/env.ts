@@ -8,7 +8,7 @@ const requiredServerEnv = [
 ] as const;
 
 const recommendedServerEnv = [
-  "GROQ_API_KEY",
+  "GEMINI_API_KEY",
   "ELEVENLABS_API_KEY",
 ] as const;
 
