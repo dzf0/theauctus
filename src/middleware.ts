@@ -41,7 +41,9 @@ const CSP_DIRECTIVES = [
   "font-src 'self' https://fonts.gstatic.com",
   // Tighten img-src: only self, data URIs for inline icons, and known hosts
   "img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com https://lh3.googleusercontent.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
+  // Allow video/audio from Supabase storage
+  "media-src 'self' https://*.supabase.co blob:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://generativelanguage.googleapis.com https://api.elevenlabs.io",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

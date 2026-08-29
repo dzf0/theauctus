@@ -11,10 +11,14 @@ export const POST = withAuth(async (request, { user, profile }) => {
   const userTopic = topic || "interesting facts";
   const targetDuration = duration || 30;
 
+  console.log(`[video/story] Request: topic=${userTopic}, niche=${userNiche}, style=${style}, duration=${targetDuration}`);
+
   const CREDIT_COST = 2;
 
   try {
     const script = await generateVideoScript(userTopic, userNiche, style || "educational", targetDuration);
+
+    console.log(`[video/story] Script generated: ${script.split(/\s+/).length} words`);
 
     // Deduct credits after successful generation (admins exempt)
     const deductResult = await deductCredits(
@@ -28,6 +32,7 @@ export const POST = withAuth(async (request, { user, profile }) => {
 
     return NextResponse.json({ script, method: "gemini", creditsDeducted: CREDIT_COST, newBalance: deductResult.balance });
   } catch (error) {
+    console.error("[video/story] Generation error:", error);
     return NextResponse.json({ error: `AI generation failed: ${error instanceof Error ? error.message : "Unknown"}` }, { status: 500 });
   }
 }, {
