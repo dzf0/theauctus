@@ -76,8 +76,10 @@ async function callGemini(prompt: string, maxTokens: number = 8192): Promise<str
  * Generate social media posts using Gemini 2.0 Flash.
  */
 export async function generatePosts(opts: GeneratePostsOptions): Promise<GeneratedPost[]> {
-  if (!GEMINI_API_KEY()) {
-    console.warn("No GEMINI_API_KEY — using fallback templates");
+  const apiKey = GEMINI_API_KEY();
+  console.log(`[ai-generate] GEMINI_API_KEY present: ${!!apiKey}, length: ${apiKey?.length || 0}`);
+  if (!apiKey) {
+    console.warn("[ai-generate] No GEMINI_API_KEY — using fallback templates");
     return generateFallbackPosts(opts);
   }
 
