@@ -71,9 +71,11 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
     if (isNaN(dur) || dur < 1) return { success: false, error: "Invalid audio duration" };
     writeFileSync(srtPath, toSRT(opts.script, Math.round(dur * 1000)));
     const bg = `color=c=${tpl.bgColor}:s=1080x1920:d=${dur}`;
+    // Use forward slashes for FFmpeg compatibility on Windows
+    const srtForward = srtPath.replace(/\\/g, "/");
     const cmd = [
       "ffmpeg -y", `-f lavfi -i "${bg}"`, `-i "${audioPath}"`,
-      `-vf "subtitles='${srtPath}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'"`,
+      `-vf "subtitles='${srtForward}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'"`,
       `-c:v libx264 -preset fast -crf 23`, `-c:a aac -b:a 128k`,
       `-t ${dur}`, `-movflags +faststart`, `-pix_fmt yuv420p`, `"${videoPath}"`,
     ].join(" ");
