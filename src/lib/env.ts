@@ -8,9 +8,8 @@ const requiredServerEnv = [
 ] as const;
 
 const recommendedServerEnv = [
-  "GEMINI_API_KEY",
+  "GROQ_API_KEY",
   "ELEVENLABS_API_KEY",
-  "ANTHROPIC_API_KEY",
 ] as const;
 
 const requiredPublicEnv = [

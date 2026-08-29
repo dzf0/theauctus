@@ -62,7 +62,7 @@ export const POST = withAuth(
         }
       }
 
-      // Generate posts with Gemini
+      // Generate posts with Groq (Llama 3.3 70B)
       const generated = await generatePosts({
         topic,
         platforms,

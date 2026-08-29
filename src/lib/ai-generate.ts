@@ -1,11 +1,12 @@
 // ══════════════════════════════════════════════════════════════
-// AI CONTENT GENERATION — Google Gemini + Search Grounding
+// AI CONTENT GENERATION — Groq (Llama 3.3 70B)
 // Used by: /api/posts (batch generation), /api/video/story
-// Gemini searches the web for accurate, up-to-date content
+// Free tier: https://console.groq.com
 // ══════════════════════════════════════════════════════════════
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_API = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 export interface GeneratedPost {
   title: string;
@@ -14,7 +15,7 @@ export interface GeneratedPost {
   contentType: string;
   hashtags: string[];
   scheduledAt: string | null;
-  sources?: string[];  // URLs from web research
+  sources?: string[];  // kept for compatibility
 }
 
 export interface GeneratePostsOptions {
@@ -29,28 +30,58 @@ export interface GeneratePostsOptions {
   tonePreferences?: string[];
 }
 
+async function callGroq(prompt: string, maxTokens: number = 4096): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+
+  try {
+    const response = await fetch(GROQ_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.8,
+        max_tokens: maxTokens,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(`Groq API error: ${JSON.stringify(error)}`);
+    }
+
+    const data = await response.json();
+    const text = data?.choices?.[0]?.message?.content?.trim() || "";
+
+    if (!text) {
+      throw new Error("Empty response from Groq");
+    }
+
+    return text;
+  } catch (error) {
+    clearTimeout(timeout);
+    throw error;
+  }
+}
+
 /**
- * Generate social media posts using Gemini with Google Search grounding.
- * Gemini researches the web first, then creates accurate, data-backed posts.
+ * Generate social media posts using Groq (Llama 3.3 70B).
  */
 export async function generatePosts(opts: GeneratePostsOptions): Promise<GeneratedPost[]> {
-  if (!GEMINI_API_KEY) {
-    console.warn("No GEMINI_API_KEY — using fallback templates");
+  if (!GROQ_API_KEY) {
+    console.warn("No GROQ_API_KEY — using fallback templates");
     return generateFallbackPosts(opts);
   }
 
   const postsPerPlatform = Math.ceil(opts.count / opts.platforms.length);
 
   const prompt = `You are an expert social media content strategist creating high-quality, in-depth, and FACTUALLY ACCURATE posts.
-
-IMPORTANT: Before writing any content, RESEARCH the topic "${opts.topic}" using Google Search to find:
-- Current trends, statistics, and recent developments
-- Real case studies, examples, and success stories
-- Up-to-date data points, percentages, and numbers
-- Recent news or changes in this space
-- Expert opinions and verified claims
-
-Use the search results to make every claim accurate and every example real. Never fabricate statistics or make up examples — use what you find in the research.
 
 TOPIC: "${opts.topic}"
 NICHE: ${opts.niche || "General"}
@@ -63,9 +94,9 @@ Each platform should get ~${postsPerPlatform} posts with content tailored to tha
 
 CRITICAL REQUIREMENTS:
 - Every post MUST be SUBSTANTIAL — at least 150-300 words of content
-- Every post MUST include at least 2-3 real data points, statistics, or verified facts from your research
-- Reference real companies, tools, or examples found during research
-- If you find a compelling recent study or statistic, build the post around it
+- Every post MUST include at least 2-3 real data points, statistics, or verified facts
+- Reference real companies, tools, or examples
+- If you know a compelling study or statistic, build the post around it
 - Twitter/X: Use threads (multiple tweets separated by \\n---\\n). Each thread should be 4-8 tweets with deep value
 - Instagram: Long-form captions with storytelling, at least 200 words
 - LinkedIn: Detailed professional posts, 200-400 words with data and personal stories
@@ -89,7 +120,7 @@ CONTENT MIX (spread across all posts):
 - 20% Promotional (CTAs, product mentions with value propositions)
 
 RULES:
-- Use REAL statistics and data from your web research — never make them up
+- Use REAL statistics and data — never fabricate them
 - Reference real companies, tools, people, and events
 - Tell stories backed by real examples
 - Provide actionable steps — not vague advice
@@ -108,64 +139,22 @@ Return a JSON array. Each element:
 Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30_000);
-    const response = await fetch(`${GEMINI_API}?key=${GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ google_search: {} }],
-        generationConfig: {
-          temperature: 0.8,
-          topP: 0.95,
-          maxOutputTokens: 16384,
-        },
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Gemini API error: ${JSON.stringify(error)}`);
-    }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-    if (!text) {
-      throw new Error("Empty response from Gemini");
-    }
-
-    // Extract grounding sources from search results
-    const sources: string[] = [];
-    const steps = data?.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-    for (const chunk of steps) {
-      if (chunk?.web?.uri) sources.push(chunk.web.uri);
-    }
+    const text = await callGroq(prompt, 4096);
 
     // Parse JSON — handle markdown code fences if present
     const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
     const posts = JSON.parse(jsonStr) as GeneratedPost[];
 
     if (!Array.isArray(posts) || posts.length === 0) {
-      throw new Error("Invalid response format from Gemini");
+      throw new Error("Invalid response format from Groq");
     }
 
-    // Attach sources to each post
-    if (sources.length > 0) {
-      for (const post of posts) {
-        post.sources = sources.slice(0, 5);
-      }
-    }
-
-    console.log(`Gemini generated ${posts.length} posts with ${sources.length} web sources`);
+    console.log(`Groq generated ${posts.length} posts`);
 
     // Apply scheduling dates
     return applySchedule(posts, opts.startDate, opts.frequency);
   } catch (error) {
-    console.error("Gemini generation failed:", error);
+    console.error("Groq generation failed:", error);
     // Fall back to template-based generation
     const fallback = generateFallbackPosts(opts);
     return applySchedule(fallback, opts.startDate, opts.frequency);
@@ -173,7 +162,7 @@ Return ONLY the JSON array. No markdown, no explanation, no code fences.`;
 }
 
 /**
- * Generate a single video script using Gemini with Google Search grounding.
+ * Generate a single video script using Groq (Llama 3.3 70B).
  * Minimum 30 seconds (~75 words), target matches duration param.
  */
 export async function generateVideoScript(
@@ -186,73 +175,41 @@ export async function generateVideoScript(
   const effectiveDuration = Math.max(duration, 30);
   const targetWords = Math.round(effectiveDuration * 2.5);
 
-  if (!GEMINI_API_KEY) {
+  if (!GROQ_API_KEY) {
     return getFallbackScript(niche, targetWords);
   }
 
   const prompt = `Write a compelling short-form video script about "${topic}" in the ${niche} niche.
 
-IMPORTANT: Before writing, RESEARCH this topic using Google Search to find:
-- Current trends, statistics, and recent developments
-- Real examples, case studies, or success stories
-- Verified data points you can reference
-- What's actually working right now in this space
-
-Use real data from your research to make the script credible and accurate.
-
 DURATION: ${effectiveDuration} seconds (at least ${targetWords} words)
 STYLE: ${style || "educational"}
 
 STRUCTURE:
-1. HOOK (first 3-5 seconds): A bold claim, surprising fact, or provocative question backed by real data
+1. HOOK (first 3-5 seconds): A bold claim, surprising fact, or provocative question
 2. PROBLEM (5-10 seconds): Identify the pain point or misconception your audience faces
 3. SOLUTION (15-20 seconds): Deliver the core value — step-by-step advice, a framework, or a story with a clear lesson
-4. PROOF (5-10 seconds): Back it up with a specific example, number, or case study from your research
+4. PROOF (5-10 seconds): Back it up with a specific example, number, or case study
 5. CTA (3-5 seconds): Tell them exactly what to do next (follow, save, share, comment)
 
 CRITICAL RULES:
 - Write for SPOKEN WORD — conversational, natural rhythm, like talking to a friend
 - Every sentence must earn its place — no filler, no generic statements
-- Use REAL numbers, verified examples, and actionable steps from your research
+- Use specific numbers, real examples, and actionable steps
 - Keep sentences short and punchy for video pacing
 - No hashtags, no emojis, no stage directions in brackets
 - The script must be at least ${targetWords} words to fill ${effectiveDuration} seconds
-- Think of this as a mini-lecture that delivers real, researched value
+- Think of this as a mini-lecture that delivers real value
 
 Return ONLY the script text. No title, no explanation, no quotes, no word count.`;
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30_000);
-    const response = await fetch(`${GEMINI_API}?key=${GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ google_search: {} }],
-        generationConfig: {
-          temperature: 0.8,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(`Gemini API error: ${JSON.stringify(error)}`);
-    }
-
-    const data = await response.json();
-    let script = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    let script = await callGroq(prompt, 2048);
 
     if (!script) {
-      throw new Error("Empty response from Gemini");
+      throw new Error("Empty response from Groq");
     }
 
-    console.log(`Gemini generated video script (${script.split(/\s+/).length} words)`);
+    console.log(`Groq generated video script (${script.split(/\s+/).length} words)`);
 
     // Ensure minimum length — if too short, pad with a stronger ending
     const wordCount = script.split(/\s+/).filter(Boolean).length;
@@ -262,7 +219,7 @@ Return ONLY the script text. No title, no explanation, no quotes, no word count.
 
     return script;
   } catch (error) {
-    console.error("Gemini script generation failed:", error);
+    console.error("Groq script generation failed:", error);
     return getFallbackScript(niche, targetWords);
   }
 }
