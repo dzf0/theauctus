@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-// AI CONTENT GENERATION — Google Gemini 2.0 Flash
+// AI CONTENT GENERATION — Google Gemini 3.6 Flash
 // Used by: /api/posts (batch generation), /api/video/story
 // Free tier: https://ai.google.dev/gemini-api/docs/pricing
 // ══════════════════════════════════════════════════════════════
@@ -47,6 +47,9 @@ async function callGemini(prompt: string, maxTokens: number = 8192): Promise<str
           topP: 0.95,
           topK: 40,
           maxOutputTokens: maxTokens,
+          thinkingConfig: {
+            thinkingLevel: "minimal",
+          } as Record<string, unknown>,
         },
       }),
       signal: controller.signal,
@@ -73,7 +76,7 @@ async function callGemini(prompt: string, maxTokens: number = 8192): Promise<str
 }
 
 /**
- * Generate social media posts using Gemini 2.0 Flash.
+ * Generate social media posts using Gemini 3.6 Flash.
  */
 export async function generatePosts(opts: GeneratePostsOptions): Promise<GeneratedPost[]> {
   const apiKey = GEMINI_API_KEY();
@@ -157,7 +160,7 @@ Return ONLY the JSON array. No markdown fences, no explanation.`;
 }
 
 /**
- * Generate a single video script using Gemini 2.0 Flash.
+ * Generate a single video script using Gemini 3.6 Flash.
  * Minimum 30 seconds (~75 words), target matches duration param.
  */
 export async function generateVideoScript(
