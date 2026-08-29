@@ -5,7 +5,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY;
-const GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
 
 export interface GeneratedPost {
   title: string;
