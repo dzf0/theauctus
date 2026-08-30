@@ -7,11 +7,18 @@
 
 const ELEVENLABS_API = "https://api.elevenlabs.io/v1";
 
+export interface WordTiming {
+  word: string;
+  startMs: number;
+  endMs: number;
+}
+
 export interface VoiceoverResult {
   success: boolean;
   audioBuffer?: Buffer;
   error?: string;
   charactersUsed?: number;
+  wordTimings?: WordTiming[];
 }
 
 // Pre-selected voices optimized for short-form video
@@ -24,8 +31,99 @@ export const VOICE_PRESETS: Record<string, { name: string; voiceId: string }> = 
 };
 
 /**
+ * Convert ElevenLabs character-level alignment to word-level timings.
+ */
+function alignmentToWordTimings(
+  characters: string[],
+  startTimes: number[],
+  endTimes: number[],
+  originalText: string
+): WordTiming[] {
+  const words: WordTiming[] = [];
+  let charIdx = 0;
+
+  // Walk through the original text, matching characters to alignment data
+  const originalWords = originalText.split(/\s+/).filter(Boolean);
+
+  for (const word of originalWords) {
+    // Find where this word starts in the character alignment
+    // Skip whitespace characters in alignment
+    while (charIdx < characters.length && /\s/.test(characters[charIdx])) {
+      charIdx++;
+    }
+
+    const wordStartIdx = charIdx;
+
+    // Find the end of this word's characters
+    let wordEndIdx = wordStartIdx;
+    let matched = "";
+    while (wordEndIdx < characters.length && matched.length < word.length) {
+      matched += characters[wordEndIdx];
+      wordEndIdx++;
+    }
+
+    if (wordStartIdx < startTimes.length) {
+      const startMs = startTimes[wordStartIdx] * 1000;
+      const endIdx = Math.min(wordEndIdx - 1, endTimes.length - 1);
+      const endMs = endTimes[endIdx] * 1000;
+
+      words.push({
+        word,
+        startMs: Math.round(startMs),
+        endMs: Math.round(endMs),
+      });
+    }
+
+    charIdx = wordEndIdx;
+  }
+
+  return words;
+}
+
+/**
+ * Group word timings into caption segments for display.
+ * Groups words into chunks of `wordsPerChunk` (default 5-7 words),
+ * keeping natural sentence boundaries where possible.
+ */
+export function groupWordsIntoSegments(
+  words: WordTiming[],
+  wordsPerChunk: number = 6
+): { text: string; startMs: number; endMs: number }[] {
+  if (words.length === 0) return [];
+
+  const segments: { text: string; startMs: number; endMs: number }[] = [];
+  let currentChunk: WordTiming[] = [];
+
+  for (const wt of words) {
+    currentChunk.push(wt);
+
+    // Break at sentence endings or when chunk is full
+    const isSentenceEnd = /[.!?]$/.test(wt.word);
+    if (currentChunk.length >= wordsPerChunk || isSentenceEnd) {
+      segments.push({
+        text: currentChunk.map(w => w.word).join(" "),
+        startMs: currentChunk[0].startMs,
+        endMs: currentChunk[currentChunk.length - 1].endMs,
+      });
+      currentChunk = [];
+    }
+  }
+
+  // Flush remaining words
+  if (currentChunk.length > 0) {
+    segments.push({
+      text: currentChunk.map(w => w.word).join(" "),
+      startMs: currentChunk[0].startMs,
+      endMs: currentChunk[currentChunk.length - 1].endMs,
+    });
+  }
+
+  return segments;
+}
+
+/**
  * Generate voiceover audio from text using ElevenLabs.
- * Returns a Buffer containing MP3 audio data.
+ * Uses /with-timestamps endpoint to get word-level timing for caption sync.
  */
 export async function generateVoiceover(
   text: string,
@@ -48,8 +146,9 @@ export async function generateVoiceover(
   const MAX_RETRIES = 3;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
+      // Use with-timestamps endpoint for word-level timing
       const response = await fetch(
-        `${ELEVENLABS_API}/text-to-speech/${voiceId}`,
+        `${ELEVENLABS_API}/text-to-speech/${voiceId}/with-timestamps`,
         {
           method: "POST",
           headers: {
@@ -91,13 +190,31 @@ export async function generateVoiceover(
         };
       }
 
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = Buffer.from(arrayBuffer);
+      const data = await response.json();
+
+      // Decode base64 audio
+      const audioBuffer = Buffer.from(data.audio_base64, "base64");
+
+      // Extract word timings from alignment data
+      let wordTimings: WordTiming[] | undefined;
+      if (data.alignment) {
+        const { characters, character_start_times_seconds, character_end_times_seconds } = data.alignment;
+        if (characters && character_start_times_seconds && character_end_times_seconds) {
+          wordTimings = alignmentToWordTimings(
+            characters,
+            character_start_times_seconds,
+            character_end_times_seconds,
+            truncatedText
+          );
+          console.log(`[voiceover] Got ${wordTimings.length} word timings`);
+        }
+      }
 
       return {
         success: true,
         audioBuffer,
         charactersUsed: truncatedText.length,
+        wordTimings,
       };
     } catch (error) {
       return {

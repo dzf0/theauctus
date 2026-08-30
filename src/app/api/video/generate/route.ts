@@ -30,6 +30,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     templateId,
     script,
     voiceoverBuffer: voiceover.audioBuffer,
+    wordTimings: voiceover.wordTimings,
     title,
     hashtags,
   });

@@ -4,6 +4,7 @@ import { writeFileSync, readFileSync, unlinkSync, mkdirSync, existsSync } from "
 import { join } from "path";
 import { tmpdir } from "os";
 import { getBackgroundVideo } from "./stock-video";
+import { WordTiming, groupWordsIntoSegments } from "./voiceover";
 
 export interface VideoTemplate {
   id: string;
@@ -29,6 +30,7 @@ export interface VideoGenOptions {
   templateId: string;
   script: string;
   voiceoverBuffer: Buffer;
+  wordTimings?: WordTiming[];
   title?: string;
   hashtags?: string[];
 }
@@ -235,8 +237,15 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
     // Write SRT file (for reference/fallback)
     writeFileSync(srtPath, toSRT(opts.script, Math.round(dur * 1000)));
 
-    // Build caption segments
-    const segments = getCaptionSegments(opts.script, Math.round(dur * 1000));
+    // Build caption segments — use word timings if available, otherwise estimate
+    let segments: { text: string; startMs: number; endMs: number }[];
+    if (opts.wordTimings && opts.wordTimings.length > 0) {
+      segments = groupWordsIntoSegments(opts.wordTimings, 6);
+      console.log(`[video] Using ${segments.length} word-synced caption segments`);
+    } else {
+      segments = getCaptionSegments(opts.script, Math.round(dur * 1000));
+      console.log(`[video] Using ${segments.length} estimated caption segments (no word timings)`);
+    }
 
     // Try to get a stock/custom background video
     let bgVideoPath: string | null = null;
