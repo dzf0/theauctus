@@ -166,6 +166,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [nicheDropdownOpen, setNicheDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/user")
@@ -176,6 +177,13 @@ export default function SettingsPage() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!nicheDropdownOpen) return;
+    const handleClick = () => setNicheDropdownOpen(false);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [nicheDropdownOpen]);
 
   const handleSave = async () => {
     if (!profile) return;
@@ -311,16 +319,34 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Niche *</label>
-                  <select
-                    value={profile.niche || ""}
-                    onChange={(e) => setProfile({ ...profile, niche: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl liquid-input text-sm"
-                  >
-                    <option value="">Select your niche</option>
-                    {NICHE_OPTIONS.map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setNicheDropdownOpen(!nicheDropdownOpen); }}
+                      className="w-full px-4 py-2.5 rounded-xl text-sm text-left flex items-center justify-between"
+                      style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)", color: profile.niche ? "var(--foreground)" : "var(--muted)" }}
+                    >
+                      <span>{profile.niche || "Select your niche"}</span>
+                      <svg className="w-4 h-4 shrink-0 ml-2" style={{ color: "var(--muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    {nicheDropdownOpen && (
+                      <div onClick={(e) => e.stopPropagation()} className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-xl" style={{ background: "var(--lg-bg-strong)", border: "1px solid var(--lg-border)", boxShadow: "var(--lg-shadow-lg)" }}>
+                        {NICHE_OPTIONS.map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => { setProfile({ ...profile, niche: n }); setNicheDropdownOpen(false); }}
+                            className="w-full px-4 py-2.5 text-left text-[13px] transition-colors"
+                            style={{ color: profile.niche === n ? "var(--accent-copper)" : "var(--foreground)", background: profile.niche === n ? "rgba(201, 168, 124, 0.1)" : "transparent" }}
+                            onMouseEnter={(e) => { if (profile.niche !== n) (e.target as HTMLElement).style.background = "var(--lg-highlight)"; }}
+                            onMouseLeave={(e) => { if (profile.niche !== n) (e.target as HTMLElement).style.background = "transparent"; }}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--muted)" }}>Keywords</label>
