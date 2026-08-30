@@ -3,6 +3,7 @@ import { execSync } from "child_process";
 import { writeFileSync, readFileSync, unlinkSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+import { getBackgroundVideo } from "./stock-video";
 
 export interface VideoTemplate {
   id: string;
@@ -117,83 +118,105 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
     // Build caption segments
     const segments = getCaptionSegments(opts.script, Math.round(dur * 1000));
 
-    // Build video filter: gradient background + captions via drawtext
-    const ffmpegColor1 = `0x${tpl.bgColor.replace("#", "")}`;
-    const ffmpegColor2 = `0x${tpl.bgGradientEnd.replace("#", "")}`;
+    // Try to get a stock background video
+    let bgVideoPath: string | null = null;
+    try {
+      const bg = await getBackgroundVideo(opts.templateId);
+      if (bg) {
+        bgVideoPath = bg.path;
+        console.log(`[video] Using ${bg.fromCache ? "cached" : "new"} stock background for ${opts.templateId}`);
+      }
+    } catch (err) {
+      console.warn("[video] Failed to get stock background:", err);
+    }
 
-    // Create gradient background using two overlapping color sources
+    // Build video filter chain
     const bgFilter = `color=c=${tpl.bgColor}:s=1080x1920:d=${dur}`;
     const gradientOverlay = `drawbox=x=0:y=0:w=1080:h=960:color=${tpl.bgGradientEnd}@0.5:t=fill`;
 
-    // Build complete filter chain
+    // Build drawtext filter for captions
     const drawtextFilter = segments.length > 0
       ? buildDrawtextFilter(segments, tpl.captionColor, tpl.captionSize)
       : null;
 
-    // Compose the full filter: background gradient + optional drawtext captions
-    const vfParts = [gradientOverlay];
-    if (drawtextFilter) {
-      vfParts.push(drawtextFilter);
-    }
-
     // Escape the SRT path for subtitles filter (fallback)
     const srtEscaped = srtPath.replace(/\\/g, "/").replace(/^([A-Z]):/i, "$1\\:");
 
-    // Try drawtext approach first (more reliable on Windows)
-    const cmd = [
-      "ffmpeg -y",
-      `-f lavfi -i "${bgFilter}"`,
-      `-i "${audioPath}"`,
-      `-vf "${vfParts.join(",")}"`,
-      `-c:v libx264 -preset fast -crf 23`,
-      `-c:a aac -b:a 128k`,
-      `-t ${dur}`,
-      `-movflags +faststart`,
-      `-pix_fmt yuv420p`,
-      `"${videoPath}"`,
-    ].join(" ");
+    console.log(`[video] Generating with ${segments.length} caption segments, ${dur.toFixed(1)}s duration, bg=${bgVideoPath ? "stock" : "gradient"}`);
 
-    console.log(`[video] Generating with ${segments.length} caption segments, ${dur.toFixed(1)}s duration`);
+    // Helper to build the video filter chain
+    const buildVf = (withCaptions: boolean): string => {
+      const parts: string[] = [];
 
-    try {
-      execSync(cmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
-    } catch (drawtextErr) {
-      // If drawtext fails, try subtitles filter as fallback
-      console.warn("[video] drawtext failed, trying subtitles filter:", drawtextErr instanceof Error ? drawtextErr.message : drawtextErr);
+      if (bgVideoPath) {
+        // Stock background: scale to 1080x1920, crop to fit, loop if shorter than audio
+        parts.push(`scale=1080:1920:force_original_aspect_ratio=increase`);
+        parts.push(`crop=1080:1920`);
+        // Slight darken overlay so captions are readable
+        parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=black@0.3:t=fill`);
+      } else {
+        // Fallback: animated gradient background
+        parts.push(gradientOverlay);
+      }
 
-      const fallbackCmd = [
+      if (withCaptions && drawtextFilter) {
+        parts.push(drawtextFilter);
+      }
+
+      return parts.join(",");
+    };
+
+    // Build the FFmpeg command
+    const buildCmd = (vf: string): string => {
+      const inputs: string[] = [];
+
+      if (bgVideoPath) {
+        // Use stock video as background, loop it to cover full duration
+        inputs.push(`-stream_loop -1 -i "${bgVideoPath}"`);
+      } else {
+        // Use generated color background
+        inputs.push(`-f lavfi -i "${bgFilter}"`);
+      }
+
+      inputs.push(`-i "${audioPath}"`);
+
+      return [
         "ffmpeg -y",
-        `-f lavfi -i "${bgFilter}"`,
-        `-i "${audioPath}"`,
-        `-vf "subtitles='${srtEscaped}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'"`,
+        ...inputs,
+        `-vf "${vf}"`,
         `-c:v libx264 -preset fast -crf 23`,
         `-c:a aac -b:a 128k`,
         `-t ${dur}`,
         `-movflags +faststart`,
         `-pix_fmt yuv420p`,
+        `-shortest`,
         `"${videoPath}"`,
       ].join(" ");
+    };
+
+    // Try: drawtext captions -> subtitles fallback -> no captions
+    const vfWithCaptions = buildVf(true);
+    const vfNoCaptions = buildVf(false);
+
+    try {
+      const cmd = buildCmd(vfWithCaptions);
+      execSync(cmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+    } catch (drawtextErr) {
+      console.warn("[video] drawtext failed, trying subtitles filter:", drawtextErr instanceof Error ? drawtextErr.message : drawtextErr);
+
+      // Try subtitles filter fallback
+      const subtitlesVf = bgVideoPath
+        ? `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,drawbox=x=0:y=0:w=1080:h=1920:color=black@0.3:t=fill,subtitles='${srtEscaped}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'`
+        : `subtitles='${srtEscaped}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'`;
 
       try {
-        execSync(fallbackCmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+        const cmd = buildCmd(subtitlesVf);
+        execSync(cmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
       } catch (subtitleErr) {
-        // If subtitles also fails, generate video without captions
+        // Last resort: no captions at all
         console.warn("[video] subtitles also failed, generating without captions:", subtitleErr instanceof Error ? subtitleErr.message : subtitleErr);
-
-        const noCaptionCmd = [
-          "ffmpeg -y",
-          `-f lavfi -i "${bgFilter}"`,
-          `-i "${audioPath}"`,
-          `-vf "${gradientOverlay}"`,
-          `-c:v libx264 -preset fast -crf 23`,
-          `-c:a aac -b:a 128k`,
-          `-t ${dur}`,
-          `-movflags +faststart`,
-          `-pix_fmt yuv420p`,
-          `"${videoPath}"`,
-        ].join(" ");
-
-        execSync(noCaptionCmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+        const cmd = buildCmd(vfNoCaptions);
+        execSync(cmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
       }
     }
 

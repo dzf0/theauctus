@@ -10,6 +10,7 @@ const requiredServerEnv = [
 const recommendedServerEnv = [
   "GEMINI_API_KEY",
   "ELEVENLABS_API_KEY",
+  "PEXELS_API_KEY",
 ] as const;
 
 const requiredPublicEnv = [
