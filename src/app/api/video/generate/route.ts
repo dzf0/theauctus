@@ -9,7 +9,7 @@ import { deductCredits } from "@/lib/credits";
 
 export const POST = withAuth(async (request, { supabase, user }) => {
   const body = await request.json();
-  const { templateId, script, voiceId, title, hashtags } = body;
+  const { templateId, script, voiceId, captionStyleId, title, hashtags } = body;
 
   if (!templateId || !script) {
     return NextResponse.json({ error: "templateId and script are required" }, { status: 400 });
@@ -31,6 +31,7 @@ export const POST = withAuth(async (request, { supabase, user }) => {
     script,
     voiceoverBuffer: voiceover.audioBuffer,
     wordTimings: voiceover.wordTimings,
+    captionStyleId,
     title,
     hashtags,
   });

@@ -5,6 +5,7 @@ import { join } from "path";
 import { tmpdir } from "os";
 import { getBackgroundVideo } from "./stock-video";
 import { WordTiming, groupWordsIntoSegments } from "./voiceover";
+import { getCaptionStyle, CaptionStyle } from "./caption-styles";
 
 export interface VideoTemplate {
   id: string;
@@ -31,6 +32,7 @@ export interface VideoGenOptions {
   script: string;
   voiceoverBuffer: Buffer;
   wordTimings?: WordTiming[];
+  captionStyleId?: string;
   title?: string;
   hashtags?: string[];
 }
@@ -80,18 +82,38 @@ function escapeDrawtext(text: string): string {
 
 /**
  * Build FFmpeg drawtext filter chain for captions.
- * Uses drawtext instead of subtitles filter for reliable cross-platform rendering.
+ * Supports caption style presets with different colors, positions, and animations.
  */
-function buildDrawtextFilter(segments: { text: string; startMs: number; endMs: number }[], captionColor: string, captionSize: number): string {
-  // Convert hex color to FFmpeg format: #RRGGBB -> 0xRRGGBB
-  const ffmpegColor = `0x${captionColor.replace("#", "")}`;
+function buildDrawtextFilter(
+  segments: { text: string; startMs: number; endMs: number }[],
+  captionColor: string,
+  captionSize: number,
+  style?: CaptionStyle
+): string {
+  const fallback: CaptionStyle = { id: "", name: "", description: "", fontColor: `0x${captionColor.replace("#", "")}`, borderColor: "0x000000", borderWidth: 3, fontSize: captionSize, position: "center", capitalize: false };
+  const s = style || fallback;
+  const ffmpegColor = s.fontColor || `0x${captionColor.replace("#", "")}`;
+  const ffmpegBorder = s.borderColor || "0x000000";
+  const fontSize = s.fontSize || captionSize;
+  const borderW = s.borderWidth ?? 3;
+
+  // Position mapping
+  let yPos = "(h-text_h)/2"; // center default
+  if (s.position === "bottom") yPos = "h-h/5";
+  else if (s.position === "top") yPos = "h/8";
+  else if (s.position === "word-highlight") yPos = "(h-text_h)/2";
+
+  // Background box (for highlight styles like Hormozi)
+  const bgBoxFilter = s.bgBox ? `:box=1:boxcolor=${s.bgBox}@0.8:boxborderw=${s.bgBoxPadding || 6}` : "";
 
   return segments
     .map((seg) => {
-      const escaped = escapeDrawtext(seg.text);
+      let text = seg.text;
+      if (s.capitalize) text = text.toUpperCase();
+      const escaped = escapeDrawtext(text);
       const startSec = (seg.startMs / 1000).toFixed(3);
       const endSec = (seg.endMs / 1000).toFixed(3);
-      return `drawtext=text='${escaped}':fontsize=${captionSize}:fontcolor=${ffmpegColor}:borderw=3:bordercolor=black:x=(w-text_w)/2:y=h-h/5:enable='between(t,${startSec},${endSec})'`;
+      return `drawtext=text='${escaped}':fontsize=${fontSize}:fontcolor=${ffmpegColor}:borderw=${borderW}:bordercolor=${ffmpegBorder}:x=(w-text_w)/2:y=${yPos}${bgBoxFilter}:enable='between(t,${startSec},${endSec})'`;
     })
     .join(",");
 }
@@ -263,9 +285,10 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
     const bgFilter = `color=c=${tpl.bgColor}:s=1080x1920:d=${dur}`;
     const gradientOverlay = getThemedBackgroundFilter(opts.templateId, dur);
 
-    // Build drawtext filter for captions
+    // Build drawtext filter for captions using selected style
+    const captionStyle = opts.captionStyleId ? getCaptionStyle(opts.captionStyleId) : undefined;
     const drawtextFilter = segments.length > 0
-      ? buildDrawtextFilter(segments, tpl.captionColor, tpl.captionSize)
+      ? buildDrawtextFilter(segments, tpl.captionColor, tpl.captionSize, captionStyle)
       : null;
 
     // Escape the SRT path for subtitles filter (fallback)
