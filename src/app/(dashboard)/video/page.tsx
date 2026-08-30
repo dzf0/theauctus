@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const TPLS = [
   { id:"minecraft-parkour", name:"Minecraft Parkour", tag:"MC" },
@@ -21,6 +21,9 @@ export default function VideoGen() {
   const [busy,setBusy] = useState(false);
   const [url,setUrl] = useState("");
   const [err,setErr] = useState("");
+  const [isAdmin,setIsAdmin] = useState(false);
+
+  useEffect(()=>{fetch("/api/admin/check").then(r=>r.json()).then(d=>setIsAdmin(d.isAdmin??false)).catch(()=>{});},[]);
 
   const extractErr = (d: {error?: string | {message?: string}}) => typeof d.error === "string" ? d.error : d.error?.message || "Request failed";
 
@@ -41,7 +44,7 @@ export default function VideoGen() {
   <div className="liquid-card p-6"><h3 className="font-semibold mb-4">Script</h3><textarea value={script} onChange={e=>setScript(e.target.value)} placeholder="AI script appears here. Edit it." className="w-full h-40 px-4 py-3 rounded-xl liquid-input text-[13px] resize-none" /><div className="flex justify-between mt-2 text-[11px]" style={{color:"var(--muted)"}}><span>{wc} words</span><span>~{Math.round(wc/2.5)}s</span></div></div>
   </div><div className="space-y-6">
   <div className="liquid-card p-6"><h3 className="font-semibold mb-4">Preview</h3>{url?<video src={url} controls className="w-full rounded-xl" style={{aspectRatio:"9/16",maxHeight:500}} />:<div className="rounded-xl flex items-center justify-center" style={{aspectRatio:"9/16",maxHeight:500,background:"var(--lg-bg)",border:"1px solid var(--lg-border)"}}><p className="text-[13px]" style={{color:"var(--muted)"}}>Video preview here</p></div>}</div>
-  <button onClick={genVideo} disabled={busy||!script.trim()} className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50">{busy?"Generating Video... (1 min)":"Generate Video (10 credits)"}</button>
+  <button onClick={genVideo} disabled={busy||!script.trim()} className="w-full py-3 liquid-btn-primary text-[13px] disabled:opacity-50">{busy?"Generating Video... (1 min)":isAdmin?"Generate Video (Free)":"Generate Video (10 credits)"}</button>
   {err&&<div className="p-3 rounded-xl text-[12px]" style={{background:"rgba(224,108,117,0.1)",color:"var(--danger)"}}>{err}</div>}
   {url&&<div className="liquid-card p-6"><h3 className="font-semibold mb-3">Publish</h3><div className="space-y-2"><button className="w-full py-2.5 liquid-btn text-[12px]">YouTube Shorts</button><button className="w-full py-2.5 liquid-btn text-[12px]">TikTok</button><button className="w-full py-2.5 liquid-btn text-[12px]">Instagram Reels</button></div></div>}
   <div className="liquid-card p-6"><h3 className="font-semibold mb-3">How It Works</h3><div className="space-y-2 text-[12px]" style={{color:"var(--muted)"}}><p>1. Pick a template (Minecraft, Subway Surfers, etc.)</p><p>2. Enter a topic</p><p>3. AI generates script (Gemini - free)</p><p>4. Voiceover (ElevenLabs - free tier)</p><p>5. FFmpeg composes video with captions</p><p>6. Publish to YouTube Shorts, TikTok, Reels</p></div></div>

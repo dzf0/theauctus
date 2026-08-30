@@ -59,6 +59,7 @@ export default function PlannerPage() {
     return d.toISOString().split("T")[0];
   });
   const [frequency, setFrequency] = useState("auto");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const creditCostPerPost = CREDIT_COSTS.find((c) => c.action === "Single social post")?.credits ?? 5;
   const totalCreditCost = postCount * creditCostPerPost;
@@ -68,6 +69,10 @@ export default function PlannerPage() {
     fetch("/api/user/stats")
       .then((r) => r.json())
       .then((data) => setCredits(data.credits ?? 0))
+      .catch(() => {});
+    fetch("/api/admin/check")
+      .then((r) => r.json())
+      .then((data) => setIsAdmin(data.isAdmin ?? false))
       .catch(() => {});
   }, []);
 
@@ -452,29 +457,36 @@ export default function PlannerPage() {
               </p>
             </div>
 
-            <div className="p-4 rounded-lg" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
-              <div className="flex items-center justify-between text-[13px]">
-                <span style={{ color: "var(--muted)" }}>Credits needed:</span>
-                <span className="font-medium" style={{ color: totalCreditCost > (credits ?? 0) ? "var(--danger)" : "var(--foreground)" }}>
-                  {totalCreditCost} credits
-                </span>
+            {!isAdmin && (
+              <div className="p-4 rounded-lg" style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}>
+                <div className="flex items-center justify-between text-[13px]">
+                  <span style={{ color: "var(--muted)" }}>Credits needed:</span>
+                  <span className="font-medium" style={{ color: totalCreditCost > (credits ?? 0) ? "var(--danger)" : "var(--foreground)" }}>
+                    {totalCreditCost} credits
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[13px] mt-1">
+                  <span style={{ color: "var(--muted)" }}>Your balance:</span>
+                  <span className="font-medium accent-text">{credits ?? "—"} credits</span>
+                </div>
+                {credits !== null && totalCreditCost > credits && (
+                  <p className="text-[11px] mt-2" style={{ color: "var(--danger)" }}>
+                    Not enough credits. You need {totalCreditCost - credits} more.
+                  </p>
+                )}
               </div>
-              <div className="flex items-center justify-between text-[13px] mt-1">
-                <span style={{ color: "var(--muted)" }}>Your balance:</span>
-                <span className="font-medium accent-text">{credits ?? "—"} credits</span>
+            )}
+            {isAdmin && (
+              <div className="p-3 rounded-lg text-center" style={{ background: "rgba(134, 178, 97, 0.1)", border: "1px solid rgba(134, 178, 97, 0.2)" }}>
+                <span className="text-[12px] font-medium" style={{ color: "#86b261" }}>Admin — unlimited credits</span>
               </div>
-              {credits !== null && totalCreditCost > credits && (
-                <p className="text-[11px] mt-2" style={{ color: "var(--danger)" }}>
-                  Not enough credits. You need {totalCreditCost - credits} more.
-                </p>
-              )}
-            </div>
+            )}
 
             <div className="flex gap-3">
               <Button variant="secondary" onClick={() => setGenerateModalOpen(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleGenerate} loading={generating} disabled={!topic.trim() || selectedPlatforms.length === 0 || (credits !== null && totalCreditCost > credits)} className="flex-1">
+              <Button onClick={handleGenerate} loading={generating} disabled={!topic.trim() || selectedPlatforms.length === 0 || (!isAdmin && credits !== null && totalCreditCost > credits)} className="flex-1">
                 Generate {postCount} Posts
-                <span className="ml-2 text-[10px] opacity-75">({totalCreditCost} cr)</span>
+                <span className="ml-2 text-[10px] opacity-75">{isAdmin ? "Free" : `(${totalCreditCost} cr)`}</span>
               </Button>
             </div>
           </div>
