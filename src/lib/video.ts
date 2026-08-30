@@ -10,17 +10,18 @@ export interface VideoTemplate {
   description: string;
   category: string;
   bgColor: string;
+  bgGradientEnd: string; // gradient endpoint for visual interest
   captionColor: string;
   captionSize: number;
 }
 
 export const VIDEO_TEMPLATES: VideoTemplate[] = [
-  { id: "minecraft-parkour", name: "Minecraft Parkour", description: "Minecraft gameplay with AI story", category: "gameplay", bgColor: "#1a1a2e", captionColor: "#ffffff", captionSize: 48 },
-  { id: "subway-surfers", name: "Subway Surfers", description: "Subway Surfers gameplay with voiceover", category: "gameplay", bgColor: "#87CEEB", captionColor: "#FFD700", captionSize: 46 },
-  { id: "gta-gameplay", name: "GTA V Gameplay", description: "GTA V driving with voiceover", category: "gameplay", bgColor: "#2C3E50", captionColor: "#FFFFFF", captionSize: 44 },
-  { id: "satisfying-loops", name: "Satisfying Loops", description: "Satisfying visuals with voiceover", category: "satisfying", bgColor: "#667eea", captionColor: "#FFFFFF", captionSize: 50 },
-  { id: "nature-stock", name: "Nature / Stock", description: "Nature background with voiceover", category: "stock", bgColor: "#2C5F2D", captionColor: "#FFFFFF", captionSize: 42 },
-  { id: "ai-cartoon", name: "AI Cartoon", description: "Family Guy inspired AI cartoon", category: "custom", bgColor: "#FF6B6B", captionColor: "#FFFFFF", captionSize: 48 },
+  { id: "minecraft-parkour", name: "Minecraft Parkour", description: "Minecraft gameplay with AI story", category: "gameplay", bgColor: "#1a1a2e", bgGradientEnd: "#16213e", captionColor: "#ffffff", captionSize: 48 },
+  { id: "subway-surfers", name: "Subway Surfers", description: "Subway Surfers gameplay with voiceover", category: "gameplay", bgColor: "#0f3460", bgGradientEnd: "#1a508b", captionColor: "#FFD700", captionSize: 46 },
+  { id: "gta-gameplay", name: "GTA V Gameplay", description: "GTA V driving with voiceover", category: "gameplay", bgColor: "#1a1a2e", bgGradientEnd: "#e94560", captionColor: "#FFFFFF", captionSize: 44 },
+  { id: "satisfying-loops", name: "Satisfying Loops", description: "Satisfying visuals with voiceover", category: "satisfying", bgColor: "#667eea", bgGradientEnd: "#764ba2", captionColor: "#FFFFFF", captionSize: 50 },
+  { id: "nature-stock", name: "Nature / Stock", description: "Nature background with voiceover", category: "stock", bgColor: "#134e5e", bgGradientEnd: "#71b280", captionColor: "#FFFFFF", captionSize: 42 },
+  { id: "ai-cartoon", name: "AI Cartoon", description: "Family Guy inspired AI cartoon", category: "custom", bgColor: "#2d1b69", bgGradientEnd: "#e94560", captionColor: "#FFFFFF", captionSize: 48 },
 ];
 
 export interface VideoGenOptions {
@@ -35,26 +36,62 @@ const TEMP = join(tmpdir(), "theauctus-video");
 
 function ensureDir() { if (!existsSync(TEMP)) mkdirSync(TEMP, { recursive: true }); }
 
-function toSRT(text: string, durMs: number): string {
-  const words = text.split(/\s+/);
-  const segs: string[] = [];
-  for (let i = 0; i < words.length; i += 6) segs.push(words.slice(i, i + 6).join(" "));
-  const segDur = durMs / segs.length;
-  return segs.map((s, i) => {
-    const st = fmt(i * segDur);
-    const en = fmt(Math.min((i + 1) * segDur, durMs));
-    return `${i + 1}\n${st} --> ${en}\n${s}\n`;
-  }).join("\n");
+/** Split script into caption segments (6 words each) with timing */
+function getCaptionSegments(text: string, durMs: number): { text: string; startMs: number; endMs: number }[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const segs: { text: string; startMs: number; endMs: number }[] = [];
+  for (let i = 0; i < words.length; i += 6) {
+    const chunk = words.slice(i, i + 6).join(" ");
+    const startMs = (i / words.length) * durMs;
+    const endMs = ((i + 6) / words.length) * durMs;
+    segs.push({ text: chunk, startMs, endMs: Math.min(endMs, durMs) });
+  }
+  return segs;
 }
 
-function fmt(ms: number): string {
+function fmtSrtTime(ms: number): string {
   const h = Math.floor(ms / 3600000);
   const m = Math.floor((ms % 3600000) / 60000);
   const s = Math.floor((ms % 60000) / 1000);
   const ml = ms % 1000;
-  return `${p(h)}:${p(m)}:${p(s)},${p(ml, 3)}`;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")},${String(ml).padStart(3, "0")}`;
 }
-function p(n: number, w = 2) { return String(n).padStart(w, "0"); }
+
+function toSRT(text: string, durMs: number): string {
+  return getCaptionSegments(text, durMs)
+    .map((seg, i) => `${i + 1}\n${fmtSrtTime(seg.startMs)} --> ${fmtSrtTime(seg.endMs)}\n${seg.text}\n`)
+    .join("\n");
+}
+
+/**
+ * Escape text for FFmpeg drawtext filter.
+ * Backslashes first, then colons, then single/double quotes.
+ */
+function escapeDrawtext(text: string): string {
+  return text
+    .replace(/\\/g, "\\\\")
+    .replace(/:/g, "\\:")
+    .replace(/'/g, "\\'")
+    .replace(/%/g, "%%"); // % is special in drawtext
+}
+
+/**
+ * Build FFmpeg drawtext filter chain for captions.
+ * Uses drawtext instead of subtitles filter for reliable cross-platform rendering.
+ */
+function buildDrawtextFilter(segments: { text: string; startMs: number; endMs: number }[], captionColor: string, captionSize: number): string {
+  // Convert hex color to FFmpeg format: #RRGGBB -> 0xRRGGBB
+  const ffmpegColor = `0x${captionColor.replace("#", "")}`;
+
+  return segments
+    .map((seg) => {
+      const escaped = escapeDrawtext(seg.text);
+      const startSec = (seg.startMs / 1000).toFixed(3);
+      const endSec = (seg.endMs / 1000).toFixed(3);
+      return `drawtext=text='${escaped}':fontsize=${captionSize}:fontcolor=${ffmpegColor}:borderw=3:bordercolor=black:x=(w-text_w)/2:y=h-h/5:enable='between(t,${startSec},${endSec})'`;
+    })
+    .join(",");
+}
 
 export async function generateVideo(opts: VideoGenOptions): Promise<{ success: boolean; videoBuffer?: Buffer; duration?: number; error?: string }> {
   const tpl = VIDEO_TEMPLATES.find(t => t.id === opts.templateId);
@@ -64,22 +101,102 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
   const audioPath = join(TEMP, `${id}.mp3`);
   const videoPath = join(TEMP, `${id}.mp4`);
   const srtPath = join(TEMP, `${id}.srt`);
+
   try {
+    // Write audio file
     writeFileSync(audioPath, opts.voiceoverBuffer);
+
+    // Get audio duration
     const durStr = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioPath}"`, { encoding: "utf-8" }).trim();
     const dur = parseFloat(durStr);
     if (isNaN(dur) || dur < 1) return { success: false, error: "Invalid audio duration" };
+
+    // Write SRT file (for reference/fallback)
     writeFileSync(srtPath, toSRT(opts.script, Math.round(dur * 1000)));
-    const bg = `color=c=${tpl.bgColor}:s=1080x1920:d=${dur}`;
-    // Escape colon in Windows drive letter (C:) for FFmpeg subtitles filter
+
+    // Build caption segments
+    const segments = getCaptionSegments(opts.script, Math.round(dur * 1000));
+
+    // Build video filter: gradient background + captions via drawtext
+    const ffmpegColor1 = `0x${tpl.bgColor.replace("#", "")}`;
+    const ffmpegColor2 = `0x${tpl.bgGradientEnd.replace("#", "")}`;
+
+    // Create gradient background using two overlapping color sources
+    const bgFilter = `color=c=${tpl.bgColor}:s=1080x1920:d=${dur}`;
+    const gradientOverlay = `drawbox=x=0:y=0:w=1080:h=960:color=${tpl.bgGradientEnd}@0.5:t=fill`;
+
+    // Build complete filter chain
+    const drawtextFilter = segments.length > 0
+      ? buildDrawtextFilter(segments, tpl.captionColor, tpl.captionSize)
+      : null;
+
+    // Compose the full filter: background gradient + optional drawtext captions
+    const vfParts = [gradientOverlay];
+    if (drawtextFilter) {
+      vfParts.push(drawtextFilter);
+    }
+
+    // Escape the SRT path for subtitles filter (fallback)
     const srtEscaped = srtPath.replace(/\\/g, "/").replace(/^([A-Z]):/i, "$1\\:");
+
+    // Try drawtext approach first (more reliable on Windows)
     const cmd = [
-      "ffmpeg -y", `-f lavfi -i "${bg}"`, `-i "${audioPath}"`,
-      `-vf "subtitles='${srtEscaped}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'"`,
-      `-c:v libx264 -preset fast -crf 23`, `-c:a aac -b:a 128k`,
-      `-t ${dur}`, `-movflags +faststart`, `-pix_fmt yuv420p`, `"${videoPath}"`,
+      "ffmpeg -y",
+      `-f lavfi -i "${bgFilter}"`,
+      `-i "${audioPath}"`,
+      `-vf "${vfParts.join(",")}"`,
+      `-c:v libx264 -preset fast -crf 23`,
+      `-c:a aac -b:a 128k`,
+      `-t ${dur}`,
+      `-movflags +faststart`,
+      `-pix_fmt yuv420p`,
+      `"${videoPath}"`,
     ].join(" ");
-    execSync(cmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+
+    console.log(`[video] Generating with ${segments.length} caption segments, ${dur.toFixed(1)}s duration`);
+
+    try {
+      execSync(cmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+    } catch (drawtextErr) {
+      // If drawtext fails, try subtitles filter as fallback
+      console.warn("[video] drawtext failed, trying subtitles filter:", drawtextErr instanceof Error ? drawtextErr.message : drawtextErr);
+
+      const fallbackCmd = [
+        "ffmpeg -y",
+        `-f lavfi -i "${bgFilter}"`,
+        `-i "${audioPath}"`,
+        `-vf "subtitles='${srtEscaped}':force_style='FontSize=${tpl.captionSize},PrimaryColour=&H${tpl.captionColor.slice(1)},OutlineColour=&H000000,Outline=3,Alignment=2,MarginV=100'"`,
+        `-c:v libx264 -preset fast -crf 23`,
+        `-c:a aac -b:a 128k`,
+        `-t ${dur}`,
+        `-movflags +faststart`,
+        `-pix_fmt yuv420p`,
+        `"${videoPath}"`,
+      ].join(" ");
+
+      try {
+        execSync(fallbackCmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+      } catch (subtitleErr) {
+        // If subtitles also fails, generate video without captions
+        console.warn("[video] subtitles also failed, generating without captions:", subtitleErr instanceof Error ? subtitleErr.message : subtitleErr);
+
+        const noCaptionCmd = [
+          "ffmpeg -y",
+          `-f lavfi -i "${bgFilter}"`,
+          `-i "${audioPath}"`,
+          `-vf "${gradientOverlay}"`,
+          `-c:v libx264 -preset fast -crf 23`,
+          `-c:a aac -b:a 128k`,
+          `-t ${dur}`,
+          `-movflags +faststart`,
+          `-pix_fmt yuv420p`,
+          `"${videoPath}"`,
+        ].join(" ");
+
+        execSync(noCaptionCmd, { encoding: "utf-8", timeout: 120000, stdio: "pipe" });
+      }
+    }
+
     const videoBuffer = readFileSync(videoPath);
     try { unlinkSync(audioPath); unlinkSync(srtPath); unlinkSync(videoPath); } catch {}
     return { success: true, videoBuffer, duration: dur };
