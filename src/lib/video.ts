@@ -94,6 +94,126 @@ function buildDrawtextFilter(segments: { text: string; startMs: number; endMs: n
     .join(",");
 }
 
+/**
+ * Create themed animated background filter chains for each template.
+ * Uses FFmpeg filters to create unique visual effects per template.
+ */
+function getThemedBackgroundFilter(templateId: string, duration: number): string {
+  switch (templateId) {
+    case "minecraft-parkour": {
+      // Scrolling colored blocks grid — mimics pixelated parkour
+      const blockSize = 120;
+      const cols = Math.ceil(1080 / blockSize);
+      const rows = Math.ceil(1920 / blockSize);
+      const colors = ["#1a1a2e", "#16213e", "#0f3460", "#533483", "#2b2d42"];
+      const parts: string[] = [];
+      // Base dark gradient
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=#0a0a1a:t=fill`);
+      // Scrolling colored blocks
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const color = colors[(r + c) % colors.length];
+          const y = ((r * blockSize) % 1920);
+          const speed = 80 + (c % 3) * 40; // different scroll speeds
+          const yOffset = `mod(${y}+t*${speed},1920)`;
+          parts.push(`drawbox=x=${c * blockSize}:y=${yOffset}:w=${blockSize - 2}:h=${blockSize - 2}:color=${color}@0.6:t=fill`);
+        }
+      }
+      return parts.join(",");
+    }
+
+    case "subway-surfers": {
+      // Fast-moving colorful horizontal speed lines
+      const parts: string[] = [];
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=#0f3460:t=fill`);
+      const lineColors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4"];
+      for (let i = 0; i < 12; i++) {
+        const color = lineColors[i % lineColors.length];
+        const y = 160 * i;
+        const speed = 200 + (i % 3) * 100;
+        const yOffset = `mod(${y}+t*${speed},1920)`;
+        parts.push(`drawbox=x=0:y=${yOffset}:w=1080:h=40:color=${color}@0.4:t=fill`);
+      }
+      // Perspective-like converging lines
+      parts.push(`drawtext=text='▶':fontsize=60:fontcolor=white@0.1:x=540:y=mod(t*300\,1920):enable='between(t,0,${duration})'`);
+      return parts.join(",");
+    }
+
+    case "gta-gameplay": {
+      // Dark city with moving neon lights
+      const parts: string[] = [];
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=#1a1a2e:t=fill`);
+      // Moving neon light streaks
+      const neonColors = ["#e94560", "#0f3460", "#533483", "#C9A87C"];
+      for (let i = 0; i < 8; i++) {
+        const color = neonColors[i % neonColors.length];
+        const speed = 150 + i * 80;
+        const yPos = `mod(t*${speed},1920)`;
+        parts.push(`drawbox=x=0:y=${yPos}:w=1080:h=3:color=${color}@0.7:t=fill`);
+      }
+      // Occasional flash effect
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=white@0.03*gt(mod(t\,4)\,3.9):t=fill`);
+      return parts.join(",");
+    }
+
+    case "satisfying-loops": {
+      // Pulsing concentric circles — hypnotic effect
+      const parts: string[] = [];
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=#1a0a2e:t=fill`);
+      for (let i = 1; i <= 8; i++) {
+        const radius = i * 100;
+        const color = i % 2 === 0 ? "#667eea" : "#764ba2";
+        const pulsePhase = i * 0.5;
+        parts.push(`drawtext=text='○':fontsize=${radius}:fontcolor=${color}@0.15:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0,${duration})'`);
+      }
+      // Rotating gradient approximation with moving boxes
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * 360;
+        const color = i % 2 === 0 ? "#667eea" : "#764ba2";
+        const xPos = `mod(540+cos(t+${i})*400\,1080)`;
+        const yPos = `mod(960+sin(t+${i})*600\,1920)`;
+        parts.push(`drawbox=x=${xPos}:y=${yPos}:w=60:h=60:color=${color}@0.2:t=fill`);
+      }
+      return parts.join(",");
+    }
+
+    case "nature-stock": {
+      // Flowing aurora-like gradient
+      const parts: string[] = [];
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=#134e5e:t=fill`);
+      // Aurora bands
+      for (let i = 0; i < 5; i++) {
+        const color = ["#71b280", "#134e5e", "#2d8659", "#48bf84", "#1a936f"][i];
+        const yBase = 300 + i * 250;
+        const waveOffset = `sin(t*0.5+${i})*100`;
+        parts.push(`drawbox=x=0:y=${yBase}+${waveOffset}:w=1080:h=80:color=${color}@0.3:t=fill`);
+      }
+      return parts.join(",");
+    }
+
+    case "ai-cartoon": {
+      // Colorful bouncing shapes
+      const parts: string[] = [];
+      parts.push(`drawbox=x=0:y=0:w=1080:h=1920:color=#2d1b69:t=fill`);
+      const colors = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#6BCB77", "#FF8B94"];
+      for (let i = 0; i < 6; i++) {
+        const color = colors[i % colors.length];
+        const xSpeed = 100 + i * 60;
+        const ySpeed = 80 + i * 50;
+        const xPos = `mod(abs(sin(t*0.3+${i}))*1080\,1080)`;
+        const yPos = `mod(abs(cos(t*0.25+${i}))*1920\,1920)`;
+        parts.push(`drawbox=x=${xPos}:y=${yPos}:w=80:h=80:color=${color}@0.25:t=fill`);
+      }
+      return parts.join(",");
+    }
+
+    default: {
+      // Generic animated gradient
+      return `drawbox=x=0:y=0:w=1080:h=960:color=${VIDEO_TEMPLATES[0].bgGradientEnd}@0.5:t=fill`;
+    }
+  }
+}
+
 export async function generateVideo(opts: VideoGenOptions): Promise<{ success: boolean; videoBuffer?: Buffer; duration?: number; error?: string }> {
   const tpl = VIDEO_TEMPLATES.find(t => t.id === opts.templateId);
   if (!tpl) return { success: false, error: `Template not found: ${opts.templateId}` };
@@ -118,13 +238,13 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
     // Build caption segments
     const segments = getCaptionSegments(opts.script, Math.round(dur * 1000));
 
-    // Try to get a stock background video
+    // Try to get a stock/custom background video
     let bgVideoPath: string | null = null;
     try {
       const bg = await getBackgroundVideo(opts.templateId);
       if (bg) {
         bgVideoPath = bg.path;
-        console.log(`[video] Using ${bg.fromCache ? "cached" : "new"} stock background for ${opts.templateId}`);
+        console.log(`[video] Using ${bg.source} background for ${opts.templateId}`);
       }
     } catch (err) {
       console.warn("[video] Failed to get stock background:", err);
@@ -132,7 +252,7 @@ export async function generateVideo(opts: VideoGenOptions): Promise<{ success: b
 
     // Build video filter chain
     const bgFilter = `color=c=${tpl.bgColor}:s=1080x1920:d=${dur}`;
-    const gradientOverlay = `drawbox=x=0:y=0:w=1080:h=960:color=${tpl.bgGradientEnd}@0.5:t=fill`;
+    const gradientOverlay = getThemedBackgroundFilter(opts.templateId, dur);
 
     // Build drawtext filter for captions
     const drawtextFilter = segments.length > 0
