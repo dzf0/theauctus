@@ -103,21 +103,24 @@ export const GET = withAuth(
       .from("content_calendars")
       .select("*", { count: "exact", head: true });
 
-    // ── Signups per day (last 14 days) ─────────────────────
-    const signupsByDay: { date: string; count: number }[] = [];
+    // ── Signups per day (last 14 days) — single query ─────────
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentProfiles } = await supabase
+      .from("profiles")
+      .select("created_at")
+      .gte("created_at", fourteenDaysAgo);
+
+    // Bucket by day
+    const dayCounts = new Map<string, number>();
     for (let i = 13; i >= 0; i--) {
-      const dayStart = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-      const { count } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", dayStart.toISOString())
-        .lt("created_at", dayEnd.toISOString());
-      signupsByDay.push({
-        date: dayStart.toISOString().split("T")[0],
-        count: count ?? 0,
-      });
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      dayCounts.set(d.toISOString().split("T")[0], 0);
     }
+    for (const p of recentProfiles ?? []) {
+      const day = p.created_at.split("T")[0];
+      if (dayCounts.has(day)) dayCounts.set(day, (dayCounts.get(day) ?? 0) + 1);
+    }
+    const signupsByDay = [...dayCounts.entries()].map(([date, count]) => ({ date, count }));
 
     return NextResponse.json({
       users: {

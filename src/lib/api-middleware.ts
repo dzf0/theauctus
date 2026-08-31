@@ -345,10 +345,9 @@ export function withAuth(
         }
 
         // ── Call the handler ─────────────────────────────────
-        const supabaseForHandler = await createSupabaseServerClient();
         return await handler(request, {
           user,
-          supabase: supabaseForHandler,
+          supabase,
           profile,
         });
       }

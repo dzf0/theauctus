@@ -20,6 +20,17 @@ export const POST = withAuth(async (request, { user, profile }) => {
 
     console.log(`[video/story] Script generated: ${script.split(/\s+/).length} words`);
 
+    // Determine if this was a real AI generation or a fallback template
+    const isFallback = script.includes("is one of the fastest growing industries") ||
+      script.includes("nobody tells you the real secret") ||
+      script.includes("completely changed my approach");
+
+    // Only deduct credits for real AI-generated scripts, not fallback templates
+    if (isFallback) {
+      console.log("[video/story] Fallback template used — no credits charged");
+      return NextResponse.json({ script, method: "fallback", creditsDeducted: 0, newBalance: undefined });
+    }
+
     // Deduct credits after successful generation (admins exempt)
     const deductResult = await deductCredits(
       user,
@@ -38,4 +49,5 @@ export const POST = withAuth(async (request, { user, profile }) => {
 }, {
   rateLimit: { limit: 20, windowMs: 60 * 60 * 1000 },
   rateLimitKey: "video:story",
+  requireCredits: 2,
 });
