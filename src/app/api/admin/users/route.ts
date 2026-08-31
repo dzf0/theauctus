@@ -3,12 +3,19 @@ import { withAuth } from "@/lib/api-middleware";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export const GET = withAuth(
-  async (_request, { supabase }) => {
+  async (request, { supabase }) => {
+    const url = new URL(request.url);
+    const limit = Math.min(parseInt(url.searchParams.get("limit") || "100"), 500);
+    const offset = parseInt(url.searchParams.get("offset") || "0");
+
     const admin = createSupabaseAdminClient();
 
-    // Get all users from auth
+    // Get users from auth with pagination
     const { data: authUsers, error: authError } =
-      await admin.auth.admin.listUsers();
+      await admin.auth.admin.listUsers({
+        page: Math.floor(offset / 1000) + 1,
+        perPage: Math.min(limit, 1000),
+      });
 
     if (authError) {
       return NextResponse.json({ error: authError.message }, { status: 500 });
@@ -16,41 +23,26 @@ export const GET = withAuth(
 
     const userIds = authUsers.users.map((u) => u.id);
 
-    // Get profiles
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("*")
-      .in("id", userIds);
+    if (userIds.length === 0) {
+      return NextResponse.json({ users: [], total: 0 });
+    }
 
-    // Get credit balances
-    const { data: balances } = await supabase
-      .from("credit_balances")
-      .select("user_id, balance")
-      .in("user_id", userIds);
+    // Batch query profiles, balances, bans, subscriptions, platforms, posts
+    const [profilesResult, balancesResult, bansResult, subsResult, platformsResult, postsResult] = await Promise.all([
+      supabase.from("profiles").select("*").in("id", userIds),
+      supabase.from("credit_balances").select("user_id, balance").in("user_id", userIds),
+      supabase.from("ip_bans").select("identifier, reason, banned_at").in("identifier", userIds),
+      supabase.from("subscriptions").select("user_id, plan, status").in("user_id", userIds),
+      supabase.from("connected_platforms").select("user_id, platform, connected").in("user_id", userIds),
+      supabase.from("posts").select("user_id, status").in("user_id", userIds),
+    ]);
 
-    // Get ban status from ip_bans table
-    const { data: bans } = await supabase
-      .from("ip_bans")
-      .select("identifier, reason, banned_at")
-      .in("identifier", userIds);
-
-    // Get subscription plans
-    const { data: subscriptions } = await supabase
-      .from("subscriptions")
-      .select("user_id, plan, status")
-      .in("user_id", userIds);
-
-    // Get platform connections count per user
-    const { data: platforms } = await supabase
-      .from("connected_platforms")
-      .select("user_id, platform, connected")
-      .in("user_id", userIds);
-
-    // Get post counts per user
-    const { data: posts } = await supabase
-      .from("posts")
-      .select("user_id, status")
-      .in("user_id", userIds);
+    const profiles = profilesResult.data;
+    const balances = balancesResult.data;
+    const bans = bansResult.data;
+    const subscriptions = subsResult.data;
+    const platforms = platformsResult.data;
+    const posts = postsResult.data;
 
     const balanceMap = new Map(
       (balances || []).map((b) => [b.user_id, b.balance])
@@ -119,7 +111,7 @@ export const GET = withAuth(
       posts: postCountMap.get(u.id) || { total: 0, published: 0, draft: 0, scheduled: 0 },
     }));
 
-    return NextResponse.json({ users });
+    return NextResponse.json({ users, total: users.length });
   },
   {
     requireAdmin: true,

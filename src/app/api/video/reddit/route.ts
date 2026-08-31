@@ -70,26 +70,32 @@ ${selftext ? `\nBody:\n${selftext.substring(0, 1500)}` : ""}${commentsText}`;
     console.log(`[video/reddit] Fetched post: "${title.substring(0, 60)}..." from r/${subreddit}`);
 
     // Generate a script from the Reddit content using Gemini
-    const script = await generateVideoScript(
+    const result = await generateVideoScript(
       redditContext,
       profile?.niche as string || "general",
       "storytelling",
       targetDuration
     );
 
-    console.log(`[video/reddit] Script generated: ${script.split(/\s+/).length} words`);
+    console.log(`[video/reddit] Script generated: ${result.script.split(/\s+/).length} words (method: ${result.method})`);
 
-    // Deduct credits
+    // Deduct credits (only for AI-generated, not fallback)
     const CREDIT_COST = 2;
-    const deductResult = await deductCredits(
-      user,
-      CREDIT_COST,
-      `Reddit video script: "${title.substring(0, 50)}"`
-    );
+    let creditsDeducted = 0;
+    let newBalance: number | undefined;
+    if (!result.isFallback) {
+      const deductResult = await deductCredits(
+        user,
+        CREDIT_COST,
+        `Reddit video script: "${title.substring(0, 50)}"`
+      );
+      creditsDeducted = CREDIT_COST;
+      newBalance = deductResult.balance;
+    }
 
     return NextResponse.json({
       success: true,
-      script,
+      script: result.script,
       redditPost: {
         title,
         subreddit,
@@ -98,8 +104,8 @@ ${selftext ? `\nBody:\n${selftext.substring(0, 1500)}` : ""}${commentsText}`;
         numComments,
         url,
       },
-      creditsDeducted: CREDIT_COST,
-      newBalance: deductResult.balance,
+      creditsDeducted,
+      newBalance,
     });
   } catch (error) {
     console.error("[video/reddit] Error:", error);

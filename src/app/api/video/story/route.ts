@@ -16,19 +16,19 @@ export const POST = withAuth(async (request, { user, profile }) => {
   const CREDIT_COST = 2;
 
   try {
-    const script = await generateVideoScript(userTopic, userNiche, style || "educational", targetDuration);
+    const result = await generateVideoScript(userTopic, userNiche, style || "educational", targetDuration);
 
-    console.log(`[video/story] Script generated: ${script.split(/\s+/).length} words`);
-
-    // Determine if this was a real AI generation or a fallback template
-    const isFallback = script.includes("is one of the fastest growing industries") ||
-      script.includes("nobody tells you the real secret") ||
-      script.includes("completely changed my approach");
+    console.log(`[video/story] Script generated: ${result.script.split(/\s+/).length} words (method: ${result.method})`);
 
     // Only deduct credits for real AI-generated scripts, not fallback templates
-    if (isFallback) {
+    if (result.isFallback) {
       console.log("[video/story] Fallback template used — no credits charged");
-      return NextResponse.json({ script, method: "fallback", creditsDeducted: 0, newBalance: undefined });
+      return NextResponse.json({
+        script: result.script,
+        method: result.method,
+        creditsDeducted: 0,
+        newBalance: undefined,
+      });
     }
 
     // Deduct credits after successful generation (admins exempt)
@@ -41,7 +41,12 @@ export const POST = withAuth(async (request, { user, profile }) => {
       console.error("[video/story] Credit deduction failed:", deductResult.error);
     }
 
-    return NextResponse.json({ script, method: "gemini", creditsDeducted: CREDIT_COST, newBalance: deductResult.balance });
+    return NextResponse.json({
+      script: result.script,
+      method: result.method,
+      creditsDeducted: CREDIT_COST,
+      newBalance: deductResult.balance,
+    });
   } catch (error) {
     console.error("[video/story] Generation error:", error);
     return NextResponse.json({ error: `AI generation failed: ${error instanceof Error ? error.message : "Unknown"}` }, { status: 500 });

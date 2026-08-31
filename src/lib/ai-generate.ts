@@ -1,9 +1,3 @@
-// ══════════════════════════════════════════════════════════════
-// AI CONTENT GENERATION — Google Gemini 3.6 Flash
-// Used by: /api/posts (batch generation), /api/video/story
-// Free tier: https://ai.google.dev/gemini-api/docs/pricing
-// ══════════════════════════════════════════════════════════════
-
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY;
 const GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
 
@@ -29,6 +23,12 @@ export interface GeneratePostsOptions {
   tonePreferences?: string[];
 }
 
+export interface VideoScriptResult {
+  script: string;
+  isFallback: boolean;
+  method: "gemini" | "fallback";
+}
+
 async function callGemini(prompt: string, maxTokens: number = 8192): Promise<string> {
   const apiKey = GEMINI_API_KEY();
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured. Add it to your .env file.");
@@ -49,9 +49,6 @@ async function callGemini(prompt: string, maxTokens: number = 8192): Promise<str
             topP: 0.95,
             topK: 40,
             maxOutputTokens: maxTokens,
-            thinkingConfig: {
-              thinkingLevel: "minimal",
-            } as Record<string, unknown>,
           },
         }),
         signal: controller.signal,
@@ -155,7 +152,7 @@ Return ONLY a JSON array. Each element:
   "hashtags": ["tag1", "tag2", "tag3"]
 }
 
-Return ONLY the JSON array. No markdown fences, no explanation.`;
+Return ONLY the JSON array. No markdown, no explanation.`;
 
   const text = await callGemini(prompt, 8192);
 
@@ -172,6 +169,7 @@ Return ONLY the JSON array. No markdown fences, no explanation.`;
 
 /**
  * Generate a single video script using Gemini 3.6 Flash.
+ * Returns a VideoScriptResult with isFallback flag.
  * Minimum 30 seconds (~75 words), target matches duration param.
  */
 export async function generateVideoScript(
@@ -179,13 +177,13 @@ export async function generateVideoScript(
   niche: string,
   style: string,
   duration: number
-): Promise<string> {
+): Promise<VideoScriptResult> {
   const effectiveDuration = Math.max(duration, 30);
   const targetWords = Math.round(effectiveDuration * 2.5);
 
   if (!GEMINI_API_KEY()) {
     console.warn("No GEMINI_API_KEY — using fallback script");
-    return getFallbackScript(niche, targetWords);
+    return { script: getFallbackScript(niche, targetWords), isFallback: true, method: "fallback" };
   }
 
   const prompt = `Write a compelling ${effectiveDuration}-second short-form video script about "${topic}" in the ${niche} niche.
@@ -222,7 +220,7 @@ Return ONLY the script text. No title, no explanation, no quotes around it.`;
     script += `\n\nIf you found this valuable, save it for later and follow for more ${niche} tips that actually work. Drop a comment below with your biggest takeaway — I read every single one.`;
   }
 
-  return script;
+  return { script, isFallback: false, method: "gemini" };
 }
 
 // ── Scheduling ───────────────────────────────────────────────

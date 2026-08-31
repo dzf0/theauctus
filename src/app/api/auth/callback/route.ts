@@ -77,17 +77,23 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/dashboard`);
       }
 
-      // For email/password users: check onboarding status
+      // For email/password users: check onboarding status and username
       try {
         const admin = createSupabaseAdminClient();
         const { data: profile } = await admin
           .from("profiles")
-          .select("onboarded")
+          .select("onboarded, full_name, username")
           .eq("id", user.id)
           .maybeSingle();
 
+        // Not onboarded → pricing flow
         if (profile && !profile.onboarded) {
           return NextResponse.redirect(`${origin}/auth/pricing`);
+        }
+
+        // Onboarded but missing username/full_name → username picker
+        if (profile && profile.onboarded && (!profile.full_name || !profile.username)) {
+          return NextResponse.redirect(`${origin}/auth/username`);
         }
       } catch {
         // DB error — fall through to default redirect

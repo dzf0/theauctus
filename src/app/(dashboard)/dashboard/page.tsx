@@ -46,16 +46,19 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/profile").then((r) => r.json()),
-      fetch("/api/posts").then((r) => r.json()),
-      fetch("/api/user/stats").then((r) => r.json()),
-    ]).then(([profileData, postsData, statsData]) => {
-      setProfile(profileData.profile);
-      setPosts(postsData.posts || []);
-      setStats(statsData);
+    Promise.allSettled([
+      fetch("/api/profile").then((r) => r.ok ? r.json() : null),
+      fetch("/api/posts").then((r) => r.ok ? r.json() : null),
+      fetch("/api/user/stats").then((r) => r.ok ? r.json() : null),
+    ]).then(([profileResult, postsResult, statsResult]) => {
+      const profileData = profileResult.status === "fulfilled" ? profileResult.value : null;
+      const postsData = postsResult.status === "fulfilled" ? postsResult.value : null;
+      const statsData = statsResult.status === "fulfilled" ? statsResult.value : null;
+      setProfile(profileData?.profile ?? null);
+      setPosts(postsData?.posts || []);
+      setStats(statsData ?? null);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   if (loading) {

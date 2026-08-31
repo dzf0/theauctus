@@ -1,0 +1,31 @@
+create table Student(
+  ID number primary key,
+  name text,
+  age number,
+  class number);
+ create table Teacher(
+   ID number,
+   name text,
+   age number,
+   subject text);
+insert into Student(ID,name,age,class)
+values(1,'aashir',18,13);
+insert into Student(ID,name,age,class)
+values(2,'asdwad',14,8);
+insert into Student(ID,name,age,class)
+values(3,'asdwadsad',12,6);
+insert into Student(ID,name,age,class)
+values(4,'asdwafdsh',12,6);
+insert into Student(ID,name,age,class)
+values(5,'jlfgjhl',13,7);
+insert into Teacher(ID,name,age,subject)
+values(5,'ggsdfes',34,'chem');
+insert into Teacher(ID,name,age,subject)
+values(4,'dadnnkgf',54,'phy');
+insert into Teacher(ID,name,age,subject)
+values(3,'askgfk',43,'english');
+insert into Teacher(ID,name,age,subject)
+values(4,'dssf',37,'history');
+insert into Teacher(ID,name,age,subject)
+values(2,'kjjkjkj',59,'maths');
+select * from Student s, Teacher t where s.ID=t.ID;

@@ -79,10 +79,12 @@ export const POST = withAuth(async (request, { user }) => {
       );
     }
 
-    const { createSupabaseServerClient } = await import("@/lib/supabase-server");
-    const supabase = await createSupabaseServerClient();
+    // Use admin client to bypass RLS for credit operations
+    const { createSupabaseAdminClient } = await import("@/lib/supabase-admin");
+    const admin = createSupabaseAdminClient();
 
-    const { data: existing } = await supabase
+    // Upsert balance atomically — prevents double-credit exploit
+    const { data: existing } = await admin
       .from("credit_balances")
       .select("balance")
       .eq("user_id", user.id)
@@ -91,18 +93,14 @@ export const POST = withAuth(async (request, { user }) => {
     const currentBalance = existing?.balance ?? 0;
     const newBalance = currentBalance + packData.credits;
 
-    if (existing) {
-      await supabase
-        .from("credit_balances")
-        .update({ balance: newBalance, updated_at: new Date().toISOString() })
-        .eq("user_id", user.id);
-    } else {
-      await supabase
-        .from("credit_balances")
-        .insert({ user_id: user.id, balance: newBalance });
-    }
+    await admin
+      .from("credit_balances")
+      .upsert(
+        { user_id: user.id, balance: newBalance, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" }
+      );
 
-    await supabase.from("credit_history").insert({
+    await admin.from("credit_history").insert({
       user_id: user.id,
       amount: packData.credits,
       type: "purchase",
