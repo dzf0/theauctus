@@ -1,8 +1,26 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Component, ReactNode } from "react";
 import { useTheme } from "@/components/theme-provider";
 import PixelSnow from "@/components/PixelSnow";
+
+// ── Error Boundary — catches WebGL/animation crashes ──────────
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.warn("[SnowBackground] Component crashed, skipping:", error.message);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 // ── Seeded pseudo-random (deterministic for SSR hydration) ──
 function seededRandom(seed: number) {
@@ -105,7 +123,7 @@ export default function SnowBackground() {
   const isDark = theme === "dark";
 
   return (
-    <>
+    <ErrorBoundary>
       {/* PixelSnow WebGL background */}
       <div className="fixed inset-0 z-0">
         <PixelSnow
@@ -142,6 +160,6 @@ export default function SnowBackground() {
           }}
         />
       </div>
-    </>
+    </ErrorBoundary>
   );
 }

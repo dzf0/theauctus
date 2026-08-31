@@ -230,16 +230,24 @@ export default function PixelSnow({
     const container = containerRef.current;
     if (!container) return;
 
+    let renderer: WebGLRenderer;
+    try {
+      renderer = new WebGLRenderer({
+        antialias: false,
+        alpha: true,
+        premultipliedAlpha: false,
+        powerPreference: 'high-performance',
+        stencil: false,
+        depth: false
+      });
+    } catch {
+      // WebGL not available or GPU error — silently skip
+      console.warn('[PixelSnow] WebGL not available, skipping background');
+      return;
+    }
+
     const scene = new Scene();
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const renderer = new WebGLRenderer({
-      antialias: false,
-      alpha: true,
-      premultipliedAlpha: false,
-      powerPreference: 'high-performance',
-      stencil: false,
-      depth: false
-    });
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.offsetWidth, container.offsetHeight);
