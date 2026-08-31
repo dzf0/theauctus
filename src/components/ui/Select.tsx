@@ -22,17 +22,14 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <div className="relative">
           <select
             ref={ref}
-            className={`w-full h-10 px-3 pr-10 bg-[#1A1A1A] border ${
-              error
-                ? "border-[#E06C75]"
-                : "border-[#2A2A2A] focus:border-[#C9A87C]/40"
-            } rounded text-[14px] text-[#F5F0EB] outline-none transition-all duration-150 appearance-none cursor-pointer ${
+            className={`w-full h-10 px-3 pr-10 rounded text-[14px] outline-none transition-all duration-150 appearance-none cursor-pointer ${
               className
             }`}
+            style={{ background: "var(--lg-bg, #1A1A1A)", border: `1px solid ${error ? "var(--danger, #E06C75)" : "var(--lg-border, #2A2A2A)"}`, color: "var(--foreground, #F5F0EB)" }}
             {...props}
           >
             {placeholder && (
-              <option value="" className="text-[#6B6560]">
+              <option value="" style={{ color: "var(--muted, #6B6560)" }}>
                 {placeholder}
               </option>
             )}

@@ -310,7 +310,7 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-2 gap-3">
                 {NICHE_OPTIONS.map((niche) => (
                   <button key={niche} onClick={() => handleNicheSelect(niche)} className="p-3 text-left text-[13px] rounded-lg border transition-colors"
-                    style={{ borderColor: formData.niche === niche ? "var(--accent-copper)" : "var(--lg-border)", backgroundColor: formData.niche === niche ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)", color: formData.niche === niche ? "var(--foreground)" : "var(--muted)" }}>
+                    style={{ borderColor: formData.niche === niche ? "var(--accent-copper)" : "var(--lg-border)", backgroundColor: formData.niche === niche ? "rgba(201, 168, 124, 0.1)" : "var(--lg-bg)", color: formData.niche === niche ? "var(--foreground)" : "rgba(245, 245, 247, 0.6)" }}>
                     {niche}
                   </button>
                 ))}

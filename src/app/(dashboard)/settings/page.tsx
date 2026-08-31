@@ -330,14 +330,14 @@ export default function SettingsPage() {
                       <svg className="w-4 h-4 shrink-0 ml-2" style={{ color: "var(--muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </button>
                     {nicheDropdownOpen && (
-                      <div onClick={(e) => e.stopPropagation()} className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-xl" style={{ background: "var(--lg-bg-strong)", border: "1px solid var(--lg-border)", boxShadow: "var(--lg-shadow-lg)" }}>
+                      <div onClick={(e) => e.stopPropagation()} className="absolute z-50 mt-1 w-full max-h-60 overflow-auto rounded-xl" style={{ background: "#1a1a1e", border: "1px solid var(--lg-border)", boxShadow: "var(--lg-shadow-lg)" }}>
                         {NICHE_OPTIONS.map((n) => (
                           <button
                             key={n}
                             type="button"
                             onClick={() => { setProfile({ ...profile, niche: n }); setNicheDropdownOpen(false); }}
                             className="w-full px-4 py-2.5 text-left text-[13px] transition-colors"
-                            style={{ color: profile.niche === n ? "var(--accent-copper)" : "var(--foreground)", background: profile.niche === n ? "rgba(201, 168, 124, 0.1)" : "transparent" }}
+                            style={{ color: profile.niche === n ? "var(--accent-copper)" : "rgba(245, 245, 247, 0.85)", background: profile.niche === n ? "rgba(201, 168, 124, 0.15)" : "transparent" }}
                             onMouseEnter={(e) => { if (profile.niche !== n) (e.target as HTMLElement).style.background = "var(--lg-highlight)"; }}
                             onMouseLeave={(e) => { if (profile.niche !== n) (e.target as HTMLElement).style.background = "transparent"; }}
                           >
