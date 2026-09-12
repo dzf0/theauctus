@@ -267,7 +267,9 @@ export default function BillingPage() {
           .then((r) => r.json())
           .catch(() => ({ history: [] })),
       ]);
-      setBalance(stats.credits ?? 0);
+      // purchasedCredits = free + bought (permanent)
+      // bonusCredits = trial credits (expire in 7 days)
+      setBalance(stats.purchasedCredits ?? stats.credits ?? 0);
       setBonusCredits(stats.bonusCredits ?? 0);
       setBonusExpiresAt(stats.bonusExpiresAt ?? null);
       setHistory(historyData.history ?? []);
@@ -520,7 +522,7 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Current balance */}
+      {/* Current balance — purchased/free credits (permanent) */}
       <div
         className="rounded-2xl p-6"
         style={{
@@ -536,12 +538,12 @@ export default function BillingPage() {
                 className="text-xs px-2 py-0.5 rounded-full"
                 style={{ background: "rgba(0,0,0,0.15)" }}
               >
-                Available Balance
+                Your Credits
               </span>
             </div>
             <h3 className="text-4xl font-headline mb-1">{balance ?? 0}</h3>
             <p className="text-sm" style={{ opacity: 0.8 }}>
-              credits available
+              purchased & free credits — never expire
             </p>
           </div>
           <div className="flex gap-2">
@@ -562,27 +564,40 @@ export default function BillingPage() {
       </div>
 
       {/* Trial bonus credits banner */}
-      {bonusCredits > 0 && bonusExpiresAt && (
-        <div className="p-4 liquid-card border border-blue-500/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "rgba(59,130,246,0.15)" }}>
-                <svg className="w-4 h-4" style={{ color: "#3b82f6" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+      {bonusCredits > 0 && bonusExpiresAt && (() => {
+        const expiresDate = new Date(bonusExpiresAt);
+        const now = new Date();
+        const daysLeft = Math.max(0, Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        const hoursLeft = Math.max(0, Math.ceil((expiresDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
+        const timeLeft = daysLeft > 0 ? `${daysLeft} day${daysLeft !== 1 ? 's' : ''}` : `${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}`;
+
+        return (
+          <div className="p-4 liquid-card border border-amber-500/20" style={{ background: "rgba(245,158,11,0.05)" }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(245,158,11,0.15)" }}>
+                  <svg className="w-5 h-5" style={{ color: "#f59e0b" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>
+                    🎁 {bonusCredits} trial credits — {timeLeft} left
+                  </p>
+                  <p className="text-[12px]" style={{ color: "var(--muted)" }}>
+                    Free trial credits expire {expiresDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}. Used before your purchased credits.
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>
-                  🎁 {bonusCredits} trial credits active
-                </p>
-                <p className="text-[11px]" style={{ color: "var(--muted)" }}>
-                  Expires {new Date(bonusExpiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} — used before purchased credits
-                </p>
+              <div className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg" style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                <span className="text-[11px] font-medium" style={{ color: "#f59e0b" }}>
+                  {timeLeft}
+                </span>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Credit costs */}
       <div className="liquid-card p-6">

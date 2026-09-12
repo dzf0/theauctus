@@ -23,9 +23,11 @@ export const GET = withAuth(async (_request, { supabase, user }) => {
     .eq("user_id", user.id)
     .single();
 
-  const credits = (creditData?.balance ?? 0) + (creditData?.bonus_credits ?? 0);
+  const purchasedCredits = creditData?.balance ?? 0;
   const bonusCredits = creditData?.bonus_credits ?? 0;
   const bonusExpiresAt = creditData?.bonus_expires_at ?? null;
+  // Total available for API consumers that need the sum
+  const credits = purchasedCredits + bonusCredits;
 
   // Fetch all posts for this user
   const { data: posts } = await supabase
@@ -64,6 +66,7 @@ export const GET = withAuth(async (_request, { supabase, user }) => {
 
   return NextResponse.json({
     credits,
+    purchasedCredits,
     bonusCredits,
     bonusExpiresAt,
     totalPosts: allPosts.length,
