@@ -19,13 +19,28 @@ const requiredPublicEnv = [
 ] as const;
 
 const optionalEnv = [
+  // Paddle (international payments)
+  "PADDLE_VENDOR_ID",
+  "PADDLE_CLIENT_TOKEN",
+  "PADDLE_WEBHOOK_SECRET",
+  "PADDLE_PRICE_STARTER",
+  "PADDLE_PRICE_GROWTH",
+  "PADDLE_PRICE_PRO",
+  // Razorpay (India payments)
+  "RAZORPAY_KEY_ID",
+  "RAZORPAY_KEY_SECRET",
+  "RAZORPAY_WEBHOOK_SECRET",
+  // Legacy Stripe (kept for reference)
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
   "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+  // Email (SMTP)
   "SMTP_HOST",
   "SMTP_PORT",
   "SMTP_USER",
   "SMTP_PASS",
+  "SMTP_FROM",
+  // App
   "NEXT_PUBLIC_APP_URL",
 ] as const;
 

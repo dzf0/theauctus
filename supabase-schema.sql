@@ -112,10 +112,12 @@ CREATE TABLE public.posts (
 
 -- ── credit_balances ───────────────────────────────────────────
 CREATE TABLE public.credit_balances (
-  id          UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id     UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
-  balance     INTEGER DEFAULT 0,
-  updated_at  TIMESTAMPTZ DEFAULT NOW()
+  id                  UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id             UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  balance             INTEGER DEFAULT 0,
+  bonus_credits       INTEGER DEFAULT 0,
+  bonus_expires_at    TIMESTAMPTZ,
+  updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── credit_history ────────────────────────────────────────────
@@ -280,9 +282,9 @@ BEGIN
   VALUES (NEW.id, 'starter')
   ON CONFLICT (user_id) DO NOTHING;
 
-  -- 10 free credits
-  INSERT INTO public.credit_balances (user_id, balance)
-  VALUES (NEW.id, 10)
+  -- 10 free credits + 50 trial bonus credits (expire in 7 days)
+  INSERT INTO public.credit_balances (user_id, balance, bonus_credits, bonus_expires_at)
+  VALUES (NEW.id, 10, 50, NOW() + INTERVAL '7 days')
   ON CONFLICT (user_id) DO NOTHING;
 
   RETURN NEW;
@@ -294,6 +296,38 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
+
+-- ── increment_balance() ──────────────────────────────────────
+-- Atomic balance increment for payment webhook idempotency
+CREATE OR REPLACE FUNCTION public.increment_balance(p_user_id UUID, p_amount INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  INSERT INTO public.credit_balances (user_id, balance, updated_at)
+  VALUES (p_user_id, p_amount, NOW())
+  ON CONFLICT (user_id) DO UPDATE
+    SET balance = public.credit_balances.balance + p_amount,
+        updated_at = NOW();
+END;
+$$;
+
+-- ── decrement_balance() ──────────────────────────────────────
+-- Atomic balance decrement for refund processing.
+-- Clamps to 0 — never allows negative balance.
+CREATE OR REPLACE FUNCTION public.decrement_balance(p_user_id UUID, p_amount INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE public.credit_balances
+  SET balance = GREATEST(balance - p_amount, 0),
+      updated_at = NOW()
+  WHERE user_id = p_user_id;
+END;
+$$;
 
 -- ── check_username_available() ────────────────────────────────
 CREATE OR REPLACE FUNCTION public.check_username_available(p_username TEXT)

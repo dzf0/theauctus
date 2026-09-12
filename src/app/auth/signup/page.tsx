@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
 import {
@@ -112,41 +112,28 @@ export default function SignUpPage() {
       if (authError) { setError(authError.message || "Failed to create account"); setLoading(false); return; }
 
       if (data.user && !data.session) {
-      // Save onboarding data from localStorage if present
-      const savedOnboarding = localStorage.getItem("theauctus-onboarding");
-      if (savedOnboarding) {
-        try {
-          const onboardingData = JSON.parse(savedOnboarding);
-          await fetch("/api/profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(onboardingData),
-          });
-          localStorage.removeItem("theauctus-onboarding");
-        } catch {
-          // Continue anyway — onboarding data is optional
-        }
-      }
+        // No session yet — user needs to verify OTP first.
+        // Don't try to save onboarding data (no auth session = API calls will 401).
         router.push(`/auth/verify-otp?email=${encodeURIComponent(formData.email)}`);
         return;
       }
 
       if (data.session) {
-      // Save onboarding data from localStorage if present
-      const savedOnboarding = localStorage.getItem("theauctus-onboarding");
-      if (savedOnboarding) {
-        try {
-          const onboardingData = JSON.parse(savedOnboarding);
-          await fetch("/api/profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(onboardingData),
-          });
-          localStorage.removeItem("theauctus-onboarding");
-        } catch {
-          // Continue anyway — onboarding data is optional
+        // Session active — save onboarding data if present
+        const savedOnboarding = localStorage.getItem("theauctus-onboarding");
+        if (savedOnboarding) {
+          try {
+            const onboardingData = JSON.parse(savedOnboarding);
+            await fetch("/api/profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(onboardingData),
+            });
+            localStorage.removeItem("theauctus-onboarding");
+          } catch {
+            // Continue anyway — onboarding data is optional
+          }
         }
-      }
         router.push("/auth/pricing");
         router.refresh();
       }
@@ -175,13 +162,15 @@ export default function SignUpPage() {
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
-  if (isLocked && lockoutTime > 0) {
-    setTimeout(() => {
+  useEffect(() => {
+    if (!isLocked || lockoutTime <= 0) return;
+    const timer = setTimeout(() => {
       const t = lockoutTime - 1;
       if (t <= 0) { setIsLocked(false); attemptsRef.current = { count: 0, firstAttempt: 0 }; }
       else setLockoutTime(t);
     }, 1000);
-  }
+    return () => clearTimeout(timer);
+  }, [isLocked, lockoutTime]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">

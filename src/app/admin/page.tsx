@@ -299,11 +299,22 @@ function UsersTab() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`Granted ${grantAmount} credits to ${grantModal.email}`, "success");
+        const msg = data.note === "duplicate_request_ignored"
+          ? `Already granted — ${grantAmount} credits to ${grantModal.email} (duplicate ignored)`
+          : `Granted ${grantAmount} credits to ${grantModal.email}`;
+        showToast(msg, "success");
         setGrantModal(null); setGrantAmount(""); setGrantReason("");
+        // Refetch to show updated balance immediately
         fetchUsers();
       } else {
-        showToast(data.error || "Failed to grant credits", "error");
+        // Show the FULL error so you can debug — includes status code and raw body
+        const statusCode = res.status;
+        const rawBody = JSON.stringify(data);
+        const errMsg = data.error
+          ? `${res.status} ${data.error.code || "ERROR"}: ${data.error.message || data.error}`
+          : `HTTP ${statusCode}: ${rawBody}`;
+        console.error("[ADMIN GRANT] API error:", { status: res.status, body: data, url: "/api/admin/credits/grant" });
+        showToast(errMsg, "error");
       }
     } catch { showToast("Network error", "error"); }
     finally { setGranting(false); }
@@ -599,7 +610,12 @@ function UsersTab() {
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setGrantModal(null)} className="flex-1 py-2.5 liquid-btn text-[12px]">Cancel</button>
-              <button onClick={handleGrant} disabled={granting || !grantAmount || !grantReason} className="flex-1 py-2.5 liquid-btn-primary text-[12px] disabled:opacity-50">
+              <button
+                onClick={handleGrant}
+                disabled={granting || !grantAmount || !grantReason}
+                className="flex-1 py-2.5 liquid-btn-primary text-[12px] disabled:opacity-50"
+                title={!grantAmount ? "Enter an amount" : !grantReason ? "Enter a reason" : granting ? "Processing..." : ""}
+              >
                 {granting ? "Granting..." : "Grant"}
               </button>
             </div>

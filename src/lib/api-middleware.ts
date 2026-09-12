@@ -172,6 +172,12 @@ export function isAdminEmail(email: string | undefined | null): boolean {
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+
+  // Fail closed: if no admin emails configured, nobody is admin
+  if (adminEmails.length === 0) {
+    return false;
+  }
+
   return adminEmails.includes(email.toLowerCase());
 }
 
@@ -321,15 +327,25 @@ export function withAuth(
           }
         }
 
-        // ── Credit balance check (admins exempt) ─────────────
+        // ── Credit balance check (admins exempt, includes bonus credits) ──
         if (requireCredits && requireCredits > 0 && !isAdminEmail(user.email)) {
+          // Lazy-expire bonus credits first
+          try { await supabase.rpc("expire_bonus_credits", { p_user_id: user.id }); } catch { /* ok */ }
+
           const { data: balance } = await supabase
             .from("credit_balances")
-            .select("balance")
+            .select("balance, bonus_credits, bonus_expires_at")
             .eq("user_id", user.id)
             .single();
 
-          const currentBalance = balance?.balance ?? 0;
+          const regBalance = balance?.balance ?? 0;
+          const bonus = balance?.bonus_credits ?? 0;
+          const bonusActive =
+            bonus > 0 &&
+            balance?.bonus_expires_at &&
+            new Date(balance.bonus_expires_at) > new Date();
+          const currentBalance = regBalance + (bonusActive ? bonus : 0);
+
           if (currentBalance < requireCredits) {
             return jsonError(
               `Insufficient credits. You need ${requireCredits} credits but have ${currentBalance}.`,

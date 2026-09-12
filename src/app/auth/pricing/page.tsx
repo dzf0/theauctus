@@ -76,12 +76,33 @@ export default function PricingPage() {
 
       const data = await res.json();
 
-      if (data.mode === "stripe" && data.url) {
-        window.location.href = data.url;
+      // Paddle: open overlay checkout
+      if (data.mode === "paddle" && data.priceId && window.Paddle) {
+        window.Paddle.Checkout.open({
+          items: [{ priceId: data.priceId, quantity: 1 }],
+          customData: data.userMetadata,
+        });
         return;
       }
 
-      // Demo mode or success — go to onboarding
+      // Razorpay: open popup checkout
+      if (data.mode === "razorpay" && data.orderId) {
+        const options = {
+          key: data.razorpayKeyId,
+          amount: data.amount,
+          currency: data.currency,
+          name: "TheAuctus",
+          description: `${data.credits} credits — ${data.packName} pack`,
+          order_id: data.orderId,
+          handler: () => { window.location.href = "/billing?success=true"; },
+          theme: { color: "#c9a87c" },
+        };
+        // @ts-expect-error — Razorpay loaded via script tag
+        new window.Razorpay(options).open();
+        return;
+      }
+
+      // Demo mode — go to dashboard
       router.push("/dashboard");
     } catch {
       router.push("/dashboard");
@@ -109,10 +130,31 @@ export default function PricingPage() {
         body: JSON.stringify({ pack: "custom", customAmount: amount }),
       });
       const data = await res.json();
-      if (data.mode === "stripe" && data.url) {
-        window.location.href = data.url;
+
+      if (data.mode === "paddle" && data.priceId && window.Paddle) {
+        window.Paddle.Checkout.open({
+          items: [{ priceId: data.priceId, quantity: 1 }],
+          customData: data.userMetadata,
+        });
         return;
       }
+
+      if (data.mode === "razorpay" && data.orderId) {
+        const options = {
+          key: data.razorpayKeyId,
+          amount: data.amount,
+          currency: data.currency,
+          name: "TheAuctus",
+          description: `${data.credits} credits — Custom`,
+          order_id: data.orderId,
+          handler: () => { window.location.href = "/billing?success=true"; },
+          theme: { color: "#c9a87c" },
+        };
+        // @ts-expect-error — Razorpay loaded via script tag
+        new window.Razorpay(options).open();
+        return;
+      }
+
       router.push("/dashboard");
     } catch {
       router.push("/dashboard");
@@ -123,7 +165,13 @@ export default function PricingPage() {
 
   const customCredits = customAmount ? Math.floor(parseFloat(customAmount || "0") / CUSTOM_CREDIT_RATE) : 0;
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    // Mark onboarding as complete so middleware doesn't redirect back here
+    try {
+      await fetch("/api/profile/complete-onboarding", { method: "POST" });
+    } catch {
+      // Continue anyway — worst case middleware sends them back
+    }
     router.push("/dashboard");
   };
 
@@ -291,7 +339,10 @@ export default function PricingPage() {
         {/* Skip / Already have credits */}
         <div className="text-center space-y-3">
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={async () => {
+              try { await fetch("/api/profile/complete-onboarding", { method: "POST" }); } catch {}
+              router.push("/dashboard");
+            }}
             className="text-[13px] accent-text hover:opacity-80 transition-opacity"
           >
             I already have credits → Go to Dashboard

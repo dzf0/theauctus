@@ -1,41 +1,46 @@
 // ══════════════════════════════════════════════════════════════
 // WEBHOOK HANDLERS
-// Prepared handlers for Stripe and platform webhooks
+// Prepared handlers for Paddle, Razorpay, and platform webhooks
 // ══════════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
 import { Platform } from "./types";
 
 // ══════════════════════════════════════════════════════════════
-// STRIPE WEBHOOK HANDLER
+// PADDLE WEBHOOK HANDLER (Merchant of Record)
 // ══════════════════════════════════════════════════════════════
 
-export interface StripeWebhookHandler {
-  handleCheckoutCompleted: (sessionId: string, customerId: string) => Promise<void>;
-  handleSubscriptionUpdated: (subscriptionId: string, status: string) => Promise<void>;
-  handleSubscriptionDeleted: (subscriptionId: string) => Promise<void>;
-  handlePaymentFailed: (paymentIntentId: string) => Promise<void>;
+export interface PaddleWebhookHandler {
+  handleTransactionCompleted: (transactionId: string, userId: string) => Promise<void>;
+  handleTransactionUpdated: (transactionId: string) => Promise<void>;
 }
 
-export const stripeWebhookHandler: StripeWebhookHandler = {
-  async handleCheckoutCompleted(sessionId: string, customerId: string) {
-    // TODO: Implement when Stripe is enabled
-    console.log("Stripe checkout completed:", sessionId, customerId);
+export const paddleWebhookHandler: PaddleWebhookHandler = {
+  async handleTransactionCompleted(transactionId: string, userId: string) {
+    console.log("[PADDLE] Transaction completed:", transactionId, "user:", userId);
   },
 
-  async handleSubscriptionUpdated(subscriptionId: string, status: string) {
-    // TODO: Implement when Stripe is enabled
-    console.log("Stripe subscription updated:", subscriptionId, status);
+  async handleTransactionUpdated(transactionId: string) {
+    console.log("[PADDLE] Transaction updated:", transactionId);
+  },
+};
+
+// ══════════════════════════════════════════════════════════════
+// RAZORPAY WEBHOOK HANDLER (India payments)
+// ══════════════════════════════════════════════════════════════
+
+export interface RazorpayWebhookHandler {
+  handlePaymentCaptured: (paymentId: string, userId: string) => Promise<void>;
+  handlePaymentFailed: (paymentId: string) => Promise<void>;
+}
+
+export const razorpayWebhookHandler: RazorpayWebhookHandler = {
+  async handlePaymentCaptured(paymentId: string, userId: string) {
+    console.log("[RAZORPAY] Payment captured:", paymentId, "user:", userId);
   },
 
-  async handleSubscriptionDeleted(subscriptionId: string) {
-    // TODO: Implement when Stripe is enabled
-    console.log("Stripe subscription deleted:", subscriptionId);
-  },
-
-  async handlePaymentFailed(paymentIntentId: string) {
-    // TODO: Implement when Stripe is enabled
-    console.log("Stripe payment failed:", paymentIntentId);
+  async handlePaymentFailed(paymentId: string) {
+    console.error("[RAZORPAY] Payment failed:", paymentId);
   },
 };
 
@@ -83,15 +88,53 @@ export const platformWebhookHandler: PlatformWebhookHandler = {
 // WEBHOOK SIGNATURE VERIFICATION
 // ══════════════════════════════════════════════════════════════
 
-export function verifyStripeSignature(
+import crypto from "crypto";
+
+/**
+ * Verify Paddle webhook signature (HMAC-SHA256).
+ * The canonical verification happens in /api/webhooks/paddle/route.ts.
+ * This is exported for any shared use.
+ */
+export function verifyPaddleSignature(
   payload: string,
   signature: string,
   secret: string
 ): boolean {
-  // TODO: Implement Stripe signature verification
-  // This is a placeholder - use stripe.webhooks.constructEvent() when enabled
-  console.warn("Stripe signature verification not implemented");
-  return true;
+  try {
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expected)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Verify Razorpay webhook signature (HMAC-SHA256).
+ * The canonical verification happens in /api/webhooks/razorpay/route.ts.
+ */
+export function verifyRazorpaySignature(
+  payload: string,
+  signature: string,
+  secret: string
+): boolean {
+  try {
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expected)
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function verifyPlatformSignature(

@@ -16,6 +16,7 @@ export default function UsernamePage() {
   const [available, setAvailable] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [provider, setProvider] = useState<string>("");
+  const [googleEmail, setGoogleEmail] = useState("");
 
   // Check if user is logged in and get their data
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function UsernamePage() {
       // Detect provider
       const userProvider = session.user.app_metadata?.provider || "email";
       setProvider(userProvider);
+      setGoogleEmail(session.user.email || "");
 
       // Pre-fill from Google metadata
       if (userProvider === "google") {
@@ -310,6 +312,7 @@ export default function UsernamePage() {
                 <input
                   type="email"
                   readOnly
+                  value={googleEmail}
                   className="w-full px-4 py-3 liquid-input text-[13px] opacity-60 cursor-not-allowed"
                 />
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseClient } from "@/lib/supabase";
 import { Spinner } from "@/components/ui/Loading";
@@ -114,9 +114,10 @@ export default function SignInPage() {
     }
   };
 
-  // Update lockout timer
-  if (isLocked && lockoutTime > 0) {
-    setTimeout(() => {
+  // Update lockout timer (must be in useEffect, not render body)
+  useEffect(() => {
+    if (!isLocked || lockoutTime <= 0) return;
+    const timer = setTimeout(() => {
       const newTime = lockoutTime - 1;
       if (newTime <= 0) {
         setIsLocked(false);
@@ -125,7 +126,8 @@ export default function SignInPage() {
         setLockoutTime(newTime);
       }
     }, 1000);
-  }
+    return () => clearTimeout(timer);
+  }, [isLocked, lockoutTime]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -24,7 +24,7 @@ export interface CreditPack {
   description: string;
   features: string[];
   popular: boolean;
-  stripePriceId?: string;
+  paddlePriceId?: string;    // Paddle price ID from env
 }
 
 export const CREDIT_PACKS: CreditPack[] = [
@@ -41,6 +41,7 @@ export const CREDIT_PACKS: CreditPack[] = [
       "All platforms supported",
     ],
     popular: false,
+    paddlePriceId: process.env.PADDLE_PRICE_STARTER || undefined,
   },
   {
     id: "growth",
@@ -56,6 +57,7 @@ export const CREDIT_PACKS: CreditPack[] = [
       "Priority support",
     ],
     popular: true,
+    paddlePriceId: process.env.PADDLE_PRICE_GROWTH || undefined,
   },
   {
     id: "pro",
@@ -72,6 +74,7 @@ export const CREDIT_PACKS: CreditPack[] = [
       "Content repurposing",
     ],
     popular: false,
+    paddlePriceId: process.env.PADDLE_PRICE_PRO || undefined,
   },
 ];
 
@@ -85,6 +88,11 @@ export const CREDIT_COSTS = [
 
 // Free credits given on signup
 export const FREE_CREDITS_ON_SIGNUP = 10;
+
+// Trial bonus credits — granted on signup, expire after TRIAL_DURATION_DAYS
+// These are spent BEFORE purchased credits (bonus-first deduction)
+export const TRIAL_CREDITS = 50;
+export const TRIAL_DURATION_DAYS = 7;
 
 // Custom credit amount: $0.20 per credit (same as Starter rate)
 // Users enter a dollar amount and get credits calculated at this rate
@@ -218,7 +226,8 @@ export const FREQUENCY_OPTIONS: FrequencyOption[] = [
 // ══════════════════════════════════════════════════════════════
 
 export interface FeatureFlags {
-  enableStripe: boolean;
+  enablePaddle: boolean;
+  enableRazorpay: boolean;
   enableAnalytics: boolean;
   enableContentRepurposing: boolean;
   enableGrowthTactics: boolean;
@@ -230,7 +239,8 @@ export interface FeatureFlags {
 }
 
 export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
-  enableStripe: false,
+  enablePaddle: false,
+  enableRazorpay: false,
   enableAnalytics: true,
   enableContentRepurposing: false,
   enableGrowthTactics: false,

@@ -63,8 +63,8 @@ export async function GET(request: Request) {
           .eq("id", user.id)
           .single();
 
-        // If no username set, or no full name, go to username picker
-        if (profile && !profile.full_name) {
+        // If no username or no full name, go to username picker
+        if (profile && (!profile.full_name || !profile.username)) {
           return NextResponse.redirect(`${origin}/auth/username`);
         }
 

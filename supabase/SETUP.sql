@@ -1,18 +1,14 @@
 -- ══════════════════════════════════════════════════════════════
--- BASELINE MIGRATION — Idempotent, safe to re-run
--- ══════════════════════════════════════════════════════════════
--- Consolidates migrations 001, 002, 003 plus supabase-schema.sql
--- and supabase-brand-profiles.sql into a single file.
---
--- Use this on EXISTING databases to bring them up to date.
--- For fresh databases, use supabase-schema.sql instead.
+-- THEAUCTUS — COMPLETE DATABASE SETUP
+-- Run this ONCE in Supabase SQL Editor.
+-- Every statement is idempotent (safe to re-run).
 -- ══════════════════════════════════════════════════════════════
 
 -- ── Extensions ────────────────────────────────────────────────
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ══════════════════════════════════════════════════════════════
--- TABLES (IF NOT EXISTS)
+-- 1. TABLES
 -- ══════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -22,7 +18,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   full_name       TEXT,
   avatar_url      TEXT,
   username        TEXT,
-
   niche                TEXT,
   brand_voice          TEXT,
   target_audience      TEXT,
@@ -34,12 +29,11 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   example_posts        TEXT[],
   brand_fingerprint    JSONB,
   onboarded            BOOLEAN DEFAULT FALSE,
-
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Idempotent ADD COLUMN for columns added after the original table
+-- Idempotent ADD COLUMN for columns that may not exist on older DBs
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='full_name') THEN
     ALTER TABLE public.profiles ADD COLUMN full_name TEXT; END IF;
@@ -47,6 +41,10 @@ END $$;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='username') THEN
     ALTER TABLE public.profiles ADD COLUMN username TEXT; END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='email') THEN
+    ALTER TABLE public.profiles ADD COLUMN email TEXT; END IF;
 END $$;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='tone_preferences') THEN
@@ -68,14 +66,24 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='brand_fingerprint') THEN
     ALTER TABLE public.profiles ADD COLUMN brand_fingerprint JSONB; END IF;
 END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='profiles' AND column_name='onboarded') THEN
+    ALTER TABLE public.profiles ADD COLUMN onboarded BOOLEAN DEFAULT FALSE; END IF;
+END $$;
+
+-- Back-fill: set email from auth.users if profiles.email is null
+UPDATE public.profiles p
+SET email = u.email
+FROM auth.users u
+WHERE p.id = u.id AND p.email IS NULL AND u.email IS NOT NULL;
 
 -- Back-fill full_name from name
 UPDATE public.profiles SET full_name = name WHERE full_name IS NULL AND name IS NOT NULL AND name != '';
 
--- Add UNIQUE constraint on username (if missing)
+-- Unique constraint on username (guarded)
 DO $$ BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conrelid = 'public.profiles'::regclass AND contype = 'u' AND array_length(conkey,1) = 1
+    SELECT 1 FROM pg_constraint WHERE conrelid = 'public.profiles'::regclass AND contype = 'u'
     AND EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid = 'public.profiles'::regclass AND attnum = ANY(conkey) AND attname = 'username')
   ) THEN
     ALTER TABLE public.profiles ADD CONSTRAINT profiles_username_unique UNIQUE (username);
@@ -83,6 +91,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+-- ── subscriptions ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.subscriptions (
   id                      UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id                 UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
@@ -95,6 +104,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   updated_at              TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── connected_platforms ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.connected_platforms (
   id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
@@ -110,6 +120,7 @@ CREATE TABLE IF NOT EXISTS public.connected_platforms (
   UNIQUE(user_id, platform)
 );
 
+-- ── content_calendars ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.content_calendars (
   id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
@@ -119,6 +130,7 @@ CREATE TABLE IF NOT EXISTS public.content_calendars (
   UNIQUE(user_id, month, year)
 );
 
+-- ── posts ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.posts (
   id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   calendar_id   UUID REFERENCES public.content_calendars(id) ON DELETE SET NULL,
@@ -143,6 +155,7 @@ CREATE TABLE IF NOT EXISTS public.posts (
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── credit_balances ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.credit_balances (
   id                  UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id             UUID REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
@@ -152,6 +165,16 @@ CREATE TABLE IF NOT EXISTS public.credit_balances (
   updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
 
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='credit_balances' AND column_name='bonus_credits') THEN
+    ALTER TABLE public.credit_balances ADD COLUMN bonus_credits INTEGER DEFAULT 0; END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='credit_balances' AND column_name='bonus_expires_at') THEN
+    ALTER TABLE public.credit_balances ADD COLUMN bonus_expires_at TIMESTAMPTZ; END IF;
+END $$;
+
+-- ── credit_history ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.credit_history (
   id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
@@ -162,6 +185,20 @@ CREATE TABLE IF NOT EXISTS public.credit_history (
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ── ip_bans (used by admin ban system) ────────────────────────
+CREATE TABLE IF NOT EXISTS public.ip_bans (
+  id          UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  identifier  TEXT NOT NULL,
+  reason      TEXT,
+  banned_by   UUID,
+  banned_at   TIMESTAMPTZ DEFAULT NOW(),
+  expires_at  TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ip_bans_identifier ON public.ip_bans (identifier);
+
+-- ── audit_log ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.audit_log (
   id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id     UUID REFERENCES auth.users(id),
@@ -176,14 +213,14 @@ CREATE TABLE IF NOT EXISTS public.audit_log (
 );
 
 -- ══════════════════════════════════════════════════════════════
--- CLEAN UP ORPHANED ROWS
+-- 2. CLEAN UP ORPHANED ROWS
 -- ══════════════════════════════════════════════════════════════
 
 DELETE FROM public.profiles p
 WHERE NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = p.id);
 
 -- ══════════════════════════════════════════════════════════════
--- RLS (drop + recreate for idempotency)
+-- 3. ROW LEVEL SECURITY
 -- ══════════════════════════════════════════════════════════════
 
 ALTER TABLE IF EXISTS public.profiles             ENABLE ROW LEVEL SECURITY;
@@ -194,6 +231,7 @@ ALTER TABLE IF EXISTS public.posts                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.credit_balances      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.credit_history       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.audit_log            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.ip_bans              ENABLE ROW LEVEL SECURITY;
 
 -- profiles
 DROP POLICY IF EXISTS "Users can view own profile"   ON public.profiles;
@@ -248,8 +286,8 @@ DROP POLICY IF EXISTS "Users can view own credit balance"    ON public.credit_ba
 DROP POLICY IF EXISTS "Users can update own credit balance"  ON public.credit_balances;
 DROP POLICY IF EXISTS "Users can insert own credit balance"  ON public.credit_balances;
 CREATE POLICY "Users can view own credit balance"    ON public.credit_balances FOR SELECT  USING (auth.uid() = user_id);
-CREATE POLICY "Users can update own credit balance"  ON public.credit_balances FOR UPDATE  USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own credit balance"  ON public.credit_balances FOR INSERT  WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own credit balance"  ON public.credit_balances FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own credit balance"  ON public.credit_balances FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- credit_history
 DROP POLICY IF EXISTS "Users can view own credit history"   ON public.credit_history;
@@ -257,14 +295,18 @@ DROP POLICY IF EXISTS "Users can insert own credit history" ON public.credit_his
 CREATE POLICY "Users can view own credit history"   ON public.credit_history FOR SELECT  USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own credit history" ON public.credit_history FOR INSERT  WITH CHECK (auth.uid() = user_id);
 
--- audit_log
+-- audit_log (admin-only via service-role, no user-level RLS)
 DROP POLICY IF EXISTS "Admins can view audit logs"   ON public.audit_log;
 DROP POLICY IF EXISTS "System can insert audit logs" ON public.audit_log;
 CREATE POLICY "Admins can view audit logs"   ON public.audit_log FOR SELECT  USING (false);
 CREATE POLICY "System can insert audit logs" ON public.audit_log FOR INSERT  WITH CHECK (true);
 
+-- ip_bans (service-role only)
+DROP POLICY IF EXISTS "Service role manages ip_bans" ON public.ip_bans;
+CREATE POLICY "Service role manages ip_bans" ON public.ip_bans FOR ALL USING (false);
+
 -- ══════════════════════════════════════════════════════════════
--- STORAGE
+-- 4. STORAGE BUCKETS
 -- ══════════════════════════════════════════════════════════════
 
 INSERT INTO storage.buckets (id, name, public)
@@ -292,9 +334,19 @@ CREATE POLICY "Users can delete own media"  ON storage.objects FOR DELETE
   USING (bucket_id = 'media' AND auth.uid()::text = (storage.foldername(name))[1]);
 
 -- ══════════════════════════════════════════════════════════════
--- FUNCTIONS & TRIGGERS
+-- 5. FUNCTIONS & TRIGGERS
 -- ══════════════════════════════════════════════════════════════
 
+-- Drop existing functions first (CREATE OR REPLACE can't rename parameters)
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS public.check_username_available(text);
+DROP FUNCTION IF EXISTS public.check_username_available(p_username text);
+DROP FUNCTION IF EXISTS public.increment_balance(uuid, integer);
+DROP FUNCTION IF EXISTS public.decrement_balance(uuid, integer);
+DROP FUNCTION IF EXISTS public.expire_bonus_credits(uuid);
+DROP FUNCTION IF EXISTS public.deduct_credits_with_bonus(uuid, integer);
+
+-- ── handle_new_user: auto-create profile, subscription, credits on signup ──
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -326,17 +378,19 @@ BEGIN
     candidate := left(base_username, 15) || '_' || suffix::text;
   END LOOP;
 
-  INSERT INTO public.profiles (id, username, full_name, created_at, updated_at)
+  INSERT INTO public.profiles (id, email, username, full_name, created_at, updated_at)
   VALUES (
     NEW.id,
+    NEW.email,
     candidate,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     NOW(),
     NOW()
   )
   ON CONFLICT (id) DO UPDATE
-    SET username   = EXCLUDED.username,
-        full_name  = EXCLUDED.full_name,
+    SET email      = COALESCE(EXCLUDED.email, public.profiles.email),
+        username   = EXCLUDED.username,
+        full_name  = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
         updated_at = NOW();
 
   INSERT INTO public.subscriptions (user_id, plan)
@@ -358,6 +412,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
+-- ── check_username_available ───────────────────────────────────
 CREATE OR REPLACE FUNCTION public.check_username_available(p_username TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -370,6 +425,7 @@ BEGIN
 END;
 $func$;
 
+-- ── increment_balance: atomic credit add (upsert) ──────────────
 CREATE OR REPLACE FUNCTION public.increment_balance(p_user_id UUID, p_amount INTEGER)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -384,7 +440,7 @@ BEGIN
 END;
 $func$;
 
--- Atomic balance decrement for refund processing (clamps to 0)
+-- ── decrement_balance: atomic credit subtract (clamps to 0) ────
 CREATE OR REPLACE FUNCTION public.decrement_balance(p_user_id UUID, p_amount INTEGER)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -398,12 +454,7 @@ BEGIN
 END;
 $func$;
 
--- ══════════════════════════════════════════════════════════════
--- BONUS CREDIT FUNCTIONS (trial system)
--- expire_bonus_credits: sets expired bonus to 0
--- deduct_credits_with_bonus: spends bonus first, then regular balance
--- ══════════════════════════════════════════════════════════════
-
+-- ── expire_bonus_credits: lazy expiry ──────────────────────────
 CREATE OR REPLACE FUNCTION public.expire_bonus_credits(p_user_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -421,6 +472,7 @@ BEGIN
 END;
 $func$;
 
+-- ── deduct_credits_with_bonus: spend bonus first, then regular ─
 CREATE OR REPLACE FUNCTION public.deduct_credits_with_bonus(
   p_user_id UUID,
   p_amount INTEGER
@@ -481,7 +533,7 @@ END;
 $func$;
 
 -- ══════════════════════════════════════════════════════════════
--- INDEXES
+-- 6. INDEXES
 -- ══════════════════════════════════════════════════════════════
 
 CREATE INDEX IF NOT EXISTS idx_profiles_id                    ON public.profiles(id);
@@ -492,8 +544,12 @@ CREATE INDEX IF NOT EXISTS idx_posts_status                   ON public.posts(st
 CREATE INDEX IF NOT EXISTS idx_posts_scheduled_at             ON public.posts(scheduled_at);
 CREATE INDEX IF NOT EXISTS idx_content_calendars_user_id      ON public.content_calendars(user_id);
 CREATE INDEX IF NOT EXISTS idx_connected_platforms_user_id    ON public.connected_platforms(user_id);
+CREATE INDEX IF NOT EXISTS idx_credit_balances_user_id        ON public.credit_balances(user_id);
+CREATE INDEX IF NOT EXISTS idx_credit_history_user_id         ON public.credit_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_credit_history_created_at      ON public.credit_history(created_at);
 CREATE INDEX IF NOT EXISTS idx_audit_log_user_id              ON public.audit_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_created_at           ON public.audit_log(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_log_action               ON public.audit_log(action);
 
 -- Unique username index (guarded against existing duplicates)
 DO $$

@@ -13,14 +13,19 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api-middleware";
 
 export const GET = withAuth(async (_request, { supabase, user }) => {
-  // Fetch credit balance
+  // Lazy-expire bonus credits before reading
+  try { await supabase.rpc("expire_bonus_credits", { p_user_id: user.id }); } catch { /* ok */ }
+
+  // Fetch credit balance (including bonus)
   const { data: creditData } = await supabase
     .from("credit_balances")
-    .select("balance")
+    .select("balance, bonus_credits, bonus_expires_at")
     .eq("user_id", user.id)
     .single();
 
-  const credits = creditData?.balance ?? 0;
+  const credits = (creditData?.balance ?? 0) + (creditData?.bonus_credits ?? 0);
+  const bonusCredits = creditData?.bonus_credits ?? 0;
+  const bonusExpiresAt = creditData?.bonus_expires_at ?? null;
 
   // Fetch all posts for this user
   const { data: posts } = await supabase
@@ -59,6 +64,8 @@ export const GET = withAuth(async (_request, { supabase, user }) => {
 
   return NextResponse.json({
     credits,
+    bonusCredits,
+    bonusExpiresAt,
     totalPosts: allPosts.length,
     postsThisWeek,
     postsByStatus,

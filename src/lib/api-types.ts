@@ -220,10 +220,24 @@ export interface SubscriptionStatus {
 // WEBHOOK EVENTS
 // ══════════════════════════════════════════════════════════════
 
-export interface StripeWebhookEvent {
-  type: string;
-  data: {
-    object: Record<string, unknown>;
+export interface PaddleWebhookEvent {
+  alert_name: string;
+  transaction_id: string | number;
+  subscription_id?: string | number;
+  product_id?: string;
+  passthrough?: string;
+  [key: string]: unknown;
+}
+
+export interface RazorpayWebhookEvent {
+  event: string;
+  payload?: {
+    payment?: {
+      entity: Record<string, unknown>;
+    };
+    order?: {
+      entity: Record<string, unknown>;
+    };
   };
 }
 

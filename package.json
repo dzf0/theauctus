@@ -17,15 +17,17 @@
     "@upstash/redis": "^1.38.2",
     "animejs": "^3.2.2",
     "next": "16.3.2",
+    "nodemailer": "^6.9.16",
     "ogl": "^1.0.11",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "stripe": "^22.5.0",
+    "razorpay": "^2.9.5",
     "three": "^0.185.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/jest": "^30.0.0",
+    "@types/nodemailer": "^6.4.17",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
