@@ -569,5 +569,34 @@ BEGIN
 END $$;
 
 -- ══════════════════════════════════════════════════════════════
+-- 7. RETROACTIVE CREDITS FOR EXISTING USERS
+-- ══════════════════════════════════════════════════════════════
+-- The trigger only fires on NEW signups. Existing users who
+-- signed up before this SQL was run need credits granted now.
+-- Uses ON CONFLICT DO NOTHING so it's safe to re-run.
+
+-- Give 10 free credits + 50 trial bonus credits to users
+-- who have a profile but NO credit_balances row yet.
+INSERT INTO public.credit_balances (user_id, balance, bonus_credits, bonus_expires_at)
+SELECT p.id, 10, 50, NOW() + INTERVAL '7 days'
+FROM public.profiles p
+LEFT JOIN public.credit_balances cb ON cb.user_id = p.id
+WHERE cb.id IS NULL
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Also grant credits to users who have a row but balance is 0
+-- and no bonus_credits (they were created but never got the welcome bonus)
+UPDATE public.credit_balances
+SET balance = GREATEST(balance, 10),
+    bonus_credits = GREATEST(bonus_credits, 50),
+    bonus_expires_at = CASE
+      WHEN bonus_expires_at IS NULL OR bonus_expires_at < NOW()
+      THEN NOW() + INTERVAL '7 days'
+      ELSE bonus_expires_at
+    END,
+    updated_at = NOW()
+WHERE balance = 0 AND (bonus_credits = 0 OR bonus_credits IS NULL);
+
+-- ══════════════════════════════════════════════════════════════
 -- DONE
 -- ══════════════════════════════════════════════════════════════
