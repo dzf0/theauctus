@@ -22,6 +22,9 @@ interface Post {
 
 interface UserStats {
   credits: number;
+  purchasedCredits: number;
+  bonusCredits: number;
+  bonusExpiresAt: string | null;
   totalPosts: number;
   postsThisWeek: number;
   postsByStatus: {
@@ -65,12 +68,25 @@ export default function DashboardPage() {
     return <SkeletonDashboard />;
   }
 
+  const purchasedCredits = stats?.purchasedCredits ?? 0;
+  const bonusCredits = stats?.bonusCredits ?? 0;
+  const bonusExpiry = stats?.bonusExpiresAt;
+  const hasBonus = bonusCredits > 0;
+  const daysLeft = bonusExpiry
+    ? Math.max(0, Math.ceil((new Date(bonusExpiry).getTime() - Date.now()) / 86400000))
+    : 0;
+
   const statCards = [
     {
       label: "Credits",
-      value: stats?.credits?.toString() ?? "0",
-      sub: stats?.credits === 0 ? "Purchase credits to generate content" : "Available balance",
+      value: purchasedCredits.toString(),
+      sub: purchasedCredits === 0 && !hasBonus ? "Purchase credits to generate content" : "Purchased & free credits",
     },
+    ...(hasBonus ? [{
+      label: "Trial Credits",
+      value: bonusCredits.toString(),
+      sub: `Expire${daysLeft <= 1 ? 's' : ''} in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
+    }] : []),
     {
       label: "Posts This Week",
       value: stats?.postsThisWeek?.toString() ?? "0",
@@ -91,17 +107,17 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Low credit warning */}
-      {stats && stats.credits < 5 && (
+      {stats && (purchasedCredits + bonusCredits) < 5 && (
         <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: "rgba(201, 168, 124, 0.08)", border: "1px solid rgba(201, 168, 124, 0.2)" }}>
           <svg className="w-5 h-5 shrink-0" style={{ color: "var(--accent-copper)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
           <div className="flex-1">
             <p className="text-[13px] font-medium" style={{ color: "var(--foreground)" }}>
-              {stats.credits === 0 ? "You're out of credits" : `Only ${stats.credits} credit${stats.credits === 1 ? "" : "s"} left`}
+              {(purchasedCredits + bonusCredits) === 0 ? "You're out of credits" : `Only ${purchasedCredits + bonusCredits} credit${(purchasedCredits + bonusCredits) === 1 ? "" : "s"} left`}
             </p>
             <p className="text-[12px]" style={{ color: "var(--muted)" }}>
-              {stats.credits === 0
+              {(purchasedCredits + bonusCredits) === 0
                 ? "Purchase credits to keep generating content."
                 : "Generate a calendar (15 credits) or posts (5 credits) — buy more to continue."}
             </p>

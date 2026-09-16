@@ -142,14 +142,25 @@ function TopBarSignOut() {
 }
 
 function CreditBalance() {
-  const [credits, setCredits] = useState<number | null>(null);
+  const [purchased, setPurchased] = useState<number | null>(null);
+  const [bonus, setBonus] = useState<number | null>(null);
+  const [bonusExpiry, setBonusExpiry] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/user/stats")
       .then((r) => r.json())
-      .then((data) => setCredits(data.credits ?? 0))
+      .then((data) => {
+        setPurchased(data.purchasedCredits ?? data.credits ?? 0);
+        setBonus(data.bonusCredits ?? 0);
+        setBonusExpiry(data.bonusExpiresAt ?? null);
+      })
       .catch(() => {});
   }, []);
+
+  const daysLeft = bonusExpiry
+    ? Math.max(0, Math.ceil((new Date(bonusExpiry).getTime() - Date.now()) / 86400000))
+    : 0;
+  const hasBonus = bonus !== null && bonus > 0;
 
   return (
     <div className="liquid-subtle p-3">
@@ -157,10 +168,17 @@ function CreditBalance() {
         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--accent-copper)" }}></div>
         <span className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>Credits</span>
       </div>
-      <p className="text-2xl font-headline mb-2" style={{ color: "var(--foreground)" }}>
-        {credits !== null ? credits : "—"}
+      <p className="text-2xl font-headline" style={{ color: "var(--foreground)" }}>
+        {purchased !== null ? purchased : "—"}
       </p>
-      <p className="text-[10px] mb-2" style={{ color: "var(--muted)" }}>Available balance</p>
+      <p className="text-[10px] mb-1" style={{ color: "var(--muted)" }}>Available balance</p>
+      {hasBonus && (
+        <div className="mt-2 mb-2 px-2 py-1.5 rounded" style={{ background: "rgba(201, 168, 124, 0.08)", border: "1px solid rgba(201, 168, 124, 0.15)" }}>
+          <p className="text-[10px]" style={{ color: "var(--accent-copper)" }}>
+            🎁 {bonus} trial credit{bonus === 1 ? "" : "s"} — {daysLeft}d left
+          </p>
+        </div>
+      )}
       <Link href="/billing" className="text-[10px] uppercase tracking-[0.1em] accent-text hover:opacity-80 transition-opacity">Buy More →</Link>
     </div>
   );
