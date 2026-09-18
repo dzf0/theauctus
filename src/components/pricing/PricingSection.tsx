@@ -1,14 +1,17 @@
 /**
- * PricingSection — 3-tier pricing with Paddle Checkout overlay
+ * PricingSection — 3-tier credit pack pricing with Paddle Checkout overlay
+ *
+ * Credits are one-time purchases — they never expire.
+ * Users buy credits and use them whenever they want.
  *
  * Security:
- * - Paddle.js is initialized client-side with NEXT_PUBLIC_PADDLE_CLIENT_TOKEN (safe to expose)
+ * - Paddle.js initialized client-side with NEXT_PUBLIC_PADDLE_CLIENT_TOKEN (safe to expose)
  * - No server-side API keys in this file
- * - Email is fetched from /api/pricing/preview (requires auth) — never stored in localStorage
- * - Country is passed from server component (can't be spoofed)
- * - Price IDs come from env vars via constants.ts
- * - Checkout.open() uses displayMode: 'overlay' and variant: 'one-page' as specified
- * - Redirect to /welcome on success (set in checkout settings or event callback)
+ * - Email fetched from /api/pricing/preview (requires auth) — never stored in localStorage
+ * - Country passed from server component (can't be spoofed)
+ * - Price IDs come from env vars via CREDIT_PACKS
+ * - Checkout.open() uses displayMode: 'overlay' and variant: 'one-page'
+ * - Redirect to /welcome on success
  */
 
 "use client";
@@ -21,7 +24,7 @@ import {
 import { useEffect, useState } from "react";
 import { useUser } from "@/components/user-provider";
 import { usePaddlePrices } from "@/hooks/usePaddlePrices";
-import { PRICING_TIERS, type Tier } from "@/lib/constants";
+import { CREDIT_PACKS } from "@/lib/constants";
 import { Spinner } from "@/components/ui/Loading";
 
 // ══════════════════════════════════════════════════════════════
@@ -34,6 +37,16 @@ interface PricingPreviewResponse {
 }
 
 // ══════════════════════════════════════════════════════════════
+// SVG ICONS
+// ══════════════════════════════════════════════════════════════
+
+const CheckIcon = () => (
+  <svg className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "var(--accent-copper)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+  </svg>
+);
+
+// ══════════════════════════════════════════════════════════════
 // COMPONENT
 // ══════════════════════════════════════════════════════════════
 
@@ -42,10 +55,9 @@ interface Props {
 }
 
 export function PricingSection({ country }: Props) {
-  const [frequency, setFrequency] = useState<"month" | "year">("month");
   const [paddle, setPaddle] = useState<Paddle | undefined>();
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [subscribing, setSubscribing] = useState<string | null>(null);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
 
   const { prices, loading: pricesLoading, error: priceError } = usePaddlePrices(paddle, country);
   const user = useUser();
@@ -82,24 +94,23 @@ export function PricingSection({ country }: Props) {
       });
   }, [user]);
 
-  // ── Handle subscribe click ──────────────────────────────────
-  function handleSubscribe(tier: Tier) {
+  // ── Handle buy click ────────────────────────────────────────
+  function handleBuy(packId: string) {
     if (!paddle) {
       console.error("[PRICING] Paddle not initialized");
       return;
     }
 
-    const priceId = tier.priceId[frequency];
-    if (!priceId) {
-      console.error(`[PRICING] No price ID for ${tier.name}/${frequency}`);
+    const pack = CREDIT_PACKS.find((p) => p.id === packId);
+    if (!pack?.paddlePriceId) {
+      console.error(`[PRICING] No price ID for pack: ${packId}`);
       return;
     }
 
-    setSubscribing(tier.name);
+    setPurchasing(packId);
 
-    // Build checkout config
     const checkoutConfig: Parameters<Paddle["Checkout"]["open"]>[0] = {
-      items: [{ priceId, quantity: 1 }],
+      items: [{ priceId: pack.paddlePriceId, quantity: 1 }],
       settings: {
         displayMode: "overlay",
         variant: "one-page" as const,
@@ -115,9 +126,8 @@ export function PricingSection({ country }: Props) {
 
     paddle.Checkout.open(checkoutConfig);
 
-    // Reset subscribing state after a short delay
-    // (checkout overlay takes over the UI)
-    setTimeout(() => setSubscribing(null), 2000);
+    // Reset after a short delay (checkout overlay takes over)
+    setTimeout(() => setPurchasing(null), 2000);
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -129,48 +139,11 @@ export function PricingSection({ country }: Props) {
       {/* Header */}
       <div className="text-center">
         <h1 className="font-headline text-3xl sm:text-4xl mb-3" style={{ color: "var(--foreground)" }}>
-          Choose your plan
+          Buy credits
         </h1>
         <p className="text-[14px] max-w-md mx-auto" style={{ color: "var(--muted)" }}>
-          AI-powered content generation for every creator. All plans include a 7-day free trial.
+          Credits power AI content generation. Buy once, use forever — they never expire.
         </p>
-      </div>
-
-      {/* Frequency toggle */}
-      <div className="flex justify-center">
-        <div
-          className="flex items-center gap-1 p-1 rounded-lg"
-          style={{ background: "var(--lg-bg)", border: "1px solid var(--lg-border)" }}
-        >
-          <button
-            onClick={() => setFrequency("month")}
-            className="px-4 py-2 text-[13px] rounded-md transition-all"
-            style={{
-              background: frequency === "month" ? "var(--accent-copper)" : "transparent",
-              color: frequency === "month" ? "#0a0a0f" : "var(--muted)",
-              fontWeight: frequency === "month" ? 600 : 400,
-            }}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setFrequency("year")}
-            className="px-4 py-2 text-[13px] rounded-md transition-all"
-            style={{
-              background: frequency === "year" ? "var(--accent-copper)" : "transparent",
-              color: frequency === "year" ? "#0a0a0f" : "var(--muted)",
-              fontWeight: frequency === "year" ? 600 : 400,
-            }}
-          >
-            Yearly
-            <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{
-              background: frequency === "year" ? "rgba(0,0,0,0.15)" : "rgba(201,168,124,0.15)",
-              color: frequency === "year" ? "#0a0a0f" : "var(--accent-copper)",
-            }}>
-              Save 20%
-            </span>
-          </button>
-        </div>
       </div>
 
       {/* Price error */}
@@ -182,24 +155,22 @@ export function PricingSection({ country }: Props) {
 
       {/* Tier cards */}
       <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {PRICING_TIERS.map((tier, i) => {
-          const priceId = tier.priceId[frequency];
-          const formatted = prices[priceId];
-          const isPopular = tier.name === "Growth";
+        {CREDIT_PACKS.map((pack, i) => {
+          const formatted = prices[pack.paddlePriceId ?? ""];
 
           return (
             <div
-              key={tier.name}
-              className={`liquid-card p-8 relative ${isPopular ? "glow-breathe" : ""}`}
+              key={pack.id}
+              className={`liquid-card p-8 relative ${pack.popular ? "glow-breathe" : ""}`}
               style={{ animationDelay: `${i * 0.1}s` }}
             >
-              {isPopular && (
-                <span className="liquid-badge absolute top-6 right-6 z-10">Most Popular</span>
+              {pack.popular && (
+                <span className="liquid-badge absolute top-6 right-6 z-10">Best Value</span>
               )}
 
-              {/* Tier name */}
+              {/* Pack name */}
               <p className="text-[10px] uppercase tracking-[0.15em] mb-3" style={{ color: "var(--muted)" }}>
-                {tier.name}
+                {pack.name}
               </p>
 
               {/* Price */}
@@ -207,39 +178,35 @@ export function PricingSection({ country }: Props) {
                 <span className="font-headline text-4xl" style={{ color: "var(--foreground)" }}>
                   {pricesLoading || !formatted ? "..." : formatted}
                 </span>
-                {!pricesLoading && formatted && (
-                  <span className="text-[13px] ml-1" style={{ color: "var(--muted)" }}>
-                    /{frequency === "month" ? "mo" : "yr"}
-                  </span>
-                )}
               </div>
 
-              {/* Description */}
-              <p className="text-[13px] mb-6" style={{ color: "var(--muted)" }}>
-                {tier.description}
+              {/* Credits + per-credit cost */}
+              <p className="text-[13px] mb-1" style={{ color: "var(--muted)" }}>
+                {pack.credits} credits — {pack.pricePerCredit} each
+              </p>
+              <p className="text-[12px] mb-6" style={{ color: "var(--muted)" }}>
+                {pack.description}
               </p>
 
               {/* Features */}
               <ul className="space-y-3 mb-8">
-                {tier.features.map((f, j) => (
+                {pack.features.map((f, j) => (
                   <li key={j} className="flex items-start gap-2 text-[12px]" style={{ color: "var(--cool-grey)" }}>
-                    <svg className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "var(--accent-copper)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
+                    <CheckIcon />
                     {f}
                   </li>
                 ))}
               </ul>
 
-              {/* Subscribe button */}
+              {/* Buy button */}
               <button
-                onClick={() => handleSubscribe(tier)}
-                disabled={!paddle || pricesLoading || subscribing !== null}
+                onClick={() => handleBuy(pack.id)}
+                disabled={!paddle || pricesLoading || purchasing !== null}
                 className={`block w-full text-center py-3 transition-opacity disabled:opacity-50 ${
-                  isPopular ? "liquid-btn-primary" : "liquid-btn"
+                  pack.popular ? "liquid-btn-primary" : "liquid-btn"
                 }`}
               >
-                {subscribing === tier.name ? (
+                {purchasing === pack.id ? (
                   <span className="flex items-center justify-center gap-2">
                     <Spinner size={14} /> Opening checkout...
                   </span>
@@ -248,7 +215,7 @@ export function PricingSection({ country }: Props) {
                     <Spinner size={14} /> Loading...
                   </span>
                 ) : (
-                  "Subscribe"
+                  `Buy ${pack.credits} Credits`
                 )}
               </button>
             </div>
@@ -258,7 +225,7 @@ export function PricingSection({ country }: Props) {
 
       {/* Footer note */}
       <p className="text-center text-[12px]" style={{ color: "var(--muted)" }}>
-        All plans include a 7-day free trial. Cancel anytime. Prices shown include applicable tax.
+        Credits never expire. Buy once, use whenever you need them. Prices include applicable tax.
       </p>
     </div>
   );

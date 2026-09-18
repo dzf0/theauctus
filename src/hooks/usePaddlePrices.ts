@@ -1,34 +1,38 @@
 /**
  * usePaddlePrices — fetches localized prices from Paddle.PricePreview()
  *
+ * Uses one-time credit pack price IDs from CREDIT_PACKS.
+ * Credits never expire — users buy once, use forever.
+ *
  * Security:
  * - PricePreview is a CLIENT-SIDE call (no API key needed)
  * - Country code is validated server-side before reaching here
  * - "OTHERS" sentinel is never passed to Paddle — we drop the address field instead
- * - Price IDs come from env vars (NEXT_PUBLIC_PADDLE_*) — never hardcoded
+ * - Price IDs come from env vars via CREDIT_PACKS — never hardcoded
  */
 
 import { type Paddle, type PricePreviewParams, type PricePreviewResponse } from "@paddle/paddle-js";
 import { useEffect, useState } from "react";
-import { PRICING_TIERS } from "@/lib/constants";
+import { CREDIT_PACKS } from "@/lib/constants";
 
 export type PaddlePrices = Record<string, string>;
 
 /**
- * Build the line items for PricePreview — all tiers, both billing frequencies.
- * This fetches everything in one API call.
+ * Build line items for PricePreview — one entry per credit pack.
+ * All prices are one-time (no billing cycle).
  */
 function getLineItems(): PricePreviewParams["items"] {
-  return PRICING_TIERS.flatMap((tier) =>
-    [tier.priceId.month, tier.priceId.year]
-      .filter(Boolean) // skip empty price IDs (not configured yet)
-      .map((priceId) => ({ priceId, quantity: 1 }))
-  );
+  return CREDIT_PACKS
+    .filter((pack) => pack.paddlePriceId) // skip packs without price IDs
+    .map((pack) => ({
+      priceId: pack.paddlePriceId!,
+      quantity: 1,
+    }));
 }
 
 /**
  * Extract formatted totals from the PricePreview response.
- * item.formattedTotals.total is already locale-formatted (e.g. "$9.99", "€8.50", "¥1,200").
+ * item.formattedTotals.total is already locale-formatted (e.g. "$5.00", "€4.50").
  */
 function getPriceAmounts(response: PricePreviewResponse): PaddlePrices {
   return response.data.details.lineItems.reduce<PaddlePrices>((acc, item) => {
@@ -55,7 +59,7 @@ export function usePaddlePrices(
     const items = getLineItems();
     if (items.length === 0) {
       setLoading(false);
-      setError("No price IDs configured. Set PADDLE_PRICE_*_MONTH and *_YEAR env vars.");
+      setError("No price IDs configured. Set PADDLE_PRICE_STARTER/GROWTH/PRO env vars.");
       return;
     }
 
