@@ -20,6 +20,10 @@ const requiredPublicEnv = [
 
 const optionalEnv = [
   // Paddle (international payments)
+  "PADDLE_API_KEY",
+  "PADDLE_NOTIFICATION_WEBHOOK_SECRET",
+  "NEXT_PUBLIC_PADDLE_CLIENT_TOKEN",
+  "NEXT_PUBLIC_PADDLE_ENV",
   "PADDLE_VENDOR_ID",
   "PADDLE_CLIENT_TOKEN",
   "PADDLE_WEBHOOK_SECRET",

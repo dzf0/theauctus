@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Spinner } from "@/components/ui/Loading";
 import {
   CREDIT_PACKS,
@@ -10,26 +11,6 @@ import {
   CUSTOM_CREDIT_MIN_DOLLARS,
   CUSTOM_CREDIT_MAX_DOLLARS,
 } from "@/lib/constants";
-
-// ══════════════════════════════════════════════════════════════
-// Paddle.js type declarations (loaded from CDN)
-// ══════════════════════════════════════════════════════════════
-
-declare global {
-  interface Window {
-    Paddle?: {
-      Initialize: (config: { eventCallback?: (event: unknown) => void }) => void;
-      Checkout: {
-        open: (config: {
-          items: Array<{ priceId: string; quantity: number }>;
-          customData?: Record<string, unknown>;
-          successCallback?: (data: unknown) => void;
-          closeCallback?: () => void;
-        }) => void;
-      };
-    };
-  }
-}
 
 interface CreditHistoryEntry {
   id: string;
@@ -248,6 +229,7 @@ export default function BillingPage() {
   const [history, setHistory] = useState<CreditHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [paddle, setPaddle] = useState<Paddle | null>(null);
 
   // Custom amount state
   const [customAmount, setCustomAmount] = useState("");
@@ -278,36 +260,24 @@ export default function BillingPage() {
     }
   }, []);
 
-  // ── Initialize Paddle.js from CDN ──────────────────────────
+  // ── Initialize Paddle.js from @paddle/paddle-js ─────────────
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const clientId = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+    const env = process.env.NEXT_PUBLIC_PADDLE_ENV as "sandbox" | "production" | undefined;
 
-    // Load Paddle.js script
-    const script = document.createElement("script");
-    script.src = "https://cdn.paddle.com/paddle/paddle.js";
-    script.async = true;
-    script.onload = () => {
-      if (window.Paddle) {
-        window.Paddle.Initialize({
-          eventCallback: (event: unknown) => {
-            const e = event as { name?: string; data?: Record<string, unknown> };
-            if (e.name === "checkout.completed") {
-              // Payment successful — refresh balance
-              fetchBalanceAndHistory();
-            }
-          },
-        });
-      }
-    };
-    document.head.appendChild(script);
+    if (!clientId || !env) return;
 
-    return () => {
-      // Cleanup
-      const existing = document.querySelector(
-        'script[src*="paddle"]'
-      );
-      if (existing) existing.remove();
-    };
+    initializePaddle({
+      token: clientId,
+      environment: env,
+      eventCallback: (event) => {
+        if (event.name === "checkout.completed") {
+          fetchBalanceAndHistory();
+        }
+      },
+    }).then((p) => {
+      if (p) setPaddle(p);
+    });
   }, [fetchBalanceAndHistory]);
 
   useEffect(() => {
@@ -337,15 +307,11 @@ export default function BillingPage() {
       const data = await res.json();
 
       // ── Paddle: open overlay checkout ────────────────────
-      if (data.mode === "paddle" && data.priceId) {
-        if (window.Paddle) {
-          window.Paddle.Checkout.open({
-            items: [{ priceId: data.priceId, quantity: 1 }],
-            customData: data.userMetadata,
-          });
-        } else {
-          console.error("[BILLING] Paddle.js not loaded");
-        }
+      if (data.mode === "paddle" && data.priceId && paddle) {
+        paddle.Checkout.open({
+          items: [{ priceId: data.priceId, quantity: 1 }],
+          customData: data.userMetadata,
+        });
         return;
       }
 
@@ -399,19 +365,16 @@ export default function BillingPage() {
 
       const data = await res.json();
 
-      if (data.mode === "paddle") {
-        // For custom amounts, Paddle uses a passthrough
-        if (window.Paddle) {
-          window.Paddle.Checkout.open({
-            items: [
-              {
-                priceId: data.priceId || "custom_price_placeholder",
-                quantity: 1,
-              },
-            ],
-            customData: data.userMetadata,
-          });
-        }
+      if (data.mode === "paddle" && paddle) {
+        paddle.Checkout.open({
+          items: [
+            {
+              priceId: data.priceId || "custom_price_placeholder",
+              quantity: 1,
+            },
+          ],
+          customData: data.userMetadata,
+        });
         return;
       }
 

@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
+    "@paddle/paddle-js": "^1.6.5",
+    "@paddle/paddle-node-sdk": "^3.10.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "@types/three": "^0.185.4",
@@ -19,16 +21,16 @@
     "next": "16.3.2",
     "nodemailer": "^6.9.16",
     "ogl": "^1.0.11",
+    "razorpay": "^2.9.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "razorpay": "^2.9.5",
     "three": "^0.185.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/jest": "^30.0.0",
-    "@types/nodemailer": "^6.4.17",
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.17",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
