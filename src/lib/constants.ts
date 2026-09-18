@@ -101,6 +101,66 @@ export const CUSTOM_CREDIT_MIN_DOLLARS = 5; // minimum purchase
 export const CUSTOM_CREDIT_MAX_DOLLARS = 500; // maximum purchase
 
 // ══════════════════════════════════════════════════════════════
+// SUBSCRIPTION TIERS — 3-tier pricing page
+// Price IDs from Paddle Dashboard → Catalog → Products
+// ══════════════════════════════════════════════════════════════
+
+export interface Tier {
+  name: "Starter" | "Growth" | "Pro";
+  description: string;
+  features: string[];
+  priceId: { month: string; year: string };
+}
+
+export const PRICING_TIERS: Tier[] = [
+  {
+    name: "Starter",
+    description: "For new creators finding their voice",
+    features: [
+      "25 credits/month",
+      "1 content calendar",
+      "All platforms",
+      "Basic analytics",
+    ],
+    priceId: {
+      month: process.env.PADDLE_PRICE_STARTER_MONTH || "",
+      year: process.env.PADDLE_PRICE_STARTER_YEAR || "",
+    },
+  },
+  {
+    name: "Growth",
+    description: "For consistent creators scaling up",
+    features: [
+      "100 credits/month",
+      "6 content calendars",
+      "All platforms",
+      "Priority support",
+      "Content repurposing",
+    ],
+    priceId: {
+      month: process.env.PADDLE_PRICE_GROWTH_MONTH || "",
+      year: process.env.PADDLE_PRICE_GROWTH_YEAR || "",
+    },
+  },
+  {
+    name: "Pro",
+    description: "For power creators who need it all",
+    features: [
+      "500 credits/month",
+      "Unlimited calendars",
+      "All platforms",
+      "Dedicated support",
+      "Custom AI training",
+      "API access",
+    ],
+    priceId: {
+      month: process.env.PADDLE_PRICE_PRO_MONTH || "",
+      year: process.env.PADDLE_PRICE_PRO_YEAR || "",
+    },
+  },
+];
+
+// ══════════════════════════════════════════════════════════════
 // PLATFORMS
 // ══════════════════════════════════════════════════════════════
 
