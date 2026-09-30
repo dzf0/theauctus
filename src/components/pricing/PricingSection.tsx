@@ -107,10 +107,21 @@ export function PricingSection({ country }: Props) {
       return;
     }
 
+    // Credits are granted by the webhook via customData.user_id — a
+    // signed-in account is required, so send logged-out visitors to sign in.
+    if (!user) {
+      window.location.href = "/auth/signin";
+      return;
+    }
+
     setPurchasing(packId);
 
     const checkoutConfig: Parameters<Paddle["Checkout"]["open"]>[0] = {
       items: [{ priceId: pack.paddlePriceId, quantity: 1 }],
+      customData: {
+        user_id: user.id,
+        pack: packId,
+      },
       settings: {
         displayMode: "overlay",
         variant: "one-page" as const,
