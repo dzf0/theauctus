@@ -36,14 +36,14 @@ const SECURITY_HEADERS: Record<string, string> = {
 // Dev keeps it for Next.js HMR / fast refresh.
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  `script-src 'self' ${isProd ? "'unsafe-inline'" : "'unsafe-inline' 'unsafe-eval'"} https://fonts.googleapis.com`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  `script-src 'self' ${isProd ? "'unsafe-inline'" : "'unsafe-inline' 'unsafe-eval'"} https://fonts.googleapis.com https://cdn.paddle.com`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.paddle.com",
   "font-src 'self' https://fonts.gstatic.com",
   // Tighten img-src: only self, data URIs for inline icons, and known hosts
   "img-src 'self' data: blob: https://*.supabase.co https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://*.razorpay.com",
   // Allow video/audio from Supabase storage
   "media-src 'self' https://*.supabase.co blob:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://sandbox.pay.paddle.com https://pay.paddle.com https://api.razorpay.com https://generativelanguage.googleapis.com https://api.elevenlabs.io",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://sandbox.pay.paddle.com https://pay.paddle.com https://*.paddle.com https://api.razorpay.com https://generativelanguage.googleapis.com https://api.elevenlabs.io",
   // Allow Paddle and Razorpay checkout iframes/popups
   "frame-src 'self' https://sandbox.pay.paddle.com https://pay.paddle.com https://*.razorpay.com",
   "base-uri 'self'",
