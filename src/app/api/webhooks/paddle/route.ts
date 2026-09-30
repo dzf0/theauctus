@@ -12,7 +12,7 @@
  *   2. Set NEXT_PUBLIC_PADDLE_CLIENT_TOKEN in .env (client-side)
  *   3. Set PADDLE_NOTIFICATION_WEBHOOK_SECRET in .env (from Paddle → Notifications → your destination)
  *   4. Set NEXT_PUBLIC_PADDLE_ENV to "sandbox" or "production"
- *   5. Set PADDLE_PRICE_STARTER, PADDLE_PRICE_GROWTH, PADDLE_PRICE_PRO
+ *   5. Set NEXT_PUBLIC_PADDLE_PRICE_STARTER/GROWTH/PRO (public — needed client-side)
  *   6. Create notification destination in Paddle Dashboard → Developer tools → Notifications
  *      - URL: https://your-domain.com/api/webhooks/paddle
  *      - Events: transaction.completed, transaction.updated
@@ -38,9 +38,18 @@ for (const pack of CREDIT_PACKS) {
 
 // Also map via env vars (fallback)
 const ENV_PRICE_MAP: Record<string, string> = {
-  starter: process.env.PADDLE_PRICE_STARTER || "",
-  growth: process.env.PADDLE_PRICE_GROWTH || "",
-  pro: process.env.PADDLE_PRICE_PRO || "",
+  starter:
+    process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER ||
+    process.env.PADDLE_PRICE_STARTER ||
+    "",
+  growth:
+    process.env.NEXT_PUBLIC_PADDLE_PRICE_GROWTH ||
+    process.env.PADDLE_PRICE_GROWTH ||
+    "",
+  pro:
+    process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO ||
+    process.env.PADDLE_PRICE_PRO ||
+    "",
 };
 
 for (const [packId, priceId] of Object.entries(ENV_PRICE_MAP)) {

@@ -59,7 +59,7 @@ export function usePaddlePrices(
     const items = getLineItems();
     if (items.length === 0) {
       setLoading(false);
-      setError("No price IDs configured. Set PADDLE_PRICE_STARTER/GROWTH/PRO env vars.");
+      setError("No price IDs configured. Set NEXT_PUBLIC_PADDLE_PRICE_STARTER/GROWTH/PRO env vars.");
       return;
     }
 

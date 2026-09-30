@@ -180,7 +180,7 @@ export const POST = withAuth(
         return NextResponse.json(
           {
             error:
-              "Paddle price not configured for this pack. Set PADDLE_PRICE_STARTER/GROWTH/PRO env vars.",
+              "Paddle price not configured for this pack. Set NEXT_PUBLIC_PADDLE_PRICE_STARTER/GROWTH/PRO env vars.",
           },
           { status: 500 }
         );

@@ -41,7 +41,10 @@ export const CREDIT_PACKS: CreditPack[] = [
       "All platforms supported",
     ],
     popular: false,
-    paddlePriceId: process.env.PADDLE_PRICE_STARTER || undefined,
+    paddlePriceId:
+      process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER ||
+      process.env.PADDLE_PRICE_STARTER ||
+      undefined,
   },
   {
     id: "growth",
@@ -57,7 +60,10 @@ export const CREDIT_PACKS: CreditPack[] = [
       "Priority support",
     ],
     popular: true,
-    paddlePriceId: process.env.PADDLE_PRICE_GROWTH || undefined,
+    paddlePriceId:
+      process.env.NEXT_PUBLIC_PADDLE_PRICE_GROWTH ||
+      process.env.PADDLE_PRICE_GROWTH ||
+      undefined,
   },
   {
     id: "pro",
@@ -74,7 +80,10 @@ export const CREDIT_PACKS: CreditPack[] = [
       "Content repurposing",
     ],
     popular: false,
-    paddlePriceId: process.env.PADDLE_PRICE_PRO || undefined,
+    paddlePriceId:
+      process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO ||
+      process.env.PADDLE_PRICE_PRO ||
+      undefined,
   },
 ];
 

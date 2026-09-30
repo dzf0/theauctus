@@ -70,9 +70,9 @@ async function seed() {
   // ── Summary ──
   console.log("═".repeat(60));
   console.log("Add these to your .env file:\n");
-  console.log(`PADDLE_PRICE_STARTER=${starterPrice.id}`);
-  console.log(`PADDLE_PRICE_GROWTH=${growthPrice.id}`);
-  console.log(`PADDLE_PRICE_PRO=${proPrice.id}`);
+  console.log(`NEXT_PUBLIC_PADDLE_PRICE_STARTER=${starterPrice.id}`);
+  console.log(`NEXT_PUBLIC_PADDLE_PRICE_GROWTH=${growthPrice.id}`);
+  console.log(`NEXT_PUBLIC_PADDLE_PRICE_PRO=${proPrice.id}`);
   console.log("\n" + "═".repeat(60));
 }
 
