@@ -70,8 +70,10 @@ export default function FakeChatPage() {
       setErr(e instanceof DOMException && e.name === "AbortError"
         ? "AI generation timed out"
         : "Failed: " + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setAiBusy(false);
+      window.dispatchEvent(new Event("credits:changed"));
     }
-    setAiBusy(false);
   };
 
   const addMessage = (sender: "left" | "right") => {
@@ -138,8 +140,10 @@ export default function FakeChatPage() {
       setErr(e instanceof DOMException && e.name === "AbortError"
         ? "Video generation timed out (took too long)"
         : "Failed: " + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setBusy(false);
+      window.dispatchEvent(new Event("credits:changed"));
     }
-    setBusy(false);
   };
 
   const validMsgCount = messages.filter(m => m.text.trim()).length;

@@ -141,21 +141,35 @@ function TopBarSignOut() {
   );
 }
 
-function CreditBalance() {
+function CreditBalance({ pathname }: { pathname: string }) {
   const [purchased, setPurchased] = useState<number | null>(null);
   const [bonus, setBonus] = useState<number | null>(null);
   const [bonusExpiry, setBonusExpiry] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/user/stats")
-      .then((r) => r.json())
-      .then((data) => {
-        setPurchased(data.purchasedCredits ?? data.credits ?? 0);
-        setBonus(data.bonusCredits ?? 0);
-        setBonusExpiry(data.bonusExpiresAt ?? null);
-      })
-      .catch(() => {});
-  }, []);
+    const load = () => {
+      fetch("/api/user/stats")
+        .then((r) => r.json())
+        .then((data) => {
+          setPurchased(data.purchasedCredits ?? data.credits ?? 0);
+          setBonus(data.bonusCredits ?? 0);
+          setBonusExpiry(data.bonusExpiresAt ?? null);
+        })
+        .catch(() => {});
+    };
+    load();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    window.addEventListener("focus", load);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("credits:changed", load);
+    return () => {
+      window.removeEventListener("focus", load);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("credits:changed", load);
+    };
+  }, [pathname]);
 
   const daysLeft = bonusExpiry
     ? Math.max(0, Math.ceil((new Date(bonusExpiry).getTime() - Date.now()) / 86400000))
@@ -251,7 +265,7 @@ export default function DashboardLayout({
         </nav>
 
         <div className="px-3 pb-4">
-          <CreditBalance />
+          <CreditBalance pathname={pathname} />
         </div>
 
         <div className="px-3 pb-4">
